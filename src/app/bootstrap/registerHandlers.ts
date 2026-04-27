@@ -3,6 +3,7 @@ import { CachedEntryEnrichmentClient } from '../../adapters/ai/CachedEntryEnrich
 import { OpenAIEnrichmentClient } from '../../adapters/ai/OpenAIEnrichmentClient';
 import { InMemoryEntryRepository } from '../../adapters/storage/InMemoryEntryRepository';
 import { InMemorySessionRepository } from '../../adapters/storage/InMemorySessionRepository';
+import { registerExportCsvCommand } from '../../adapters/telegram/commands/exportCsv.command';
 import { registerStartCommand } from '../../adapters/telegram/commands/start.command';
 import { registerStatusCommand } from '../../adapters/telegram/commands/status.command';
 import { registerStopCommand } from '../../adapters/telegram/commands/stop.command';
@@ -39,6 +40,7 @@ export function registerHandlers(bot: Telegraf) {
   const entries = new InMemoryEntryRepository();
 
   registerStartCommand(bot, sessions);
+  registerExportCsvCommand(bot, sessions, entries);
   registerStatusCommand(bot, sessions, entries);
   registerStopCommand(bot, sessions);
   registerTextMessageHandler(bot, entryEnrichmentClient, sessions, entries);

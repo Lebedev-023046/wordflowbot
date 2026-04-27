@@ -63,5 +63,122 @@
       }
     ],
     "translation": "высмеянный; насмехаться; оскорблять (словами)"
+  },
+  "bound over": {
+    "examples": [
+      {
+        "text": "The police bound over the suspect to appear in court.",
+        "translation": "Полиция обязала подозреваемого явиться в суд и связала его обязательством."
+      },
+      {
+        "text": "The judge bound the defendant over to keep the peace.",
+        "translation": "Судья обязал обвиняемого соблюдать порядок и не нарушать спокойствие."
+      }
+    ],
+    "translation": "обязать (судом); привлечь к ответственности по обязательству (например, явиться в суд)"
+  },
+  "rich": {
+    "examples": [
+      {
+        "text": "He is rich, but he still lives in a small apartment.",
+        "translation": "Он богат, но всё равно живёт в небольшой квартире."
+      },
+      {
+        "text": "This neighborhood has lots of rich history and old buildings.",
+        "translation": "В этом районе много богатой истории и старых зданий."
+      }
+    ],
+    "translation": "богатый; (книжн.) богатый, насыщенный (о событиях/истории)"
+  },
+  "confide in": {
+    "examples": [
+      {
+        "text": "You can confide in me—I won’t tell anyone.",
+        "translation": "Ты можешь мне довериться — я никому не расскажу."
+      },
+      {
+        "text": "She confided in her friend about her plans for the summer.",
+        "translation": "Она рассказала своей подруге о своих планах на лето."
+      }
+    ],
+    "translation": "довериться; открыться; (кому-то) сообщить по секрету"
+  },
+  "reach": {
+    "examples": [
+      {
+        "text": "I can reach the top shelf with this step ladder.",
+        "translation": "Я могу дотянуться до верхней полки с этой стремянкой."
+      },
+      {
+        "text": "What time will we reach the airport?",
+        "translation": "Во сколько мы приедем в аэропорт?"
+      }
+    ],
+    "translation": "достигать; дотягиваться; (доехать/приехать)"
+  },
+  "soothe": {
+    "examples": [
+      {
+        "text": "The warm tea helped soothe my sore throat.",
+        "translation": "Тёплый чай помог успокоить больное горло."
+      },
+      {
+        "text": "The nurse used a gentle voice to soothe the child.",
+        "translation": "Медсестра говорила мягко, чтобы успокоить ребёнка."
+      }
+    ],
+    "translation": "успокаивать; смягчать"
+  },
+  "intimidated": {
+    "examples": [
+      {
+        "text": "I felt intimidated during the job interview.",
+        "translation": "Я почувствовал(а) себя запуганным(ой) во время собеседования на работу."
+      },
+      {
+        "text": "The big dog looked intimidating, but it was friendly.",
+        "translation": "Большая собака выглядела устрашающе, но она была дружелюбной."
+      }
+    ],
+    "translation": "подавленный страхом; запуганный; устрашающе действующий"
+  },
+  "call out": {
+    "examples": [
+      {
+        "text": "Please call out any questions you have.",
+        "translation": "Пожалуйста, задавайте вслух любые вопросы, которые у вас есть."
+      },
+      {
+        "text": "The teacher called out the winners’ names.",
+        "translation": "Учитель назвал вслух имена победителей."
+      }
+    ],
+    "translation": "вызвать (вслух), назвать; выкрикнуть; обратить внимание"
+  },
+  "get off": {
+    "examples": [
+      {
+        "text": "Get off the bus now.",
+        "translation": "Слезай с автобуса сейчас."
+      },
+      {
+        "text": "Get off my back—I'm trying to work.",
+        "translation": "Отстань от меня — я пытаюсь работать."
+      }
+    ],
+    "translation": "слезь (с), сойти (с); отстань (от кого‑либо), отцепись"
+  },
+  "rush off": {
+    "examples": [
+      {
+        "text": "She had to rush off to catch the last bus.",
+        "translation": "Ей нужно было срочно уйти, чтобы успеть на последний автобус."
+      },
+      {
+        "text": "Sorry, I must rush off—I've got an urgent meeting.",
+        "translation": "Извини, мне нужно срочно уйти — у меня срочное совещание."
+      }
+    ],
+    "translation": "срочно уйти; поспешно убежать"
   }
 }

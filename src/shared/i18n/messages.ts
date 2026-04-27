@@ -2,6 +2,7 @@ export const messages = {
   session: {
     active: 'Session is active. Send words or phrases.',
     alreadyActive: 'Session already active.',
+    emptyExport: 'No completed entries are ready for export yet.',
     idle: 'Press Start session first.',
     noActive: 'No active session.',
     promptStart: 'Press Start session to begin.',
