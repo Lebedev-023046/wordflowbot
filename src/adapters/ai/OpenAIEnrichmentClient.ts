@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import type { EntryEnrichmentClient } from '../../entities/entry/api/entryEnrichmentClient';
 import type { EntryEnrichment } from '../../entities/entry/model/entry.types';
 import type { Logger } from '../../shared/logging/logger';
+import { normalizeEnrichmentTextCasing } from '../../shared/utils/enrichmentText';
 import { getErrorDetails } from '../../shared/utils/errors';
 import { entryEnrichmentSchema } from './entryEnrichmentSchema';
 import { getSystemPrompt } from './system-prompt';
@@ -98,7 +99,9 @@ export class OpenAIEnrichmentClient implements EntryEnrichmentClient {
       }
 
       try {
-        return JSON.parse(response.output_text) as EntryEnrichment;
+        return normalizeEnrichmentTextCasing(
+          JSON.parse(response.output_text) as EntryEnrichment,
+        );
       } catch (error) {
         this.debugLogger.error('Failed to parse structured response.', {
           error: getErrorDetails(error),

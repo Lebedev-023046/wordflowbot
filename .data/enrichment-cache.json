@@ -11,5 +11,57 @@
       }
     ],
     "translation": "перехватчик; (в информатике/безопасности) перехватыватель"
+  },
+  "rumor": {
+    "examples": [
+      {
+        "text": "There’s a rumor that the store will close next month.",
+        "translation": "Ходят слухи, что магазин закроют в следующем месяце."
+      },
+      {
+        "text": "I heard a rumor, but I can’t confirm it is true.",
+        "translation": "Я слышал слух, но не могу подтвердить, что это правда."
+      }
+    ],
+    "translation": "слух"
+  },
+  "hatred": {
+    "examples": [
+      {
+        "text": "Hate and hatred can destroy relationships.",
+        "translation": "Ненависть и злоба могут разрушить отношения."
+      },
+      {
+        "text": "He felt hatred toward his former friend.",
+        "translation": "Он испытывал ненависть к своему бывшему другу."
+      }
+    ],
+    "translation": "ненависть; злоба"
+  },
+  "curious": {
+    "examples": [
+      {
+        "text": "I'm curious about your new job.",
+        "translation": "Мне интересно узнать о твоей новой работе."
+      },
+      {
+        "text": "The child was curious and asked many questions.",
+        "translation": "Ребёнок был любопытным и задал много вопросов."
+      }
+    ],
+    "translation": "любопытный; интересующийся; любознательный"
+  },
+  "ridiculed": {
+    "examples": [
+      {
+        "text": "She ridiculed my idea in front of everyone.",
+        "translation": "Она высмеяла мою идею при всех."
+      },
+      {
+        "text": "The movie ridicules the rich for their greed.",
+        "translation": "В фильме высмеивают богатых за их жадность."
+      }
+    ],
+    "translation": "высмеянный; насмехаться; оскорблять (словами)"
   }
 }

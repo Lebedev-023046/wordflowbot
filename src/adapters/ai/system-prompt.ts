@@ -12,6 +12,8 @@ export const getSystemPrompt = (): { type: 'input_text'; text: string }[] => {
 			Keep examples simple, clear, relevant to the input phrase, and concise,
 			but informative enough that the learner can understand the context and
 			see a common real usage of the word or phrase.
+			Use normal Russian sentence or dictionary casing.
+			Do not write Russian translations in ALL CAPS.
     `,
     },
   ];
