@@ -28,6 +28,22 @@ with this:
 
 ```bash
 npm run dev
+npm run bot
 npm run build
 npm run preview
 ```
+
+## Telegram Bot Setup
+
+1. Open Telegram and talk to `@BotFather`.
+2. Run `/newbot` and finish the bot creation flow.
+3. Copy the token BotFather gives you.
+4. Create `.env` from `.env.example`.
+5. Put your real token into `BOT_TOKEN=...`.
+6. Start the bot with:
+
+```bash
+npm run bot
+```
+
+For the current MVP, the bot replies with the same text message it receives.
