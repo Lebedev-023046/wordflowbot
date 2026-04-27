@@ -47,3 +47,11 @@ npm run bot
 ```
 
 For the current MVP, the bot replies with the same text message it receives.
+
+## Cost Controls
+
+- `OPENAI_SERVICE_TIER=flex` uses lower-cost asynchronous processing.
+- `ENRICHMENT_CACHE_FILE=.data/enrichment-cache.json` enables persistent reuse of previously enriched entries across sessions.
+- `DEBUG_BOT=true` enables verbose OpenAI and cache diagnostics.
+- `LOG_USAGE=true` enables per-request token usage logs.
+- `LOG_CACHE=true` enables cache hit/miss/store logs.

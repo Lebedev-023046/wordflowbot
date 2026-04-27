@@ -1,5 +1,6 @@
 import type { Telegraf } from 'telegraf';
 import { message } from 'telegraf/filters';
+import type { EntryEnrichmentClient } from '../../../entities/entry/api/entryEnrichmentClient';
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
 import { handleTextEntries } from '../../../features/intake-entries/model/handleTextEntries';
@@ -8,10 +9,15 @@ import { buttons } from '../../../shared/i18n/buttons';
 import { messages } from '../../../shared/i18n/messages';
 import { getUserId } from '../lib/getUserId';
 import { renderSessionKeyboard } from '../lib/sessionKeyboard';
-import { formatProcessedEntriesReply, getInitialReplyText } from './textMessage.helpers';
+import {
+  formatProcessedEntriesReply,
+  getInitialReplyText,
+  getProcessedFailuresReplyText,
+} from './textMessage.helpers';
 
 export function registerTextMessageHandler(
   bot: Telegraf,
+  entryEnrichmentClient: EntryEnrichmentClient,
   sessions: SessionRepository,
   entries: EntryRepository,
 ) {
@@ -43,11 +49,12 @@ export function registerTextMessageHandler(
 
     const processedEntries = await processEntries({
       entries: result.entries,
+      entryEnrichmentClient,
       entryRepository: entries,
     });
 
     if (processedEntries.succeeded.length === 0) {
-      return ctx.reply(messages.entries.processedWithFailures(processedEntries.failedCount));
+      return ctx.reply(getProcessedFailuresReplyText(processedEntries));
     }
 
     return ctx.reply(formatProcessedEntriesReply(processedEntries));

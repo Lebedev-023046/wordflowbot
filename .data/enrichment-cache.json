@@ -1,0 +1,15 @@
+{
+  "interceptor": {
+    "examples": [
+      {
+        "text": "The interceptor caught the incoming missile before it reached the city.",
+        "translation": "Перехватчик поймал входящую ракету, прежде чем она достигла города."
+      },
+      {
+        "text": "The app blocks an interceptor from reading your messages.",
+        "translation": "Приложение блокирует перехватчик, который пытается читать ваши сообщения."
+      }
+    ],
+    "translation": "перехватчик; (в информатике/безопасности) перехватыватель"
+  }
+}

@@ -1,32 +1,29 @@
-import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
-import type { Entry } from '../../../entities/entry/model/entry.types';
+import type {
+  ProcessEntriesParams,
+  ProcessEntriesResult,
+} from './process-entry.types';
 import { processEntry } from './processEntry';
-
-type ProcessedEntryPreview = {
-  text: string;
-  translation: string;
-};
-
-export type ProcessEntriesResult = {
-  failedCount: number;
-  succeeded: ProcessedEntryPreview[];
-};
-
-interface ProcessEntriesParams {
-  entries: Entry[];
-  entryRepository: EntryRepository;
-}
 
 export async function processEntries({
   entries,
+  entryEnrichmentClient,
   entryRepository,
 }: ProcessEntriesParams): Promise<ProcessEntriesResult> {
-  const results = await Promise.all(entries.map((entry) => processEntry(entry, entryRepository)));
+  const results = await Promise.all(
+    entries.map((entry) =>
+      processEntry({
+        entry,
+        entryEnrichmentClient,
+        entryRepository,
+      }),
+    ),
+  );
 
   return results.reduce<ProcessEntriesResult>(
     (accumulator, result) => {
       if (result.kind === 'failed') {
         accumulator.failedCount += 1;
+        accumulator.failureKinds.push(result.failureKind);
         return accumulator;
       }
 
@@ -39,6 +36,7 @@ export async function processEntries({
     },
     {
       failedCount: 0,
+      failureKinds: [],
       succeeded: [],
     },
   );

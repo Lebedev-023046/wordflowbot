@@ -1,9 +1,6 @@
 import type { EntryRepository } from '../../entities/entry/api/entryRepository';
 import type { Entry, EntryEnrichment, EntryStatus } from '../../entities/entry/model/entry.types';
-
-function normalizeEntryText(text: string): string {
-  return text.trim().toLowerCase();
-}
+import { normalizeEntryText } from '../../shared/utils/entryText';
 
 export class InMemoryEntryRepository implements EntryRepository {
   private entries = new Map<string, Entry[]>();

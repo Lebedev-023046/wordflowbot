@@ -1,12 +1,11 @@
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
+import type { EntryStatusSummary } from './summarizeEntries';
+import { summarizeEntries } from './summarizeEntries';
 
 export type SessionStatusResult =
   | { kind: 'noActive' }
-  | {
-      kind: 'active';
-      totalEntries: number;
-    };
+  | ({ kind: 'active' } & EntryStatusSummary);
 
 export function getSessionStatus(
   sessionRepository: SessionRepository,
@@ -23,6 +22,6 @@ export function getSessionStatus(
 
   return {
     kind: 'active',
-    totalEntries: entries.length,
+    ...summarizeEntries(entries),
   };
 }

@@ -1,3 +1,5 @@
+import { normalizeEntryText } from '../../../shared/utils/entryText';
+
 export function parseEntries(text: string): string[] {
   const uniqueEntries = new Map<string, string>();
 
@@ -8,7 +10,7 @@ export function parseEntries(text: string): string[] {
       continue;
     }
 
-    const normalizedLine = trimmedLine.toLowerCase();
+    const normalizedLine = normalizeEntryText(trimmedLine);
 
     if (!uniqueEntries.has(normalizedLine)) {
       uniqueEntries.set(normalizedLine, trimmedLine);

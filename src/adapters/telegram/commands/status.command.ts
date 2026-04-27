@@ -25,7 +25,7 @@ export function registerStatusCommand(
 
     return replyWithSessionState({
       ctx,
-      message: messages.status.active(result.totalEntries),
+      message: messages.status.active(result),
       isActive: true,
     });
   });

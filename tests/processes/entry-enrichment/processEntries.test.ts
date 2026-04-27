@@ -1,8 +1,28 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { InMemoryEntryRepository } from '../../../src/adapters/storage/InMemoryEntryRepository';
+import type { EntryEnrichmentClient } from '../../../src/entities/entry/api/entryEnrichmentClient';
 import { handleTextEntries } from '../../../src/features/intake-entries/model/handleTextEntries';
 import { processEntries } from '../../../src/processes/entry-enrichment/model/processEntries';
+import { withMutedConsole } from '../../support/withMutedConsole';
+
+const entryEnrichmentClient: EntryEnrichmentClient = {
+  async enrich(text) {
+    return {
+      translation: `translation for ${text}`,
+      examples: [
+        {
+          text: `Example with ${text}.`,
+          translation: `Пример с ${text}.`,
+        },
+        {
+          text: `Another example with ${text}.`,
+          translation: `Еще один пример с ${text}.`,
+        },
+      ],
+    };
+  },
+};
 
 test('processEntries returns word-translation previews and completes entries', async () => {
   const entries = new InMemoryEntryRepository();
@@ -16,11 +36,13 @@ test('processEntries returns word-translation previews and completes entries', a
 
   const result = await processEntries({
     entries: saved.entries,
+    entryEnrichmentClient,
     entryRepository: entries,
   });
 
   assert.deepEqual(result, {
     failedCount: 0,
+    failureKinds: [],
     succeeded: [
       {
         text: 'hassle',
@@ -42,4 +64,41 @@ test('processEntries returns word-translation previews and completes entries', a
     processedEntries.map((entry) => entry.translation),
     ['translation for hassle', 'translation for pull through'],
   );
+});
+
+test('processEntries classifies insufficient quota failures', async () => {
+  const entries = new InMemoryEntryRepository();
+  const saved = handleTextEntries({
+    entryRepository: entries,
+    sessionId: 'session-1',
+    text: 'hilarious',
+  });
+
+  assert.equal(saved.kind, 'saved');
+
+  const failingClient: EntryEnrichmentClient = {
+    async enrich() {
+      const error = new Error('429 You exceeded your current quota.');
+      Object.assign(error, {
+        code: 'insufficient_quota',
+        status: 429,
+        type: 'insufficient_quota',
+      });
+      throw error;
+    },
+  };
+
+  const result = await withMutedConsole(() =>
+    processEntries({
+      entries: saved.entries,
+      entryEnrichmentClient: failingClient,
+      entryRepository: entries,
+    }),
+  );
+
+  assert.deepEqual(result, {
+    failedCount: 1,
+    failureKinds: ['insufficient_quota'],
+    succeeded: [],
+  });
 });

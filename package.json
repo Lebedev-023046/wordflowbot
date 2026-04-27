@@ -26,6 +26,7 @@
     "vite": "^8.0.10"
   },
   "dependencies": {
+    "openai": "^6.34.0",
     "telegraf": "^4.16.3"
   }
 }
