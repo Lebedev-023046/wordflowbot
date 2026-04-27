@@ -3,18 +3,19 @@ import { message } from 'telegraf/filters';
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
 import { handleTextEntries } from '../../../features/intake-entries/model/handleTextEntries';
+import { processEntries } from '../../../processes/entry-enrichment/model/processEntries';
 import { buttons } from '../../../shared/i18n/buttons';
 import { messages } from '../../../shared/i18n/messages';
 import { getUserId } from '../lib/getUserId';
 import { renderSessionKeyboard } from '../lib/sessionKeyboard';
-import { getReplyText } from './textMessage.helpers';
+import { formatProcessedEntriesReply, getInitialReplyText } from './textMessage.helpers';
 
 export function registerTextMessageHandler(
   bot: Telegraf,
   sessions: SessionRepository,
   entries: EntryRepository,
 ) {
-  bot.on(message('text'), (ctx) => {
+  bot.on(message('text'), async (ctx) => {
     const text = ctx.message.text;
 
     if (text === buttons.startSession || text === buttons.stopSession) {
@@ -34,6 +35,21 @@ export function registerTextMessageHandler(
       text,
     });
 
-    return ctx.reply(getReplyText(result));
+    if (result.kind !== 'saved') {
+      return ctx.reply(getInitialReplyText(result));
+    }
+
+    await ctx.reply(getInitialReplyText(result));
+
+    const processedEntries = await processEntries({
+      entries: result.entries,
+      entryRepository: entries,
+    });
+
+    if (processedEntries.succeeded.length === 0) {
+      return ctx.reply(messages.entries.processedWithFailures(processedEntries.failedCount));
+    }
+
+    return ctx.reply(formatProcessedEntriesReply(processedEntries));
   });
 }

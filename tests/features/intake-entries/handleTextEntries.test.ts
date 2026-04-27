@@ -3,10 +3,6 @@ import assert from 'node:assert/strict';
 import { InMemoryEntryRepository } from '../../../src/adapters/storage/InMemoryEntryRepository';
 import { handleTextEntries } from '../../../src/features/intake-entries/model/handleTextEntries';
 
-async function waitForProcessing() {
-  await new Promise((resolve) => setTimeout(resolve, 150));
-}
-
 test('handleTextEntries returns empty for blank input', () => {
   const entries = new InMemoryEntryRepository();
 
@@ -46,9 +42,13 @@ test('handleTextEntries saves unique entries and starts background processing', 
   });
 
   assert.deepEqual(result, {
-    kind: 'saved',
     count: 2,
+    entries: result.kind === 'saved' ? result.entries : [],
+    kind: 'saved',
   });
+
+  assert.equal(result.kind, 'saved');
+  assert.equal(result.entries.length, 2);
 
   const savedEntries = entries.findBySessionId('session-1');
   assert.equal(savedEntries.length, 2);
@@ -59,13 +59,5 @@ test('handleTextEntries saves unique entries and starts background processing', 
   assert.deepEqual(
     savedEntries.map((entry) => entry.status),
     ['pending', 'pending'],
-  );
-
-  await waitForProcessing();
-
-  const processedEntries = entries.findBySessionId('session-1');
-  assert.deepEqual(
-    processedEntries.map((entry) => entry.status),
-    ['completed', 'completed'],
   );
 });

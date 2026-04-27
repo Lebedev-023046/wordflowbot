@@ -1,5 +1,5 @@
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
-import { processEntry } from '../../../processes/entry-enrichment/model/processEntry';
+import type { Entry } from '../../../entities/entry/model/entry.types';
 import { parseEntries } from './parseEntries';
 import { saveEntries } from './saveEntries';
 
@@ -12,7 +12,7 @@ interface HandleTextEntriesParams {
 export type HandleTextEntriesResult =
   | { kind: 'empty' }
   | { kind: 'duplicatesOnly' }
-  | { kind: 'saved'; count: number };
+  | { count: number; entries: Entry[]; kind: 'saved' };
 
 export function handleTextEntries({
   entryRepository,
@@ -31,10 +31,9 @@ export function handleTextEntries({
 
   if (savedEntries.length === 0) return { kind: 'duplicatesOnly' };
 
-  void Promise.allSettled(savedEntries.map((entry) => processEntry(entry, entryRepository)));
-
   return {
-    kind: 'saved',
     count: savedEntries.length,
+    entries: savedEntries,
+    kind: 'saved',
   };
 }

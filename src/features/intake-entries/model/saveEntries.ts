@@ -7,14 +7,23 @@ interface SaveEntriesParams {
   texts: string[];
 }
 
-export function saveEntries({ entryRepository, sessionId, texts }: SaveEntriesParams): Entry[] {
-  const uniqueTexts = texts.filter((text) => !entryRepository.existsInSession(sessionId, text));
+export function saveEntries({
+  entryRepository,
+  sessionId,
+  texts,
+}: SaveEntriesParams): Entry[] {
+  const uniqueTexts = texts.filter(
+    (text) => !entryRepository.existsInSession(sessionId, text),
+  );
 
   const entries: Entry[] = uniqueTexts.map((text) => ({
     id: crypto.randomUUID(),
     sessionId,
     text,
+    examples: [],
     status: 'pending',
+    translation: null,
+    errorMessage: null,
   }));
 
   entryRepository.saveMany(entries);

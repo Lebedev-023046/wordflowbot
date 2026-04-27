@@ -14,6 +14,9 @@ export const messages = {
   entries: {
     duplicatesOnly: 'All entries already exist in this session.',
     empty: 'Send at least one word or phrase.',
+    processedWithFailures: (failedCount: number) =>
+      `${failedCount} item(s) could not be processed.`,
+    processing: (count: number) => `Saved: ${count} item(s). Processing...`,
     saved: (count: number) => `Saved: ${count} item(s).`,
   },
 } as const;

@@ -1,5 +1,5 @@
 import type { EntryRepository } from '../../entities/entry/api/entryRepository';
-import type { Entry, EntryStatus } from '../../entities/entry/model/entry.types';
+import type { Entry, EntryEnrichment, EntryStatus } from '../../entities/entry/model/entry.types';
 
 function normalizeEntryText(text: string): string {
   return text.trim().toLowerCase();
@@ -32,6 +32,33 @@ export class InMemoryEntryRepository implements EntryRepository {
     for (const [sessionId, sessionEntries] of this.entries.entries()) {
       const nextEntries = sessionEntries.map((entry) =>
         entry.id === entryId ? { ...entry, status } : entry,
+      );
+
+      this.entries.set(sessionId, nextEntries);
+    }
+  }
+
+  updateEnrichment(entryId: string, enrichment: EntryEnrichment) {
+    for (const [sessionId, sessionEntries] of this.entries.entries()) {
+      const nextEntries = sessionEntries.map((entry) =>
+        entry.id === entryId
+          ? {
+              ...entry,
+              errorMessage: null,
+              examples: enrichment.examples,
+              translation: enrichment.translation,
+            }
+          : entry,
+      );
+
+      this.entries.set(sessionId, nextEntries);
+    }
+  }
+
+  updateError(entryId: string, errorMessage: string) {
+    for (const [sessionId, sessionEntries] of this.entries.entries()) {
+      const nextEntries = sessionEntries.map((entry) =>
+        entry.id === entryId ? { ...entry, errorMessage } : entry,
       );
 
       this.entries.set(sessionId, nextEntries);
