@@ -1,17 +1,44 @@
-import type { SessionRepository } from '../../entities/session/api/sessionRepository';
+import type { Session, SessionRepository } from '../../entities/session/api/sessionRepository';
 
 export class InMemorySessionRepository implements SessionRepository {
-  private sessions = new Map<number, boolean>();
+  private sessions = new Map<number, Session>();
+
+  getActiveSession(userId: number) {
+    const session = this.sessions.get(userId);
+
+    if (!session || !session.isActive) {
+      return null;
+    }
+
+    return session;
+  }
 
   hasActiveSession(userId: number) {
-    return this.sessions.get(userId) ?? false;
+    return this.getActiveSession(userId) !== null;
   }
 
   startSession(userId: number) {
-    this.sessions.set(userId, true);
+    const session: Session = {
+      id: crypto.randomUUID(),
+      userId,
+      isActive: true,
+    };
+
+    this.sessions.set(userId, session);
+
+    return session;
   }
 
   stopSession(userId: number) {
-    this.sessions.set(userId, false);
+    const session = this.sessions.get(userId);
+
+    if (!session) {
+      return;
+    }
+
+    this.sessions.set(userId, {
+      ...session,
+      isActive: false,
+    });
   }
 }
