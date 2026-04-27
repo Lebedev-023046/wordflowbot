@@ -1,0 +1,71 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { InMemoryEntryRepository } from '../../../src/adapters/storage/InMemoryEntryRepository';
+import { handleTextEntries } from '../../../src/features/intake-entries/model/handleTextEntries';
+
+async function waitForProcessing() {
+  await new Promise((resolve) => setTimeout(resolve, 150));
+}
+
+test('handleTextEntries returns empty for blank input', () => {
+  const entries = new InMemoryEntryRepository();
+
+  const result = handleTextEntries({
+    entryRepository: entries,
+    sessionId: 'session-1',
+    text: ' \n \n',
+  });
+
+  assert.deepEqual(result, { kind: 'empty' });
+});
+
+test('handleTextEntries returns duplicatesOnly when all entries already exist', () => {
+  const entries = new InMemoryEntryRepository();
+  handleTextEntries({
+    entryRepository: entries,
+    sessionId: 'session-1',
+    text: 'hassle',
+  });
+
+  const result = handleTextEntries({
+    entryRepository: entries,
+    sessionId: 'session-1',
+    text: 'HASSLE',
+  });
+
+  assert.deepEqual(result, { kind: 'duplicatesOnly' });
+});
+
+test('handleTextEntries saves unique entries and starts background processing', async () => {
+  const entries = new InMemoryEntryRepository();
+
+  const result = handleTextEntries({
+    entryRepository: entries,
+    sessionId: 'session-1',
+    text: 'hassle\nHASSLE\npull through',
+  });
+
+  assert.deepEqual(result, {
+    kind: 'saved',
+    count: 2,
+  });
+
+  const savedEntries = entries.findBySessionId('session-1');
+  assert.equal(savedEntries.length, 2);
+  assert.deepEqual(
+    savedEntries.map((entry) => entry.text),
+    ['hassle', 'pull through'],
+  );
+  assert.deepEqual(
+    savedEntries.map((entry) => entry.status),
+    ['pending', 'pending'],
+  );
+
+  await waitForProcessing();
+
+  const processedEntries = entries.findBySessionId('session-1');
+  assert.deepEqual(
+    processedEntries.map((entry) => entry.status),
+    ['completed', 'completed'],
+  );
+});

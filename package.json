@@ -8,6 +8,7 @@
     "bot": "node --env-file=.env --import tsx src/app/index.ts",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "test": "tsx --test tests/**/*.test.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier . --write"

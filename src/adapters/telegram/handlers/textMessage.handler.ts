@@ -2,11 +2,12 @@ import type { Telegraf } from 'telegraf';
 import { message } from 'telegraf/filters';
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
-import { parseEntries } from '../../../features/intake-entries/model/parseEntries';
-import { saveEntries } from '../../../features/intake-entries/model/saveEntries';
-import { processEntry } from '../../../processes/entry-enrichment/model/processEntry';
+import { handleTextEntries } from '../../../features/intake-entries/model/handleTextEntries';
+import { buttons } from '../../../shared/i18n/buttons';
+import { messages } from '../../../shared/i18n/messages';
 import { getUserId } from '../lib/getUserId';
 import { renderSessionKeyboard } from '../lib/sessionKeyboard';
+import { getReplyText } from './textMessage.helpers';
 
 export function registerTextMessageHandler(
   bot: Telegraf,
@@ -16,7 +17,7 @@ export function registerTextMessageHandler(
   bot.on(message('text'), (ctx) => {
     const text = ctx.message.text;
 
-    if (text === 'Start session' || text === 'Stop session') {
+    if (text === buttons.startSession || text === buttons.stopSession) {
       return;
     }
 
@@ -24,27 +25,15 @@ export function registerTextMessageHandler(
     const session = sessions.getActiveSession(userId);
 
     if (!session) {
-      return ctx.reply('Press Start session first.', renderSessionKeyboard({ isActive: false }));
+      return ctx.reply(messages.session.idle, renderSessionKeyboard(false));
     }
 
-    const parsedEntries = parseEntries(text);
-
-    if (parsedEntries.length === 0) {
-      return ctx.reply('Send at least one word or phrase.');
-    }
-
-    const savedEntries = saveEntries({
+    const result = handleTextEntries({
       entryRepository: entries,
       sessionId: session.id,
-      texts: parsedEntries,
+      text,
     });
 
-    if (savedEntries.length === 0) {
-      return ctx.reply('All entries already exist in this session.');
-    }
-
-    void Promise.allSettled(savedEntries.map((entry) => processEntry(entry, entries)));
-
-    return ctx.reply(`Saved: ${savedEntries.length} item(s).`);
+    return ctx.reply(getReplyText(result));
   });
 }

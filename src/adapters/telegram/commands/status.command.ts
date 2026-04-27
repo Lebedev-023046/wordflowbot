@@ -1,28 +1,32 @@
 import type { Telegraf } from 'telegraf';
+import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
-import { endSession } from '../../../features/end-session/model/endSession';
-import { buttons } from '../../../shared/i18n/buttons';
+import { getSessionStatus } from '../../../features/session-status/model/getSessionStatus';
 import { messages } from '../../../shared/i18n/messages';
 import { getUserId } from '../lib/getUserId';
 import { replyWithSessionState } from '../lib/replyWithSessionState';
 
-export function registerStopCommand(bot: Telegraf, sessions: SessionRepository) {
-  bot.hears(buttons.stopSession, (ctx) => {
+export function registerStatusCommand(
+  bot: Telegraf,
+  sessions: SessionRepository,
+  entries: EntryRepository,
+) {
+  bot.command('status', (ctx) => {
     const userId = getUserId(ctx);
-    const result = endSession(sessions, userId);
+    const result = getSessionStatus(sessions, entries, userId);
 
     if (result.kind === 'noActive') {
       return replyWithSessionState({
         ctx,
         message: messages.session.noActive,
-        isActive: result.isActive,
+        isActive: false,
       });
     }
 
     return replyWithSessionState({
       ctx,
-      message: messages.session.stopped,
-      isActive: result.isActive,
+      message: messages.status.active(result.totalEntries),
+      isActive: true,
     });
   });
 }

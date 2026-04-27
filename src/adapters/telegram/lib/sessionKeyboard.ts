@@ -1,5 +1,6 @@
 import { Markup } from 'telegraf';
+import { buttons } from '../../../shared/i18n/buttons';
 
-export function renderSessionKeyboard({ isActive }: { isActive: boolean }) {
-  return Markup.keyboard([[isActive ? 'Stop session' : 'Start session']]).resize();
+export function renderSessionKeyboard(isActive: boolean) {
+  return Markup.keyboard([[isActive ? buttons.stopSession : buttons.startSession]]).resize();
 }
