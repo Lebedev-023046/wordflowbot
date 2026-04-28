@@ -34,3 +34,15 @@ export function isMissingFileError(error: unknown): boolean {
     (error as ErrorWithMetadata).code === 'ENOENT'
   );
 }
+
+export function isMissingDatabaseTableError(
+  error: unknown,
+  tableName: string,
+): boolean {
+  return (
+    error instanceof Error &&
+    'code' in error &&
+    (error as ErrorWithMetadata).code === 'P2021' &&
+    error.message.includes(tableName)
+  );
+}

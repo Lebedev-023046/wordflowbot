@@ -42,6 +42,20 @@ npm run prisma:migrate:deploy
 npm run prisma:migrate:status
 ```
 
+Local scripts expect `WORDFLOWBOT_ENV_FILE` to point to your real env file.
+
+If you use oh-my-zsh, add this to `~/.zshrc`:
+
+```bash
+export WORDFLOWBOT_ENV_FILE="$HOME/Documents/wordflowbot/.env"
+```
+
+Then reload your shell:
+
+```bash
+source ~/.zshrc
+```
+
 ## Database Roles
 
 - `DATABASE_URL` is the runtime bot connection and uses `wordflowbot_app`.

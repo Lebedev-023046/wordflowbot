@@ -1,129 +1,111 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import type { EnrichmentCacheRepository } from '../../application/ports/EnrichmentCacheRepository';
 import type { EntryEnrichmentClient } from '../../entities/entry/api/entryEnrichmentClient';
 import type { EntryEnrichment } from '../../entities/entry/model/entry.types';
 import type { Logger } from '../../shared/logging/logger';
-import { isMissingFileError } from '../../shared/utils/errors';
 import { normalizeEntryText } from '../../shared/utils/entryText';
 
 interface CachedEntryEnrichmentClientParams {
-  cacheFilePath: string;
+  cacheRepository: EnrichmentCacheRepository;
   delegate: EntryEnrichmentClient;
   logger: Logger;
+  model: string;
+  promptVersion: string;
 }
 
-type CacheRecord = Record<string, EntryEnrichment>;
-
 export class CachedEntryEnrichmentClient implements EntryEnrichmentClient {
-  private cache: CacheRecord | null = null;
-  private cacheLoadPromise: Promise<CacheRecord> | null = null;
-  private readonly cacheFilePath: string;
+  private readonly cacheRepository: EnrichmentCacheRepository;
   private readonly delegate: EntryEnrichmentClient;
+  private readonly inFlightRequests = new Map<
+    string,
+    Promise<EntryEnrichment>
+  >();
   private readonly logger: Logger;
-  private writeQueue: Promise<void> = Promise.resolve();
+  private readonly model: string;
+  private readonly promptVersion: string;
 
   constructor({
-    cacheFilePath,
+    cacheRepository,
     delegate,
     logger,
+    model,
+    promptVersion,
   }: CachedEntryEnrichmentClientParams) {
-    this.cacheFilePath = cacheFilePath;
+    this.cacheRepository = cacheRepository;
     this.delegate = delegate;
     this.logger = logger;
+    this.model = model;
+    this.promptVersion = promptVersion;
   }
 
   async enrich(text: string): Promise<EntryEnrichment> {
     const normalizedText = normalizeEntryText(text);
-    const cached = await this.getCachedEntry(normalizedText);
+    const cacheKey = this.getCacheKey(normalizedText);
+    const cached = await this.cacheRepository.findByKey({
+      model: this.model,
+      normalizedText,
+      promptVersion: this.promptVersion,
+    });
 
     if (cached) {
       this.logger.info('Cache hit.', {
-        cacheFilePath: this.cacheFilePath,
+        model: this.model,
+        promptVersion: this.promptVersion,
         text,
       });
       return cached;
     }
 
+    const inFlightRequest = this.inFlightRequests.get(cacheKey);
+
+    if (inFlightRequest) {
+      this.logger.info('Cache request deduplicated.', {
+        model: this.model,
+        promptVersion: this.promptVersion,
+        text,
+      });
+      return inFlightRequest;
+    }
+
     this.logger.info('Cache miss.', {
-      cacheFilePath: this.cacheFilePath,
+      model: this.model,
+      promptVersion: this.promptVersion,
       text,
     });
 
+    const request = this.loadAndCacheEnrichment(text, normalizedText);
+    this.inFlightRequests.set(cacheKey, request);
+
+    try {
+      return await request;
+    } finally {
+      this.inFlightRequests.delete(cacheKey);
+    }
+  }
+
+  private getCacheKey(normalizedText: string): string {
+    return `${normalizedText}:${this.model}:${this.promptVersion}`;
+  }
+
+  private async loadAndCacheEnrichment(
+    text: string,
+    normalizedText: string,
+  ): Promise<EntryEnrichment> {
     const enrichment = await this.delegate.enrich(text);
-    await this.storeCacheEntry(normalizedText, enrichment);
+
+    await this.cacheRepository.save({
+      enrichment,
+      model: this.model,
+      normalizedText,
+      promptVersion: this.promptVersion,
+      sourceText: text,
+    });
 
     this.logger.info('Cache stored.', {
-      cacheFilePath: this.cacheFilePath,
+      model: this.model,
+      promptVersion: this.promptVersion,
       text,
     });
 
     return enrichment;
-  }
-
-  private async getCachedEntry(
-    normalizedText: string,
-  ): Promise<EntryEnrichment | null> {
-    const cache = await this.loadCache();
-    return cache[normalizedText] ?? null;
-  }
-
-  private async loadCache(): Promise<CacheRecord> {
-    if (this.cache) {
-      return this.cache;
-    }
-
-    if (!this.cacheLoadPromise) {
-      this.cacheLoadPromise = this.readCacheFromDisk();
-    }
-
-    const cache = await this.cacheLoadPromise;
-    this.cache = cache;
-
-    return cache;
-  }
-
-  private async persistCache(cache: CacheRecord): Promise<void> {
-    await mkdir(dirname(this.cacheFilePath), { recursive: true });
-    await writeFile(this.cacheFilePath, JSON.stringify(cache, null, 2), 'utf8');
-  }
-
-  private async storeCacheEntry(
-    normalizedText: string,
-    enrichment: EntryEnrichment,
-  ): Promise<void> {
-    this.writeQueue = this.writeQueue.then(async () => {
-      const cache = await this.loadCache();
-      cache[normalizedText] = enrichment;
-      await this.persistCache(cache);
-    });
-
-    await this.writeQueue;
-  }
-
-  private async readCacheFromDisk(): Promise<CacheRecord> {
-    try {
-      const rawCache = await readFile(this.cacheFilePath, 'utf8');
-      const parsed = JSON.parse(rawCache) as CacheRecord;
-
-      this.logger.info('Cache loaded.', {
-        cacheEntries: Object.keys(parsed).length,
-        cacheFilePath: this.cacheFilePath,
-      });
-
-      return parsed;
-    } catch (error) {
-      if (isMissingFileError(error)) {
-        return {};
-      }
-
-      this.logger.warn('Failed to read cache file. Starting empty.', {
-        cacheFilePath: this.cacheFilePath,
-        error:
-          error instanceof Error
-            ? { message: error.message, stack: error.stack }
-            : error,
-      });
-      return {};
-    }
   }
 }

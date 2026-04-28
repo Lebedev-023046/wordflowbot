@@ -50,6 +50,21 @@ model EntryExample {
   @@index([entryId])
 }
 
+model EnrichmentCache {
+  id             String   @id
+  normalizedText String
+  sourceText     String
+  model          String
+  promptVersion  String
+  translation    String
+  examplesJson   Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([normalizedText, model, promptVersion])
+  @@index([normalizedText])
+}
+
 enum EntryStatus {
   pending
   completed

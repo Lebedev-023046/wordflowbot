@@ -1,3 +1,5 @@
+export const ENTRY_ENRICHMENT_PROMPT_VERSION = 'v1';
+
 export const getSystemPrompt = (): { type: 'input_text'; text: string }[] => {
   return [
     {

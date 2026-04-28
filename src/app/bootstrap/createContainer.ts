@@ -1,7 +1,9 @@
 import { CachedEntryEnrichmentClient } from '../../adapters/ai/CachedEntryEnrichmentClient';
 import { OpenAIEnrichmentClient } from '../../adapters/ai/OpenAIEnrichmentClient';
+import { ENTRY_ENRICHMENT_PROMPT_VERSION } from '../../adapters/ai/system-prompt';
 import { ImmediateEnrichmentJobQueue } from '../../adapters/queue/ImmediateEnrichmentJobQueue';
 import { PrismaEntryRepository } from '../../adapters/storage/prisma/PrismaEntryRepository';
+import { PrismaEnrichmentCacheRepository } from '../../adapters/storage/prisma/PrismaEnrichmentCacheRepository';
 import { createPrismaClient } from '../../adapters/storage/prisma/createPrismaClient';
 import { PrismaSessionRepository } from '../../adapters/storage/prisma/PrismaSessionRepository';
 import { CsvExporter } from '../../application/services/CsvExporter';
@@ -33,12 +35,19 @@ export function createContainer() {
     infoEnabled: env.logCache,
     scope: 'CachedEntryEnrichmentClient',
   });
+  const cacheRepositoryLogger = createLogger({
+    scope: 'PrismaEnrichmentCacheRepository',
+  });
   const processEntriesLogger = createLogger({
     scope: 'ProcessEntriesUseCase',
   });
 
   const sessionRepository = new PrismaSessionRepository(prisma);
   const entryRepository = new PrismaEntryRepository(prisma);
+  const enrichmentCacheRepository = new PrismaEnrichmentCacheRepository(
+    prisma,
+    cacheRepositoryLogger,
+  );
 
   const openAiEnrichmentClient = new OpenAIEnrichmentClient({
     apiKey: env.openAiApiKey,
@@ -48,9 +57,11 @@ export function createContainer() {
     usageLogger,
   });
   const entryEnrichmentClient = new CachedEntryEnrichmentClient({
-    cacheFilePath: env.enrichmentCacheFile,
+    cacheRepository: enrichmentCacheRepository,
     delegate: openAiEnrichmentClient,
     logger: cacheLogger,
+    model: env.openAiModel,
+    promptVersion: ENTRY_ENRICHMENT_PROMPT_VERSION,
   });
 
   const entryParser = new EntryParser();
