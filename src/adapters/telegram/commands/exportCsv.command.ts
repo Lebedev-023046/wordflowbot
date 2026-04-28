@@ -15,7 +15,7 @@ export function registerExportCsvCommand(
 ) {
   bot.hears(buttons.exportCsv, async (ctx) => {
     const userId = getUserId(ctx);
-    const result = exportSessionCsvUseCase.execute(userId);
+    const result = await exportSessionCsvUseCase.execute(userId);
 
     if (result.kind === 'noActive') {
       return replyWithSessionState({
@@ -26,12 +26,12 @@ export function registerExportCsvCommand(
     }
 
     if (result.kind === 'empty') {
-      const session = sessions.getActiveSession(userId);
+      const session = await sessions.getActiveSession(userId);
       return replyWithSessionState({
         ctx,
-        hasEntries: session ? hasEntries(entries, session.id) : false,
+        hasEntries: session ? await hasEntries(entries, session.id) : false,
         hasFailedEntries: session
-          ? hasFailedEntries(entries, session.id)
+          ? await hasFailedEntries(entries, session.id)
           : false,
         isActive: true,
         message: messages.session.emptyExport,
@@ -50,15 +50,29 @@ export function registerExportCsvCommand(
 function hasFailedEntries(
   entryRepository: EntryRepository,
   sessionId: string,
-): boolean {
-  return entryRepository
-    .findBySessionId(sessionId)
-    .some((entry) => entry.status === 'failed');
+): Promise<boolean> {
+  return hasFailedEntriesInternal(entryRepository, sessionId);
+}
+
+async function hasFailedEntriesInternal(
+  entryRepository: EntryRepository,
+  sessionId: string,
+): Promise<boolean> {
+  return (await entryRepository.findBySessionId(sessionId)).some(
+    (entry) => entry.status === 'failed',
+  );
 }
 
 function hasEntries(
   entryRepository: EntryRepository,
   sessionId: string,
-): boolean {
-  return entryRepository.findBySessionId(sessionId).length > 0;
+): Promise<boolean> {
+  return hasEntriesInternal(entryRepository, sessionId);
+}
+
+async function hasEntriesInternal(
+  entryRepository: EntryRepository,
+  sessionId: string,
+): Promise<boolean> {
+  return (await entryRepository.findBySessionId(sessionId)).length > 0;
 }

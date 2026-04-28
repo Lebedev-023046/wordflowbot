@@ -1,8 +1,9 @@
 import { CachedEntryEnrichmentClient } from '../../adapters/ai/CachedEntryEnrichmentClient';
 import { OpenAIEnrichmentClient } from '../../adapters/ai/OpenAIEnrichmentClient';
 import { ImmediateEnrichmentJobQueue } from '../../adapters/queue/ImmediateEnrichmentJobQueue';
-import { InMemoryEntryRepository } from '../../adapters/storage/InMemoryEntryRepository';
-import { InMemorySessionRepository } from '../../adapters/storage/InMemorySessionRepository';
+import { PrismaEntryRepository } from '../../adapters/storage/prisma/PrismaEntryRepository';
+import { createPrismaClient } from '../../adapters/storage/prisma/createPrismaClient';
+import { PrismaSessionRepository } from '../../adapters/storage/prisma/PrismaSessionRepository';
 import { CsvExporter } from '../../application/services/CsvExporter';
 import { EntryFactory } from '../../application/services/EntryFactory';
 import { EntryParser } from '../../application/services/EntryParser';
@@ -19,6 +20,7 @@ import { createLogger } from '../../shared/logging/logger';
 import { env } from '../config/env';
 
 export function createContainer() {
+  const prisma = createPrismaClient();
   const openAiDebugLogger = createLogger({
     infoEnabled: env.debugBot,
     scope: 'OpenAIEnrichmentClient',
@@ -35,8 +37,8 @@ export function createContainer() {
     scope: 'ProcessEntriesUseCase',
   });
 
-  const sessionRepository = new InMemorySessionRepository();
-  const entryRepository = new InMemoryEntryRepository();
+  const sessionRepository = new PrismaSessionRepository(prisma);
+  const entryRepository = new PrismaEntryRepository(prisma);
 
   const openAiEnrichmentClient = new OpenAIEnrichmentClient({
     apiKey: env.openAiApiKey,
@@ -94,6 +96,7 @@ export function createContainer() {
   );
 
   return {
+    prisma,
     repositories: {
       entries: entryRepository,
       sessions: sessionRepository,
@@ -114,3 +117,5 @@ export function createContainer() {
     },
   };
 }
+
+export type AppContainer = ReturnType<typeof createContainer>;

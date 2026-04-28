@@ -31,14 +31,14 @@ export class GetSessionWordsUseCase {
     this.entryRepository = entryRepository;
   }
 
-  execute(userId: number): GetSessionWordsResult {
-    const session = this.sessionRepository.getActiveSession(userId);
+  async execute(userId: number): Promise<GetSessionWordsResult> {
+    const session = await this.sessionRepository.getActiveSession(userId);
 
     if (!session) {
       return { kind: 'noActive' };
     }
 
-    const entries = this.entryRepository.findBySessionId(session.id);
+    const entries = await this.entryRepository.findBySessionId(session.id);
 
     if (entries.length === 0) {
       return { kind: 'empty' };

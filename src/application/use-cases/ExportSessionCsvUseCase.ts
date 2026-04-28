@@ -27,16 +27,16 @@ export class ExportSessionCsvUseCase {
     this.csvExporter = csvExporter;
   }
 
-  execute(userId: number): ExportSessionCsvResult {
-    const session = this.sessionRepository.getActiveSession(userId);
+  async execute(userId: number): Promise<ExportSessionCsvResult> {
+    const session = await this.sessionRepository.getActiveSession(userId);
 
     if (!session) {
       return { kind: 'noActive' };
     }
 
-    const completedEntries = this.entryRepository
-      .findBySessionId(session.id)
-      .filter(isCompletedEntry);
+    const completedEntries = (
+      await this.entryRepository.findBySessionId(session.id)
+    ).filter(isCompletedEntry);
 
     if (completedEntries.length === 0) {
       return { kind: 'empty' };

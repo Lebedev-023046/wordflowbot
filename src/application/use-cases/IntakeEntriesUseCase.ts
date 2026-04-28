@@ -28,17 +28,23 @@ export class IntakeEntriesUseCase {
     this.entryFactory = entryFactory;
   }
 
-  execute({ sessionId, text }: IntakeEntriesCommand): IntakeEntriesResult {
+  async execute({
+    sessionId,
+    text,
+  }: IntakeEntriesCommand): Promise<IntakeEntriesResult> {
     const parsedEntries = this.entryParser.parse(text);
 
     if (parsedEntries.length === 0) {
       return { kind: 'empty' };
     }
 
-    const uniqueTexts = parsedEntries.filter(
-      (entryText) =>
-        !this.entryRepository.existsInSession(sessionId, entryText),
-    );
+    const uniqueTexts: string[] = [];
+
+    for (const entryText of parsedEntries) {
+      if (!(await this.entryRepository.existsInSession(sessionId, entryText))) {
+        uniqueTexts.push(entryText);
+      }
+    }
 
     if (uniqueTexts.length === 0) {
       return { kind: 'duplicatesOnly' };
@@ -48,7 +54,7 @@ export class IntakeEntriesUseCase {
       this.entryFactory.createPending(sessionId, entryText),
     );
 
-    this.entryRepository.saveMany(entries);
+    await this.entryRepository.saveMany(entries);
 
     return {
       count: entries.length,

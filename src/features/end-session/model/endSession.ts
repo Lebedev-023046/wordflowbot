@@ -7,6 +7,6 @@ import {
 export function endSession(
   sessionRepository: SessionRepository,
   userId: number,
-): StopSessionResult {
+): Promise<StopSessionResult> {
   return new StopSessionUseCase(sessionRepository).execute(userId);
 }

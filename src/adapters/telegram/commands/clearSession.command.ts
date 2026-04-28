@@ -12,9 +12,9 @@ export function registerClearSessionCommand(
   bot: Telegraf,
   clearSessionUseCase: ClearSessionUseCase,
 ) {
-  bot.hears(buttons.clearSession, (ctx) => {
+  bot.hears(buttons.clearSession, async (ctx) => {
     const userId = getUserId(ctx);
-    const result = clearSessionUseCase.preview(userId);
+    const result = await clearSessionUseCase.preview(userId);
 
     if (result.kind === 'noActive') {
       return replyWithSessionState({
@@ -45,7 +45,7 @@ export function registerClearSessionCommand(
     await ctx.answerCbQuery();
 
     const userId = getUserId(ctx);
-    const result = clearSessionUseCase.execute(userId);
+    const result = await clearSessionUseCase.execute(userId);
 
     if (result.kind === 'noActive') {
       return ctx.editMessageText(messages.session.noActive);

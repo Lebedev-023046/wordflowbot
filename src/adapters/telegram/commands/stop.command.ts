@@ -9,9 +9,9 @@ export function registerStopCommand(
   bot: Telegraf,
   stopSessionUseCase: StopSessionUseCase,
 ) {
-  bot.hears(buttons.stopSession, (ctx) => {
+  bot.hears(buttons.stopSession, async (ctx) => {
     const userId = getUserId(ctx);
-    const result = stopSessionUseCase.execute(userId);
+    const result = await stopSessionUseCase.execute(userId);
 
     if (result.kind === 'noActive') {
       return replyWithSessionState({

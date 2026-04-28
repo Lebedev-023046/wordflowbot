@@ -7,7 +7,19 @@
     "dev": "vite",
     "bot": "node --env-file=.env --import tsx src/app/index.ts",
     "build": "tsc && vite build",
+    "db:up": "docker compose up --build",
+    "db:down": "docker compose down",
+    "db:restart": "docker compose restart postgres",
+    "db:logs": "docker compose logs -f postgres",
+    "db:ps": "docker compose ps",
+    "db:sql:admin": "docker compose exec postgres sh -lc 'PGPASSWORD=\"$POSTGRES_ADMIN_PASSWORD\" psql -h localhost -U \"$POSTGRES_ADMIN_USER\" -d \"$POSTGRES_DB\"'",
+    "db:sql:app": "docker compose exec postgres sh -lc 'PGPASSWORD=\"$APP_DB_PASSWORD\" psql -h localhost -U \"$APP_DB_USER\" -d \"$POSTGRES_DB\"'",
+    "db:sql:migrator": "docker compose exec postgres sh -lc 'PGPASSWORD=\"$MIGRATION_DB_PASSWORD\" psql -h localhost -U \"$MIGRATION_DB_USER\" -d \"$POSTGRES_DB\"'",
     "preview": "vite preview",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:migrate:status": "prisma migrate status",
     "test": "tsx --test tests/**/*.test.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -21,12 +33,16 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "prettier": "^3.8.3",
+    "prisma": "^7.8.0",
     "tsx": "^4.21.0",
     "typescript": "~6.0.2",
     "vite": "^8.0.10"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "openai": "^6.34.0",
+    "pg": "^8.20.0",
     "telegraf": "^4.16.3"
   }
 }

@@ -1,36 +1,36 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { InMemoryEntryRepository } from '../../src/adapters/storage/InMemoryEntryRepository';
-import { InMemorySessionRepository } from '../../src/adapters/storage/InMemorySessionRepository';
+import { InMemoryEntryRepository } from '../../src/adapters/storage/in-memory/InMemoryEntryRepository';
+import { InMemorySessionRepository } from '../../src/adapters/storage/in-memory/InMemorySessionRepository';
 import { EntryFactory } from '../../src/application/services/EntryFactory';
 import { GetSessionWordsUseCase } from '../../src/application/use-cases/GetSessionWordsUseCase';
 
-test('GetSessionWordsUseCase returns noActive without an active session', () => {
+test('GetSessionWordsUseCase returns noActive without an active session', async () => {
   const sessions = new InMemorySessionRepository();
   const entries = new InMemoryEntryRepository();
 
-  const result = new GetSessionWordsUseCase(sessions, entries).execute(1);
+  const result = await new GetSessionWordsUseCase(sessions, entries).execute(1);
 
   assert.deepEqual(result, { kind: 'noActive' });
 });
 
-test('GetSessionWordsUseCase returns empty when the session has no entries', () => {
+test('GetSessionWordsUseCase returns empty when the session has no entries', async () => {
   const sessions = new InMemorySessionRepository();
   const entries = new InMemoryEntryRepository();
-  sessions.startSession(1);
+  await sessions.startSession(1);
 
-  const result = new GetSessionWordsUseCase(sessions, entries).execute(1);
+  const result = await new GetSessionWordsUseCase(sessions, entries).execute(1);
 
   assert.deepEqual(result, { kind: 'empty' });
 });
 
-test('GetSessionWordsUseCase returns completed and failed session words separately', () => {
+test('GetSessionWordsUseCase returns completed and failed session words separately', async () => {
   const sessions = new InMemorySessionRepository();
   const entries = new InMemoryEntryRepository();
   const entryFactory = new EntryFactory();
-  const session = sessions.startSession(1);
+  const session = await sessions.startSession(1);
 
-  entries.saveMany([
+  await entries.saveMany([
     {
       ...entryFactory.createPending(session.id, 'hassle'),
       status: 'completed',
@@ -45,7 +45,7 @@ test('GetSessionWordsUseCase returns completed and failed session words separate
     },
   ]);
 
-  const result = new GetSessionWordsUseCase(sessions, entries).execute(1);
+  const result = await new GetSessionWordsUseCase(sessions, entries).execute(1);
 
   assert.deepEqual(result, {
     completedItems: [

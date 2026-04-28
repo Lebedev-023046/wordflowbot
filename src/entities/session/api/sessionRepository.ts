@@ -5,9 +5,9 @@ export interface Session {
 }
 
 export interface SessionRepository {
-  clearSession(userId: number): void;
-  getActiveSession(userId: number): Session | null;
-  hasActiveSession(userId: number): boolean;
-  startSession(userId: number): Session;
-  stopSession(userId: number): void;
+  clearSession(userId: number): Promise<void>;
+  getActiveSession(userId: number): Promise<Session | null>;
+  hasActiveSession(userId: number): Promise<boolean>;
+  startSession(userId: number): Promise<Session>;
+  stopSession(userId: number): Promise<void>;
 }

@@ -18,7 +18,7 @@ export function handleTextEntries({
   entryRepository,
   sessionId,
   text,
-}: HandleTextEntriesParams): HandleTextEntriesResult {
+}: HandleTextEntriesParams): Promise<HandleTextEntriesResult> {
   return new IntakeEntriesUseCase(
     entryRepository,
     new EntryParser(),

@@ -7,6 +7,6 @@ import {
 export function startSession(
   sessionRepository: SessionRepository,
   userId: number,
-): StartSessionResult {
+): Promise<StartSessionResult> {
   return new StartSessionUseCase(sessionRepository).execute(userId);
 }

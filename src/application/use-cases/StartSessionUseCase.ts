@@ -12,15 +12,15 @@ export class StartSessionUseCase {
     this.sessionRepository = sessionRepository;
   }
 
-  execute(userId: number): StartSessionResult {
-    if (this.sessionRepository.hasActiveSession(userId)) {
+  async execute(userId: number): Promise<StartSessionResult> {
+    if (await this.sessionRepository.hasActiveSession(userId)) {
       return {
         kind: 'alreadyActive',
         isActive: true,
       };
     }
 
-    this.sessionRepository.startSession(userId);
+    await this.sessionRepository.startSession(userId);
 
     return {
       kind: 'started',

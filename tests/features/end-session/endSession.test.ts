@@ -1,25 +1,25 @@
-import test from 'node:test';
 import assert from 'node:assert/strict';
-import { InMemorySessionRepository } from '../../../src/adapters/storage/InMemorySessionRepository';
+import test from 'node:test';
+import { InMemorySessionRepository } from '../../../src/adapters/storage/in-memory/InMemorySessionRepository';
 import { endSession } from '../../../src/features/end-session/model/endSession';
 
-test('endSession stops an active session', () => {
+test('endSession stops an active session', async () => {
   const sessions = new InMemorySessionRepository();
-  sessions.startSession(1);
+  await sessions.startSession(1);
 
-  const result = endSession(sessions, 1);
+  const result = await endSession(sessions, 1);
 
   assert.deepEqual(result, {
     kind: 'stopped',
     isActive: false,
   });
-  assert.equal(sessions.hasActiveSession(1), false);
+  assert.equal(await sessions.hasActiveSession(1), false);
 });
 
-test('endSession returns noActive when there is no session', () => {
+test('endSession returns noActive when there is no session', async () => {
   const sessions = new InMemorySessionRepository();
 
-  const result = endSession(sessions, 1);
+  const result = await endSession(sessions, 1);
 
   assert.deepEqual(result, {
     kind: 'noActive',

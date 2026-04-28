@@ -29,15 +29,15 @@ export class RetryFailedEntriesUseCase {
   }
 
   async execute(userId: number): Promise<RetryFailedEntriesResult> {
-    const session = this.sessionRepository.getActiveSession(userId);
+    const session = await this.sessionRepository.getActiveSession(userId);
 
     if (!session) {
       return { kind: 'noActive' };
     }
 
-    const failedEntries = this.entryRepository
-      .findBySessionId(session.id)
-      .filter((entry) => entry.status === 'failed');
+    const failedEntries = (
+      await this.entryRepository.findBySessionId(session.id)
+    ).filter((entry) => entry.status === 'failed');
 
     if (failedEntries.length === 0) {
       return { kind: 'noFailed' };
@@ -48,7 +48,7 @@ export class RetryFailedEntriesUseCase {
     );
 
     for (const entry of retriedEntries) {
-      this.entryRepository.update(entry);
+      await this.entryRepository.update(entry);
     }
 
     const processingResult =

@@ -1,11 +1,11 @@
 import type { Entry } from '../model/entry.types';
 
 export interface EntryRepository {
-  deleteBySessionId(sessionId: string): void;
-  existsInSession(sessionId: string, text: string): boolean;
-  findById(entryId: string): Entry | null;
-  findBySessionId(sessionId: string): Entry[];
-  save(entry: Entry): void;
-  saveMany(entries: Entry[]): void;
-  update(entry: Entry): void;
+  deleteBySessionId(sessionId: string): Promise<void>;
+  existsInSession(sessionId: string, text: string): Promise<boolean>;
+  findById(entryId: string): Promise<Entry | null>;
+  findBySessionId(sessionId: string): Promise<Entry[]>;
+  save(entry: Entry): Promise<void>;
+  saveMany(entries: Entry[]): Promise<void>;
+  update(entry: Entry): Promise<void>;
 }

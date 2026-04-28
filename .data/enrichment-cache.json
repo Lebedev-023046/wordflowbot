@@ -375,5 +375,44 @@
       }
     ],
     "translation": "чудесно; замечательно"
+  },
+  "ledger": {
+    "examples": [
+      {
+        "text": "The ledger shows all monthly expenses.",
+        "translation": "В бухгалтерской книге показаны все ежемесячные расходы."
+      },
+      {
+        "text": "She updated the ledger after receiving the invoices.",
+        "translation": "Она обновила бухгалтерскую книгу после получения счетов."
+      }
+    ],
+    "translation": "бухгалтерская книга; (денежный) реестр"
+  },
+  "satisfy": {
+    "examples": [
+      {
+        "text": "I want to satisfy my curiosity about how it works.",
+        "translation": "Я хочу удовлетворить своё любопытство о том, как это работает."
+      },
+      {
+        "text": "The new rules will satisfy the requirements for safety.",
+        "translation": "Новые правила удовлетворят требования по безопасности."
+      }
+    ],
+    "translation": "удовлетворять; исполнять (требование), удовлетворять (потребность, желание)"
+  },
+  "orphan": {
+    "examples": [
+      {
+        "text": "The orphan lived in a small home and went to school every day.",
+        "translation": "Осиротевший ребёнок жил в небольшом доме и каждый день ходил в школу."
+      },
+      {
+        "text": "Many charities help orphan children find a safe place to live.",
+        "translation": "Многие благотворительные организации помогают детям-сиротам найти безопасное место для жизни."
+      }
+    ],
+    "translation": "сирота"
   }
 }

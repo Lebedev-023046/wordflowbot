@@ -1,16 +1,16 @@
 import type {
   Session,
   SessionRepository,
-} from '../../entities/session/api/sessionRepository';
+} from '../../../entities/session/api/sessionRepository';
 
 export class InMemorySessionRepository implements SessionRepository {
   private sessions = new Map<number, Session>();
 
-  clearSession(userId: number) {
+  async clearSession(userId: number) {
     this.sessions.delete(userId);
   }
 
-  getActiveSession(userId: number) {
+  async getActiveSession(userId: number) {
     const session = this.sessions.get(userId);
 
     if (!session || !session.isActive) {
@@ -20,11 +20,11 @@ export class InMemorySessionRepository implements SessionRepository {
     return session;
   }
 
-  hasActiveSession(userId: number) {
-    return this.getActiveSession(userId) !== null;
+  async hasActiveSession(userId: number) {
+    return (await this.getActiveSession(userId)) !== null;
   }
 
-  startSession(userId: number) {
+  async startSession(userId: number) {
     const session: Session = {
       id: crypto.randomUUID(),
       userId,
@@ -36,7 +36,7 @@ export class InMemorySessionRepository implements SessionRepository {
     return session;
   }
 
-  stopSession(userId: number) {
+  async stopSession(userId: number) {
     const session = this.sessions.get(userId);
 
     if (!session) {

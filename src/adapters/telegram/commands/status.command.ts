@@ -8,9 +8,9 @@ export function registerStatusCommand(
   bot: Telegraf,
   getSessionStatusUseCase: GetSessionStatusUseCase,
 ) {
-  bot.command('status', (ctx) => {
+  bot.command('status', async (ctx) => {
     const userId = getUserId(ctx);
-    const result = getSessionStatusUseCase.execute(userId);
+    const result = await getSessionStatusUseCase.execute(userId);
 
     if (result.kind === 'noActive') {
       return replyWithSessionState({

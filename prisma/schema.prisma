@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Session {
+  id        String    @id
+  userId    BigInt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  endedAt   DateTime?
+
+  entries Entry[]
+
+  @@index([userId, endedAt])
+}
+
+model Entry {
+  id             String      @id
+  sessionId      String
+  text           String
+  normalizedText String
+  status         EntryStatus
+  translation    String?
+  errorMessage   String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  session  Session        @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  examples EntryExample[]
+
+  @@unique([sessionId, normalizedText])
+  @@index([sessionId])
+  @@index([sessionId, status])
+}
+
+model EntryExample {
+  id          String @id
+  entryId     String
+  text        String
+  translation String
+  sortOrder   Int
+
+  entry Entry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  @@unique([entryId, sortOrder])
+  @@index([entryId])
+}
+
+enum EntryStatus {
+  pending
+  completed
+  failed
+}

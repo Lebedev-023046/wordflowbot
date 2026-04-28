@@ -1,8 +1,8 @@
-import test from 'node:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
+import { InMemoryEntryRepository } from '../../../src/adapters/storage/in-memory/InMemoryEntryRepository';
+import { InMemorySessionRepository } from '../../../src/adapters/storage/in-memory/InMemorySessionRepository';
 import type { EntryEnrichmentClient } from '../../../src/entities/entry/api/entryEnrichmentClient';
-import { InMemoryEntryRepository } from '../../../src/adapters/storage/InMemoryEntryRepository';
-import { InMemorySessionRepository } from '../../../src/adapters/storage/InMemorySessionRepository';
 import { handleTextEntries } from '../../../src/features/intake-entries/model/handleTextEntries';
 import { getSessionStatus } from '../../../src/features/session-status/model/getSessionStatus';
 import { processEntries } from '../../../src/processes/entry-enrichment/model/processEntries';
@@ -11,8 +11,8 @@ import { withMutedConsole } from '../../support/withMutedConsole';
 test('getSessionStatus returns counts and failure details for an active session', async () => {
   const sessions = new InMemorySessionRepository();
   const entries = new InMemoryEntryRepository();
-  const session = sessions.startSession(1);
-  const saved = handleTextEntries({
+  const session = await sessions.startSession(1);
+  const saved = await handleTextEntries({
     entryRepository: entries,
     sessionId: session.id,
     text: 'hilarious\npull through',
@@ -50,7 +50,7 @@ test('getSessionStatus returns counts and failure details for an active session'
     }),
   );
 
-  const result = getSessionStatus(sessions, entries, 1);
+  const result = await getSessionStatus(sessions, entries, 1);
 
   assert.deepEqual(result, {
     completedEntries: 1,

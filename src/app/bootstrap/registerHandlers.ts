@@ -7,11 +7,9 @@ import { registerStartCommand } from '../../adapters/telegram/commands/start.com
 import { registerStatusCommand } from '../../adapters/telegram/commands/status.command';
 import { registerStopCommand } from '../../adapters/telegram/commands/stop.command';
 import { registerTextMessageHandler } from '../../adapters/telegram/handlers/textMessage.handler';
-import { createContainer } from './createContainer';
+import type { AppContainer } from './createContainer';
 
-export function registerHandlers(bot: Telegraf) {
-  const container = createContainer();
-
+export function registerHandlers(bot: Telegraf, container: AppContainer) {
   registerClearSessionCommand(bot, container.useCases.clearSession);
   registerStartCommand(
     bot,

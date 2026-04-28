@@ -29,13 +29,13 @@ export function registerTextMessageHandler(
     }
 
     const userId = getUserId(ctx);
-    const session = sessions.getActiveSession(userId);
+    const session = await sessions.getActiveSession(userId);
 
     if (!session) {
       return ctx.reply(messages.session.idle, renderSessionKeyboard(false));
     }
 
-    const result = intakeEntriesUseCase.execute({
+    const result = await intakeEntriesUseCase.execute({
       sessionId: session.id,
       text,
     });
@@ -47,10 +47,11 @@ export function registerTextMessageHandler(
     await ctx.reply(getInitialReplyText(result));
 
     const processedEntries = await enrichmentJobQueue.enqueue(result.entries);
-    const hasSessionEntries = entries.findBySessionId(session.id).length > 0;
-    const hasSessionFailures = entries
-      .findBySessionId(session.id)
-      .some((entry) => entry.status === 'failed');
+    const sessionEntries = await entries.findBySessionId(session.id);
+    const hasSessionEntries = sessionEntries.length > 0;
+    const hasSessionFailures = sessionEntries.some(
+      (entry) => entry.status === 'failed',
+    );
 
     if (processedEntries.succeeded.length === 0) {
       return ctx.reply(

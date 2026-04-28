@@ -12,17 +12,29 @@ export function saveEntries({
   entryRepository,
   sessionId,
   texts,
-}: SaveEntriesParams): Entry[] {
+}: SaveEntriesParams): Promise<Entry[]> {
+  return saveEntriesInternal({ entryRepository, sessionId, texts });
+}
+
+async function saveEntriesInternal({
+  entryRepository,
+  sessionId,
+  texts,
+}: SaveEntriesParams): Promise<Entry[]> {
   const entryFactory = new EntryFactory();
-  const uniqueTexts = texts.filter(
-    (text) => !entryRepository.existsInSession(sessionId, text),
-  );
+  const uniqueTexts: string[] = [];
+
+  for (const text of texts) {
+    if (!(await entryRepository.existsInSession(sessionId, text))) {
+      uniqueTexts.push(text);
+    }
+  }
 
   const entries: Entry[] = uniqueTexts.map((text) =>
     entryFactory.createPending(sessionId, text),
   );
 
-  entryRepository.saveMany(entries);
+  await entryRepository.saveMany(entries);
 
   return entries;
 }

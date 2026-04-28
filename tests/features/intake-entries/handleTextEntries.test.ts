@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { InMemoryEntryRepository } from '../../../src/adapters/storage/InMemoryEntryRepository';
+import { InMemoryEntryRepository } from '../../../src/adapters/storage/in-memory/InMemoryEntryRepository';
 import { handleTextEntries } from '../../../src/features/intake-entries/model/handleTextEntries';
 
-test('handleTextEntries returns empty for blank input', () => {
+test('handleTextEntries returns empty for blank input', async () => {
   const entries = new InMemoryEntryRepository();
 
-  const result = handleTextEntries({
+  const result = await handleTextEntries({
     entryRepository: entries,
     sessionId: 'session-1',
     text: ' \n \n',
@@ -15,15 +15,15 @@ test('handleTextEntries returns empty for blank input', () => {
   assert.deepEqual(result, { kind: 'empty' });
 });
 
-test('handleTextEntries returns duplicatesOnly when all entries already exist', () => {
+test('handleTextEntries returns duplicatesOnly when all entries already exist', async () => {
   const entries = new InMemoryEntryRepository();
-  handleTextEntries({
+  await handleTextEntries({
     entryRepository: entries,
     sessionId: 'session-1',
     text: 'hassle',
   });
 
-  const result = handleTextEntries({
+  const result = await handleTextEntries({
     entryRepository: entries,
     sessionId: 'session-1',
     text: 'HASSLE',
@@ -35,7 +35,7 @@ test('handleTextEntries returns duplicatesOnly when all entries already exist', 
 test('handleTextEntries saves unique entries and starts background processing', async () => {
   const entries = new InMemoryEntryRepository();
 
-  const result = handleTextEntries({
+  const result = await handleTextEntries({
     entryRepository: entries,
     sessionId: 'session-1',
     text: 'hassle\nHASSLE\npull through',
@@ -50,7 +50,7 @@ test('handleTextEntries saves unique entries and starts background processing', 
   assert.equal(result.kind, 'saved');
   assert.equal(result.entries.length, 2);
 
-  const savedEntries = entries.findBySessionId('session-1');
+  const savedEntries = await entries.findBySessionId('session-1');
   assert.equal(savedEntries.length, 2);
   assert.deepEqual(
     savedEntries.map((entry) => entry.text),

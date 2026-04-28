@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { InMemoryEntryRepository } from '../../../src/adapters/storage/InMemoryEntryRepository';
+import { InMemoryEntryRepository } from '../../../src/adapters/storage/in-memory/InMemoryEntryRepository';
 import type { EntryEnrichmentClient } from '../../../src/entities/entry/api/entryEnrichmentClient';
 import { handleTextEntries } from '../../../src/features/intake-entries/model/handleTextEntries';
 import { processEntries } from '../../../src/processes/entry-enrichment/model/processEntries';
@@ -26,7 +26,7 @@ const entryEnrichmentClient: EntryEnrichmentClient = {
 
 test('processEntries returns word-translation previews and completes entries', async () => {
   const entries = new InMemoryEntryRepository();
-  const saved = handleTextEntries({
+  const saved = await handleTextEntries({
     entryRepository: entries,
     sessionId: 'session-1',
     text: 'hassle\npull through',
@@ -55,7 +55,7 @@ test('processEntries returns word-translation previews and completes entries', a
     ],
   });
 
-  const processedEntries = entries.findBySessionId('session-1');
+  const processedEntries = await entries.findBySessionId('session-1');
   assert.deepEqual(
     processedEntries.map((entry) => entry.status),
     ['completed', 'completed'],
@@ -68,7 +68,7 @@ test('processEntries returns word-translation previews and completes entries', a
 
 test('processEntries classifies insufficient quota failures', async () => {
   const entries = new InMemoryEntryRepository();
-  const saved = handleTextEntries({
+  const saved = await handleTextEntries({
     entryRepository: entries,
     sessionId: 'session-1',
     text: 'hilarious',

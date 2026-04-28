@@ -60,7 +60,7 @@ export class ProcessEntriesUseCase {
   private async processEntry(entry: Entry): Promise<ProcessEntryResult> {
     try {
       const enrichment = await this.entryEnrichmentClient.enrich(entry.text);
-      this.entryRepository.update(completeEntry(entry, enrichment));
+      await this.entryRepository.update(completeEntry(entry, enrichment));
 
       return {
         kind: 'succeeded',
@@ -80,7 +80,7 @@ export class ProcessEntriesUseCase {
         text: entry.text,
       });
 
-      this.entryRepository.update(failEntry(entry, userFacingMessage));
+      await this.entryRepository.update(failEntry(entry, userFacingMessage));
 
       return {
         kind: 'failed',

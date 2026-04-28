@@ -1,40 +1,42 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { InMemoryEntryRepository } from '../../../src/adapters/storage/InMemoryEntryRepository';
-import { InMemorySessionRepository } from '../../../src/adapters/storage/InMemorySessionRepository';
+import { InMemoryEntryRepository } from '../../../src/adapters/storage/in-memory/InMemoryEntryRepository';
+import { InMemorySessionRepository } from '../../../src/adapters/storage/in-memory/InMemorySessionRepository';
+import type { EntryEnrichmentClient } from '../../../src/entities/entry/api/entryEnrichmentClient';
 import { exportSessionCsv } from '../../../src/features/export-session/model/exportSessionCsv';
 import { handleTextEntries } from '../../../src/features/intake-entries/model/handleTextEntries';
 import { processEntries } from '../../../src/processes/entry-enrichment/model/processEntries';
-import type { EntryEnrichmentClient } from '../../../src/entities/entry/api/entryEnrichmentClient';
 
-test('exportSessionCsv returns noActive when there is no active session', () => {
+test('exportSessionCsv returns noActive when there is no active session', async () => {
   const sessions = new InMemorySessionRepository();
   const entries = new InMemoryEntryRepository();
 
-  assert.deepEqual(exportSessionCsv(sessions, entries, 1), {
+  assert.deepEqual(await exportSessionCsv(sessions, entries, 1), {
     kind: 'noActive',
   });
 });
 
-test('exportSessionCsv returns empty when no completed entries exist', () => {
+test('exportSessionCsv returns empty when no completed entries exist', async () => {
   const sessions = new InMemorySessionRepository();
   const entries = new InMemoryEntryRepository();
-  const session = sessions.startSession(1);
+  const session = await sessions.startSession(1);
 
-  handleTextEntries({
+  await handleTextEntries({
     entryRepository: entries,
     sessionId: session.id,
     text: 'hilarious',
   });
 
-  assert.deepEqual(exportSessionCsv(sessions, entries, 1), { kind: 'empty' });
+  assert.deepEqual(await exportSessionCsv(sessions, entries, 1), {
+    kind: 'empty',
+  });
 });
 
 test('exportSessionCsv returns csv for completed entries only', async () => {
   const sessions = new InMemorySessionRepository();
   const entries = new InMemoryEntryRepository();
-  const session = sessions.startSession(1);
-  const saved = handleTextEntries({
+  const session = await sessions.startSession(1);
+  const saved = await handleTextEntries({
     entryRepository: entries,
     sessionId: session.id,
     text: 'hilarious\nrumor',
@@ -66,7 +68,7 @@ test('exportSessionCsv returns csv for completed entries only', async () => {
     entryRepository: entries,
   });
 
-  const result = exportSessionCsv(sessions, entries, 1);
+  const result = await exportSessionCsv(sessions, entries, 1);
 
   assert.equal(result.kind, 'ready');
 

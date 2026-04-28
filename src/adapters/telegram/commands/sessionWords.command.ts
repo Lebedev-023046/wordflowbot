@@ -15,9 +15,9 @@ export function registerSessionWordsCommand(
   bot: Telegraf,
   getSessionWordsUseCase: GetSessionWordsUseCase,
 ) {
-  const handleShowWords = (ctx: Context) => {
+  const handleShowWords = async (ctx: Context) => {
     const userId = getUserId(ctx);
-    const result = getSessionWordsUseCase.execute(userId);
+    const result = await getSessionWordsUseCase.execute(userId);
 
     if (result.kind === 'noActive') {
       return replyWithSessionState({
@@ -69,7 +69,7 @@ export function registerSessionWordsCommand(
     }
 
     const userId = getUserId(ctx);
-    const result = getSessionWordsUseCase.execute(userId);
+    const result = await getSessionWordsUseCase.execute(userId);
 
     if (result.kind === 'noActive') {
       return ctx.editMessageText(messages.session.noActive);

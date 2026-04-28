@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { InMemoryEntryRepository } from '../../src/adapters/storage/InMemoryEntryRepository';
-import { InMemorySessionRepository } from '../../src/adapters/storage/InMemorySessionRepository';
+import { InMemoryEntryRepository } from '../../src/adapters/storage/in-memory/InMemoryEntryRepository';
+import { InMemorySessionRepository } from '../../src/adapters/storage/in-memory/InMemorySessionRepository';
 import type { EnrichmentJobQueue } from '../../src/application/ports/EnrichmentJobQueue';
 import { EntryFactory } from '../../src/application/services/EntryFactory';
 import { RetryFailedEntriesUseCase } from '../../src/application/use-cases/RetryFailedEntriesUseCase';
@@ -31,7 +31,7 @@ test('RetryFailedEntriesUseCase returns noActive without an active session', asy
 test('RetryFailedEntriesUseCase returns noFailed when there are no failed items', async () => {
   const sessions = new InMemorySessionRepository();
   const entries = new InMemoryEntryRepository();
-  sessions.startSession(1);
+  await sessions.startSession(1);
 
   const queue: EnrichmentJobQueue = {
     enqueue: async () => ({
@@ -53,7 +53,7 @@ test('RetryFailedEntriesUseCase returns noFailed when there are no failed items'
 test('RetryFailedEntriesUseCase retries failed items only and resets them to pending before enqueue', async () => {
   const sessions = new InMemorySessionRepository();
   const entries = new InMemoryEntryRepository();
-  const session = sessions.startSession(1);
+  const session = await sessions.startSession(1);
   const entryFactory = new EntryFactory();
   const failedEntry = {
     ...entryFactory.createPending(session.id, 'hassle'),
@@ -66,7 +66,7 @@ test('RetryFailedEntriesUseCase retries failed items only and resets them to pen
     translation: 'translation for pull through',
   };
 
-  entries.saveMany([failedEntry, completedEntry]);
+  await entries.saveMany([failedEntry, completedEntry]);
 
   let queuedEntriesSnapshot: Entry[] = [];
   const processingResult: ProcessEntriesResult = {
@@ -102,7 +102,7 @@ test('RetryFailedEntriesUseCase retries failed items only and resets them to pen
   assert.equal(queuedEntriesSnapshot[0].status, 'pending');
   assert.equal(queuedEntriesSnapshot[0].errorMessage, null);
 
-  const persistedFailedEntry = entries.findById(failedEntry.id);
+  const persistedFailedEntry = await entries.findById(failedEntry.id);
   assert.equal(persistedFailedEntry?.status, 'pending');
   assert.equal(persistedFailedEntry?.errorMessage, null);
 });

@@ -9,7 +9,7 @@ export function getSessionStatus(
   sessionRepository: SessionRepository,
   entryRepository: EntryRepository,
   userId: number,
-): SessionStatusResult {
+): Promise<SessionStatusResult> {
   return new GetSessionStatusUseCase(
     sessionRepository,
     entryRepository,

@@ -20,34 +20,35 @@ export class ClearSessionUseCase {
     this.entryRepository = entryRepository;
   }
 
-  preview(userId: number): ClearSessionResult {
-    const session = this.sessionRepository.getActiveSession(userId);
+  async preview(userId: number): Promise<ClearSessionResult> {
+    const session = await this.sessionRepository.getActiveSession(userId);
 
     if (!session) {
       return { kind: 'noActive' };
     }
 
     return {
-      clearedEntries: this.entryRepository.findBySessionId(session.id).length,
+      clearedEntries: (await this.entryRepository.findBySessionId(session.id))
+        .length,
       kind: 'cleared',
     };
   }
 
-  execute(userId: number): ClearSessionResult {
-    const preview = this.preview(userId);
+  async execute(userId: number): Promise<ClearSessionResult> {
+    const preview = await this.preview(userId);
 
     if (preview.kind === 'noActive') {
       return preview;
     }
 
-    const session = this.sessionRepository.getActiveSession(userId);
+    const session = await this.sessionRepository.getActiveSession(userId);
 
     if (!session) {
       return { kind: 'noActive' };
     }
 
-    this.entryRepository.deleteBySessionId(session.id);
-    this.sessionRepository.clearSession(userId);
+    await this.entryRepository.deleteBySessionId(session.id);
+    await this.sessionRepository.clearSession(userId);
 
     return {
       clearedEntries: preview.clearedEntries,

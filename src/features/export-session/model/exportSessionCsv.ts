@@ -10,7 +10,7 @@ export function exportSessionCsv(
   sessionRepository: SessionRepository,
   entryRepository: EntryRepository,
   userId: number,
-): ExportSessionCsvResult {
+): Promise<ExportSessionCsvResult> {
   return new ExportSessionCsvUseCase(
     sessionRepository,
     entryRepository,

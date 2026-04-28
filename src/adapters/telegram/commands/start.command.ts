@@ -13,17 +13,19 @@ export function registerStartCommand(
   sessions: SessionRepository,
   startSessionUseCase: StartSessionUseCase,
 ) {
-  const showStartState = (ctx: Context) => {
+  const showStartState = async (ctx: Context) => {
     const userId = getUserId(ctx);
-    const session = sessions.getActiveSession(userId);
+    const session = await sessions.getActiveSession(userId);
     const isActive = session !== null;
     const message = isActive
       ? messages.session.active
       : messages.session.promptStart;
     return replyWithSessionState({
       ctx,
-      hasEntries: session ? hasEntries(entries, session.id) : false,
-      hasFailedEntries: session ? hasFailedEntries(entries, session.id) : false,
+      hasEntries: session ? await hasEntries(entries, session.id) : false,
+      hasFailedEntries: session
+        ? await hasFailedEntries(entries, session.id)
+        : false,
       message,
       isActive,
     });
@@ -31,17 +33,17 @@ export function registerStartCommand(
 
   bot.start(showStartState);
 
-  bot.hears(buttons.startSession, (ctx) => {
+  bot.hears(buttons.startSession, async (ctx) => {
     const userId = getUserId(ctx);
-    const result = startSessionUseCase.execute(userId);
+    const result = await startSessionUseCase.execute(userId);
 
     if (result.kind === 'alreadyActive') {
-      const session = sessions.getActiveSession(userId);
+      const session = await sessions.getActiveSession(userId);
       return replyWithSessionState({
         ctx,
-        hasEntries: session ? hasEntries(entries, session.id) : false,
+        hasEntries: session ? await hasEntries(entries, session.id) : false,
         hasFailedEntries: session
-          ? hasFailedEntries(entries, session.id)
+          ? await hasFailedEntries(entries, session.id)
           : false,
         message: messages.session.alreadyActive,
         isActive: result.isActive,
@@ -59,15 +61,29 @@ export function registerStartCommand(
 function hasFailedEntries(
   entryRepository: EntryRepository,
   sessionId: string,
-): boolean {
-  return entryRepository
-    .findBySessionId(sessionId)
-    .some((entry) => entry.status === 'failed');
+): Promise<boolean> {
+  return hasFailedEntriesInternal(entryRepository, sessionId);
+}
+
+async function hasFailedEntriesInternal(
+  entryRepository: EntryRepository,
+  sessionId: string,
+): Promise<boolean> {
+  return (await entryRepository.findBySessionId(sessionId)).some(
+    (entry) => entry.status === 'failed',
+  );
 }
 
 function hasEntries(
   entryRepository: EntryRepository,
   sessionId: string,
-): boolean {
-  return entryRepository.findBySessionId(sessionId).length > 0;
+): Promise<boolean> {
+  return hasEntriesInternal(entryRepository, sessionId);
+}
+
+async function hasEntriesInternal(
+  entryRepository: EntryRepository,
+  sessionId: string,
+): Promise<boolean> {
+  return (await entryRepository.findBySessionId(sessionId)).length > 0;
 }

@@ -31,6 +31,37 @@ npm run dev
 npm run bot
 npm run build
 npm run preview
+npm run db:up
+npm run db:down
+npm run db:logs
+npm run db:sql:admin
+npm run db:sql:migrator
+npm run db:sql:app
+npm run prisma:migrate
+npm run prisma:migrate:deploy
+npm run prisma:migrate:status
+```
+
+## Database Roles
+
+- `DATABASE_URL` is the runtime bot connection and uses `wordflowbot_app`.
+- `MIGRATION_DATABASE_URL` is for Prisma migrations and uses `wordflowbot_migrator`.
+- `wordflowbot_admin` is only for manual database administration.
+
+Typical local workflow:
+
+```bash
+npm run db:up
+npm run prisma:migrate
+npm run bot
+```
+
+Manual database access:
+
+```bash
+npm run db:sql:admin
+npm run db:sql:migrator
+npm run db:sql:app
 ```
 
 ## Telegram Bot Setup

@@ -12,15 +12,15 @@ export class StopSessionUseCase {
     this.sessionRepository = sessionRepository;
   }
 
-  execute(userId: number): StopSessionResult {
-    if (!this.sessionRepository.hasActiveSession(userId)) {
+  async execute(userId: number): Promise<StopSessionResult> {
+    if (!(await this.sessionRepository.hasActiveSession(userId))) {
       return {
         kind: 'noActive',
         isActive: false,
       };
     }
 
-    this.sessionRepository.stopSession(userId);
+    await this.sessionRepository.stopSession(userId);
 
     return {
       kind: 'stopped',

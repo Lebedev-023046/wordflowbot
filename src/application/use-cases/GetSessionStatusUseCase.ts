@@ -19,14 +19,14 @@ export class GetSessionStatusUseCase {
     this.entryRepository = entryRepository;
   }
 
-  execute(userId: number): SessionStatusResult {
-    const session = this.sessionRepository.getActiveSession(userId);
+  async execute(userId: number): Promise<SessionStatusResult> {
+    const session = await this.sessionRepository.getActiveSession(userId);
 
     if (!session) {
       return { kind: 'noActive' };
     }
 
-    const entries = this.entryRepository.findBySessionId(session.id);
+    const entries = await this.entryRepository.findBySessionId(session.id);
 
     return {
       kind: 'active',

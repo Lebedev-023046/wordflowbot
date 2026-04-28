@@ -31,12 +31,12 @@ export function registerRetryFailedCommand(
     }
 
     if (result.kind === 'noFailed') {
-      const session = sessions.getActiveSession(userId);
+      const session = await sessions.getActiveSession(userId);
       return replyWithSessionState({
         ctx,
-        hasEntries: session ? hasEntries(entries, session.id) : false,
+        hasEntries: session ? await hasEntries(entries, session.id) : false,
         hasFailedEntries: session
-          ? hasFailedEntries(entries, session.id)
+          ? await hasFailedEntries(entries, session.id)
           : false,
         isActive: true,
         message: messages.entries.retryNothingFailed,
@@ -46,27 +46,27 @@ export function registerRetryFailedCommand(
     await ctx.reply(messages.entries.retrying(result.retryCount));
 
     if (result.processingResult.succeeded.length === 0) {
-      const session = sessions.getActiveSession(userId);
+      const session = await sessions.getActiveSession(userId);
       return ctx.reply(
         getProcessedFailuresReplyText(result.processingResult),
         session
           ? renderSessionKeyboard(
               true,
-              hasEntries(entries, session.id),
-              hasFailedEntries(entries, session.id),
+              await hasEntries(entries, session.id),
+              await hasFailedEntries(entries, session.id),
             )
           : undefined,
       );
     }
 
-    const session = sessions.getActiveSession(userId);
+    const session = await sessions.getActiveSession(userId);
     return ctx.reply(
       formatProcessedEntriesReply(result.processingResult),
       session
         ? renderSessionKeyboard(
             true,
-            hasEntries(entries, session.id),
-            hasFailedEntries(entries, session.id),
+            await hasEntries(entries, session.id),
+            await hasFailedEntries(entries, session.id),
           )
         : undefined,
     );
@@ -79,15 +79,29 @@ export function registerRetryFailedCommand(
 function hasFailedEntries(
   entryRepository: EntryRepository,
   sessionId: string,
-): boolean {
-  return entryRepository
-    .findBySessionId(sessionId)
-    .some((entry) => entry.status === 'failed');
+): Promise<boolean> {
+  return hasFailedEntriesInternal(entryRepository, sessionId);
+}
+
+async function hasFailedEntriesInternal(
+  entryRepository: EntryRepository,
+  sessionId: string,
+): Promise<boolean> {
+  return (await entryRepository.findBySessionId(sessionId)).some(
+    (entry) => entry.status === 'failed',
+  );
 }
 
 function hasEntries(
   entryRepository: EntryRepository,
   sessionId: string,
-): boolean {
-  return entryRepository.findBySessionId(sessionId).length > 0;
+): Promise<boolean> {
+  return hasEntriesInternal(entryRepository, sessionId);
+}
+
+async function hasEntriesInternal(
+  entryRepository: EntryRepository,
+  sessionId: string,
+): Promise<boolean> {
+  return (await entryRepository.findBySessionId(sessionId)).length > 0;
 }
