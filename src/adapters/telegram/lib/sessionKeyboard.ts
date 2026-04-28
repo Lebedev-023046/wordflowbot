@@ -1,14 +1,20 @@
 import { Markup } from 'telegraf';
 import { buttons } from '../../../shared/i18n/buttons';
 
-export function renderSessionKeyboard(isActive: boolean) {
+export function renderSessionKeyboard(
+  isActive: boolean,
+  hasEntries = false,
+  hasFailedEntries = false,
+) {
   const rows = isActive
     ? [
         [buttons.showWords],
-        [buttons.retryFailed],
         [buttons.exportCsv],
-        [buttons.clearSession],
-        [buttons.stopSession],
+        [
+          ...(hasEntries ? [buttons.clearSession] : []),
+          buttons.stopSession,
+          ...(hasFailedEntries ? [buttons.retryFailed] : []),
+        ],
       ]
     : [[buttons.startSession]];
 

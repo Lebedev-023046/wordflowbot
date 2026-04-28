@@ -9,7 +9,10 @@ test('clear session messages are user-friendly', () => {
   );
   assert.equal(
     messages.session.cleared(2),
-    'Session cleared. Removed 2 items from this session.',
+    '🧹 Session cleared. Removed 2 items from this session.',
   );
-  assert.equal(messages.session.clearCancelled, 'Your session was not cleared.');
+  assert.equal(
+    messages.session.clearCancelled,
+    'Your session was not cleared.',
+  );
 });

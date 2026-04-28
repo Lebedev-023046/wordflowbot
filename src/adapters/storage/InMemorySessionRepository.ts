@@ -1,4 +1,7 @@
-import type { Session, SessionRepository } from '../../entities/session/api/sessionRepository';
+import type {
+  Session,
+  SessionRepository,
+} from '../../entities/session/api/sessionRepository';
 
 export class InMemorySessionRepository implements SessionRepository {
   private sessions = new Map<number, Session>();

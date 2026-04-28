@@ -36,7 +36,8 @@ export class IntakeEntriesUseCase {
     }
 
     const uniqueTexts = parsedEntries.filter(
-      (entryText) => !this.entryRepository.existsInSession(sessionId, entryText),
+      (entryText) =>
+        !this.entryRepository.existsInSession(sessionId, entryText),
     );
 
     if (uniqueTexts.length === 0) {

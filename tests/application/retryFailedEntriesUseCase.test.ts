@@ -19,7 +19,11 @@ test('RetryFailedEntriesUseCase returns noActive without an active session', asy
     }),
   };
 
-  const result = await new RetryFailedEntriesUseCase(sessions, entries, queue).execute(1);
+  const result = await new RetryFailedEntriesUseCase(
+    sessions,
+    entries,
+    queue,
+  ).execute(1);
 
   assert.deepEqual(result, { kind: 'noActive' });
 });
@@ -37,7 +41,11 @@ test('RetryFailedEntriesUseCase returns noFailed when there are no failed items'
     }),
   };
 
-  const result = await new RetryFailedEntriesUseCase(sessions, entries, queue).execute(1);
+  const result = await new RetryFailedEntriesUseCase(
+    sessions,
+    entries,
+    queue,
+  ).execute(1);
 
   assert.deepEqual(result, { kind: 'noFailed' });
 });
@@ -78,7 +86,11 @@ test('RetryFailedEntriesUseCase retries failed items only and resets them to pen
     },
   };
 
-  const result = await new RetryFailedEntriesUseCase(sessions, entries, queue).execute(1);
+  const result = await new RetryFailedEntriesUseCase(
+    sessions,
+    entries,
+    queue,
+  ).execute(1);
 
   assert.deepEqual(result, {
     kind: 'retried',

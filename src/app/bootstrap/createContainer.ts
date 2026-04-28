@@ -84,7 +84,9 @@ export function createContainer() {
     entryRepository,
     processEntriesLogger,
   );
-  const enrichmentJobQueue = new ImmediateEnrichmentJobQueue(processEntriesUseCase);
+  const enrichmentJobQueue = new ImmediateEnrichmentJobQueue(
+    processEntriesUseCase,
+  );
   const retryFailedEntriesUseCase = new RetryFailedEntriesUseCase(
     sessionRepository,
     entryRepository,

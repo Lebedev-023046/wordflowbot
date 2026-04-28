@@ -46,7 +46,9 @@ export class GetSessionWordsUseCase {
 
     return {
       completedItems: entries
-        .filter((entry) => entry.status === 'completed' && entry.translation !== null)
+        .filter(
+          (entry) => entry.status === 'completed' && entry.translation !== null,
+        )
         .map((entry) => ({
           text: entry.text,
           translation: entry.translation ?? '',

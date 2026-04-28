@@ -43,13 +43,16 @@ export class RetryFailedEntriesUseCase {
       return { kind: 'noFailed' };
     }
 
-    const retriedEntries = failedEntries.map((entry) => markEntryPending(entry));
+    const retriedEntries = failedEntries.map((entry) =>
+      markEntryPending(entry),
+    );
 
     for (const entry of retriedEntries) {
       this.entryRepository.update(entry);
     }
 
-    const processingResult = await this.enrichmentJobQueue.enqueue(retriedEntries);
+    const processingResult =
+      await this.enrichmentJobQueue.enqueue(retriedEntries);
 
     return {
       kind: 'retried',

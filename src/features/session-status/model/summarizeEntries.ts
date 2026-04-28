@@ -21,7 +21,9 @@ export interface EntryStatusSummary {
 }
 
 export function summarizeEntries(entries: Entry[]): EntryStatusSummary {
-  const pendingEntries = entries.filter((entry) => entry.status === 'pending').length;
+  const pendingEntries = entries.filter(
+    (entry) => entry.status === 'pending',
+  ).length;
   const completedEntries = entries.filter(isCompletedEntry);
   const completedEntrySummaries = completedEntries.map((entry) => ({
     text: entry.text,
@@ -38,7 +40,8 @@ export function summarizeEntries(entries: Entry[]): EntryStatusSummary {
     completedEntries: completedEntries.length,
     completedEntrySummaries,
     failedEntries,
-    failedEntriesCount: entries.filter((entry) => entry.status === 'failed').length,
+    failedEntriesCount: entries.filter((entry) => entry.status === 'failed')
+      .length,
     pendingEntries,
     totalEntries: entries.length,
   };

@@ -62,7 +62,8 @@ test('getSessionStatus returns counts and failure details for an active session'
     ],
     failedEntries: [
       {
-        errorMessage: 'Something went wrong while preparing this item. Please try again.',
+        errorMessage:
+          'Something went wrong while preparing this item. Please try again.',
         text: 'hilarious',
       },
     ],

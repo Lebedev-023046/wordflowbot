@@ -1,7 +1,10 @@
 import type { EntryEnrichmentClient } from '../../entities/entry/api/entryEnrichmentClient';
 import type { EntryRepository } from '../../entities/entry/api/entryRepository';
 import type { Entry } from '../../entities/entry/model/entry.types';
-import { completeEntry, failEntry } from '../../entities/entry/model/entryState';
+import {
+  completeEntry,
+  failEntry,
+} from '../../entities/entry/model/entryState';
 import { getEntryFailureKind } from '../../processes/entry-enrichment/model/getEntryFailureKind';
 import type {
   EntryFailureKind,
@@ -27,7 +30,9 @@ export class ProcessEntriesUseCase {
   }
 
   async execute(entries: Entry[]): Promise<ProcessEntriesResult> {
-    const results = await Promise.all(entries.map((entry) => this.processEntry(entry)));
+    const results = await Promise.all(
+      entries.map((entry) => this.processEntry(entry)),
+    );
 
     return results.reduce<ProcessEntriesResult>(
       (accumulator, result) => {

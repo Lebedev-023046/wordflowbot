@@ -22,7 +22,11 @@ export class CachedEntryEnrichmentClient implements EntryEnrichmentClient {
   private readonly logger: Logger;
   private writeQueue: Promise<void> = Promise.resolve();
 
-  constructor({ cacheFilePath, delegate, logger }: CachedEntryEnrichmentClientParams) {
+  constructor({
+    cacheFilePath,
+    delegate,
+    logger,
+  }: CachedEntryEnrichmentClientParams) {
     this.cacheFilePath = cacheFilePath;
     this.delegate = delegate;
     this.logger = logger;
@@ -56,7 +60,9 @@ export class CachedEntryEnrichmentClient implements EntryEnrichmentClient {
     return enrichment;
   }
 
-  private async getCachedEntry(normalizedText: string): Promise<EntryEnrichment | null> {
+  private async getCachedEntry(
+    normalizedText: string,
+  ): Promise<EntryEnrichment | null> {
     const cache = await this.loadCache();
     return cache[normalizedText] ?? null;
   }
@@ -112,7 +118,10 @@ export class CachedEntryEnrichmentClient implements EntryEnrichmentClient {
 
       this.logger.warn('Failed to read cache file. Starting empty.', {
         cacheFilePath: this.cacheFilePath,
-        error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
+        error:
+          error instanceof Error
+            ? { message: error.message, stack: error.stack }
+            : error,
       });
       return {};
     }

@@ -5,7 +5,10 @@ import { messages } from '../../../shared/i18n/messages';
 import { getUserId } from '../lib/getUserId';
 import { replyWithSessionState } from '../lib/replyWithSessionState';
 
-export function registerStopCommand(bot: Telegraf, stopSessionUseCase: StopSessionUseCase) {
+export function registerStopCommand(
+  bot: Telegraf,
+  stopSessionUseCase: StopSessionUseCase,
+) {
   bot.hears(buttons.stopSession, (ctx) => {
     const userId = getUserId(ctx);
     const result = stopSessionUseCase.execute(userId);

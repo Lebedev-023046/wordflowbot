@@ -18,7 +18,8 @@ function getOpenAiServiceTier(): OpenAIServiceTier {
 export const env = {
   botToken: process.env.BOT_TOKEN ?? '',
   debugBot: process.env.DEBUG_BOT === 'true',
-  enrichmentCacheFile: process.env.ENRICHMENT_CACHE_FILE ?? '.data/enrichment-cache.json',
+  enrichmentCacheFile:
+    process.env.ENRICHMENT_CACHE_FILE ?? '.data/enrichment-cache.json',
   logCache: process.env.LOG_CACHE === 'true',
   openAiApiKey: process.env.OPENAI_API_KEY ?? '',
   openAiModel: process.env.OPENAI_MODEL ?? 'gpt-5.4-mini',
@@ -27,9 +28,13 @@ export const env = {
 };
 
 if (!env.botToken) {
-  throw new Error('BOT_TOKEN is missing. Put it into .env before starting the bot.');
+  throw new Error(
+    'BOT_TOKEN is missing. Put it into .env before starting the bot.',
+  );
 }
 
 if (!env.openAiApiKey) {
-  throw new Error('OPENAI_API_KEY is missing. Put it into .env before starting the bot.');
+  throw new Error(
+    'OPENAI_API_KEY is missing. Put it into .env before starting the bot.',
+  );
 }

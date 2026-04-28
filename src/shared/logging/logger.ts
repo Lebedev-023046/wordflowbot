@@ -36,7 +36,12 @@ export function createLogger({
   };
 }
 
-function log(level: 'error' | 'info' | 'warn', scope: string, message: string, payload?: unknown) {
+function log(
+  level: 'error' | 'info' | 'warn',
+  scope: string,
+  message: string,
+  payload?: unknown,
+) {
   const line = `[${scope}] ${message}`;
 
   if (payload === undefined) {

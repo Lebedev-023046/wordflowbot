@@ -180,5 +180,200 @@
       }
     ],
     "translation": "срочно уйти; поспешно убежать"
+  },
+  "garrity": {
+    "examples": [
+      {
+        "text": "Garrity was the last name on the invitation list.",
+        "translation": "Гаррити — это была фамилия в списке получателей приглашения."
+      },
+      {
+        "text": "We met a Mr. Garrity at the community center.",
+        "translation": "Мы познакомились с мистером Гаррити в общественном центре."
+      }
+    ],
+    "translation": "Гаррити (фамилия)"
+  },
+  "precise": {
+    "examples": [
+      {
+        "text": "Please be precise when you write the date.",
+        "translation": "Пожалуйста, указывайте точную дату, когда пишете её."
+      },
+      {
+        "text": "I need a precise measurement of the room.",
+        "translation": "Мне нужно точное измерение комнаты."
+      }
+    ],
+    "translation": "точный; точный, скрупулёзный; строго определённый"
+  },
+  "enticement": {
+    "examples": [
+      {
+        "text": "The enticement of a free trial helped me decide to sign up.",
+        "translation": "Искушение бесплатным пробным периодом помогло мне решиться и зарегистрироваться."
+      },
+      {
+        "text": "She couldn't resist the enticement of chocolate cookies.",
+        "translation": "Она не смогла устоять перед соблазном шоколадного печенья."
+      }
+    ],
+    "translation": "соблазн; искушение"
+  },
+  "fret": {
+    "examples": [
+      {
+        "text": "Don’t fret—everything will be fine.",
+        "translation": "Не волнуйся — всё будет хорошо."
+      },
+      {
+        "text": "She tends to fret about small mistakes.",
+        "translation": "Она склонна переживать из‑за мелких ошибок."
+      }
+    ],
+    "translation": "тревожиться, беспокоиться"
+  },
+  "prowl": {
+    "examples": [
+      {
+        "text": "The cat prowled around the garden at night.",
+        "translation": "Кот крался по саду ночью."
+      },
+      {
+        "text": "Someone prowled near our house, so we called the police.",
+        "translation": "Кто-то шнырял возле нашего дома, поэтому мы позвонили в полицию."
+      }
+    ],
+    "translation": "красться; шнырять; рыскать"
+  },
+  "relent": {
+    "examples": [
+      {
+        "text": "The judge refused to relent, even though everyone asked him to.",
+        "translation": "Судья отказался смягчиться, даже несмотря на то, что все просили его."
+      },
+      {
+        "text": "She didn't relent until the problem was solved.",
+        "translation": "Она не уступала, пока проблема не была решена."
+      }
+    ],
+    "translation": "смягчаться; уступать; ослабевать (требования, сопротивление, настойчивость)"
+  },
+  "horse run off": {
+    "examples": [
+      {
+        "text": "The horse ran off after the gate was left open.",
+        "translation": "Лошадь убежала, потому что калитку оставили открытой."
+      },
+      {
+        "text": "Be careful—if you scare it, it might run off.",
+        "translation": "Будь осторожен: если напугаешь, оно может сорваться и убежать."
+      }
+    ],
+    "translation": "убежать (о лошади), сорваться и убежать; сбежать"
+  },
+  "so eager": {
+    "examples": [
+      {
+        "text": "I’m so eager to start the new project.",
+        "translation": "Я так eager (очень) хочу начать новый проект."
+      },
+      {
+        "text": "She was eager to hear the results.",
+        "translation": "Она с нетерпением хотела узнать результаты."
+      }
+    ],
+    "translation": "очень eager (пытливый/с большим желанием), с нетерпением"
+  },
+  "seal": {
+    "examples": [
+      {
+        "text": "The seal on the bottle is still unbroken.",
+        "translation": "Пломба на бутылке всё ещё не вскрыта."
+      },
+      {
+        "text": "A seal caught a fish near the rocks.",
+        "translation": "Тюлень поймал рыбу рядом со скалами."
+      }
+    ],
+    "translation": "пломба; печать; (морское) тюлень"
+  },
+  "carry off": {
+    "examples": [
+      {
+        "text": "She managed to carry off the performance without any mistakes.",
+        "translation": "Ей удалось провести выступление без ошибок."
+      },
+      {
+        "text": "The magician carried off the trick smoothly, and the audience was amazed.",
+        "translation": "Фокусник легко и уверенно проделал трюк, и зрители были в восторге."
+      }
+    ],
+    "translation": "справиться (с чем-то), ловко выполнить; (также) унести, уволочь; (перен.) одержать успех, успешно провести"
+  },
+  "infest": {
+    "examples": [
+      {
+        "text": "The old apartment was infested with cockroaches.",
+        "translation": "Старая квартира была заражена тараканами."
+      },
+      {
+        "text": "We had to treat the garden because it was infested with weeds.",
+        "translation": "Нам пришлось обработать сад, потому что он был зарос сорняками."
+      }
+    ],
+    "translation": "заражать, кишеть (насекомыми/вредителями), быть заражённым"
+  },
+  "rabid": {
+    "examples": [
+      {
+        "text": "The dog was rabid, so the vet quarantined it immediately.",
+        "translation": "Собака была бешеной, поэтому ветеринар сразу поместил её в карантин."
+      },
+      {
+        "text": "He became rabid about the issue after watching one video.",
+        "translation": "Он стал ярым (одержимым) по этому вопросу после того, как посмотрел одно видео."
+      }
+    ],
+    "translation": "бешеный; неистовый, ярый"
+  },
+  "poke me head underneath": {
+    "examples": [
+      {
+        "text": "I peeked my head underneath the table to see what was moving.",
+        "translation": "Я заглянул головой под стол, чтобы понять, что там шевелится."
+      },
+      {
+        "text": "The child poked his head underneath the fence to look for the dog.",
+        "translation": "Ребёнок сунул голову под забор, чтобы поискать собаку."
+      }
+    ],
+    "translation": "заглянуть/высунуть голову снизу (куда-то)"
+  },
+  "diverge": {
+    "examples": [
+      {
+        "text": "The two paths diverge after the bridge.",
+        "translation": "Две тропинки расходятся после моста."
+      },
+      {
+        "text": "The opinions diverged during the meeting.",
+        "translation": "Во время встречи мнения разошлись."
+      }
+    ],
+    "translation": "расходиться; расходить(ся) (в стороны); разойтись (во мнениях)"
+  },
+  "wonderful": {
+    "examples": [
+      {
+        "text": "“Wonderful! I’m so glad you came.”",
+        "translation": "«Чудесно! Я так рад, что ты пришёл.»"
+      },
+      {
+        "text": "The view from the top was wonderful.",
+        "translation": "Вид сверху был чудесным."
+      }
+    ],
+    "translation": "чудесно; замечательно"
   }
 }

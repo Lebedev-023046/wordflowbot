@@ -44,10 +44,9 @@ test('CachedEntryEnrichmentClient reuses persisted enrichments across calls', as
     await client.enrich('Hilarious'),
     await client.enrich('hilarious'),
   ]);
-  const persistedCache = JSON.parse(await readFile(cacheFilePath, 'utf8')) as Record<
-    string,
-    unknown
-  >;
+  const persistedCache = JSON.parse(
+    await readFile(cacheFilePath, 'utf8'),
+  ) as Record<string, unknown>;
 
   assert.deepEqual(first, second);
   assert.equal(callCount, 1);
@@ -92,10 +91,9 @@ test('CachedEntryEnrichmentClient stores all entries during concurrent enrichmen
     ]),
   );
 
-  const persistedCache = JSON.parse(await readFile(cacheFilePath, 'utf8')) as Record<
-    string,
-    unknown
-  >;
+  const persistedCache = JSON.parse(
+    await readFile(cacheFilePath, 'utf8'),
+  ) as Record<string, unknown>;
 
   assert.deepEqual(Object.keys(persistedCache).sort(), [
     'hilarious',

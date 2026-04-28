@@ -10,8 +10,14 @@ export function createBot() {
 
   bot.catch((error, ctx) => {
     logger.error('Unhandled bot error.', {
-      error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
-      messageText: 'message' in ctx && ctx.message && 'text' in ctx.message ? ctx.message.text : null,
+      error:
+        error instanceof Error
+          ? { message: error.message, stack: error.stack }
+          : error,
+      messageText:
+        'message' in ctx && ctx.message && 'text' in ctx.message
+          ? ctx.message.text
+          : null,
       updateId: ctx.update.update_id,
     });
   });

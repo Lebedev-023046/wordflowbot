@@ -19,7 +19,12 @@ export class OpenAIEnrichmentClient implements EntryEnrichmentClient {
   private readonly client: OpenAI;
   private readonly debugLogger: Logger;
   private readonly model: string;
-  private readonly serviceTier: 'auto' | 'default' | 'flex' | 'priority' | 'scale';
+  private readonly serviceTier:
+    | 'auto'
+    | 'default'
+    | 'flex'
+    | 'priority'
+    | 'scale';
   private readonly usageLogger: Logger;
 
   constructor({

@@ -13,14 +13,30 @@ export function registerHandlers(bot: Telegraf) {
   const container = createContainer();
 
   registerClearSessionCommand(bot, container.useCases.clearSession);
-  registerStartCommand(bot, container.repositories.sessions, container.useCases.startSession);
-  registerExportCsvCommand(bot, container.useCases.exportSessionCsv);
-  registerRetryFailedCommand(bot, container.useCases.retryFailedEntries);
+  registerStartCommand(
+    bot,
+    container.repositories.entries,
+    container.repositories.sessions,
+    container.useCases.startSession,
+  );
+  registerExportCsvCommand(
+    bot,
+    container.repositories.entries,
+    container.repositories.sessions,
+    container.useCases.exportSessionCsv,
+  );
+  registerRetryFailedCommand(
+    bot,
+    container.repositories.entries,
+    container.repositories.sessions,
+    container.useCases.retryFailedEntries,
+  );
   registerSessionWordsCommand(bot, container.useCases.getSessionWords);
   registerStatusCommand(bot, container.useCases.getSessionStatus);
   registerStopCommand(bot, container.useCases.stopSession);
   registerTextMessageHandler(
     bot,
+    container.repositories.entries,
     container.repositories.sessions,
     container.useCases.intakeEntries,
     container.queues.enrichment,

@@ -39,7 +39,8 @@ test('GetSessionWordsUseCase returns completed and failed session words separate
     entryFactory.createPending(session.id, 'pull through'),
     {
       ...entryFactory.createPending(session.id, 'rumor'),
-      errorMessage: 'Could not finish this item right now. Please try again later.',
+      errorMessage:
+        'Could not finish this item right now. Please try again later.',
       status: 'failed',
     },
   ]);

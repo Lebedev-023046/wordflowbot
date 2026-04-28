@@ -6,6 +6,7 @@ import type {
 
 const WORDS_PAGE_SIZE = 10;
 const SESSION_WORDS_CALLBACK_PREFIX = 'session_words';
+export const SESSION_WORDS_NOOP_CALLBACK = 'session_words:noop';
 
 interface PageSlice<T> {
   items: T[];
@@ -18,7 +19,9 @@ export interface SessionWordsPageState {
   failedPage: number;
 }
 
-export function createSessionWordsCallbackData(state: SessionWordsPageState): string {
+export function createSessionWordsCallbackData(
+  state: SessionWordsPageState,
+): string {
   return `${SESSION_WORDS_CALLBACK_PREFIX}:${state.completedPage}:${state.failedPage}`;
 }
 
@@ -26,7 +29,9 @@ export function isSessionWordsCallbackData(value: string): boolean {
   return new RegExp(`^${SESSION_WORDS_CALLBACK_PREFIX}:\\d+:\\d+$`).test(value);
 }
 
-export function parseSessionWordsCallbackData(value: string): SessionWordsPageState | null {
+export function parseSessionWordsCallbackData(
+  value: string,
+): SessionWordsPageState | null {
   if (!isSessionWordsCallbackData(value)) {
     return null;
   }
@@ -65,7 +70,8 @@ export function buildSessionWordsReply(
       `Failed${failedSlice.totalPages > 1 ? ` (${failedSlice.page + 1}/${failedSlice.totalPages})` : ''}:`,
       ...(failedSlice.items.length > 0
         ? failedSlice.items.map(
-            (item, index) => `${failedSlice.page * WORDS_PAGE_SIZE + index + 1}. ${item.text}`,
+            (item, index) =>
+              `${failedSlice.page * WORDS_PAGE_SIZE + index + 1}. ${item.text}`,
           )
         : ['None.']),
     );
@@ -84,7 +90,9 @@ export function buildSessionWordsInlineKeyboard(
   const failedSlice = getPageSlice(failedItems, state.failedPage);
 
   if (completedSlice.totalPages > 1) {
-    rows.push(buildNavigationRow('Ready', state, completedSlice, 'completedPage'));
+    rows.push(
+      buildNavigationRow('Ready', state, completedSlice, 'completedPage'),
+    );
   }
 
   if (failedSlice.totalPages > 1) {
@@ -117,7 +125,7 @@ function buildNavigationRow(
     ),
     Markup.button.callback(
       `${label} ${slice.page + 1}/${slice.totalPages}`,
-      createSessionWordsCallbackData(state),
+      SESSION_WORDS_NOOP_CALLBACK,
     ),
     Markup.button.callback(
       '▶',

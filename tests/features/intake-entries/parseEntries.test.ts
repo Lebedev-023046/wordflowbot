@@ -15,9 +15,16 @@ test('parseEntries deduplicates case-insensitively and keeps first value', () =>
 });
 
 test('parseEntries supports bullet lists and numbered lists', () => {
-  const result = parseEntries('- hassle\n* pull through\n1. baffled\n2) on the other hand');
+  const result = parseEntries(
+    '- hassle\n* pull through\n1. baffled\n2) on the other hand',
+  );
 
-  assert.deepEqual(result, ['hassle', 'pull through', 'baffled', 'on the other hand']);
+  assert.deepEqual(result, [
+    'hassle',
+    'pull through',
+    'baffled',
+    'on the other hand',
+  ]);
 });
 
 test('parseEntries supports semicolon-separated items on a single line', () => {

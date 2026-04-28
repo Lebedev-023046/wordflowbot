@@ -8,6 +8,7 @@ import {
   buildSessionWordsInlineKeyboard,
   buildSessionWordsReply,
   parseSessionWordsCallbackData,
+  SESSION_WORDS_NOOP_CALLBACK,
 } from '../lib/sessionWordsPagination';
 
 export function registerSessionWordsCommand(
@@ -53,6 +54,10 @@ export function registerSessionWordsCommand(
   bot.command('words', handleShowWords);
   bot.hears(buttons.showWords, handleShowWords);
 
+  bot.action(SESSION_WORDS_NOOP_CALLBACK, async (ctx) => {
+    await ctx.answerCbQuery();
+  });
+
   bot.action(/^session_words:\d+:\d+$/, async (ctx) => {
     const data = 'data' in ctx.callbackQuery ? ctx.callbackQuery.data : '';
     const pageState = parseSessionWordsCallbackData(data);
@@ -75,7 +80,11 @@ export function registerSessionWordsCommand(
     }
 
     return ctx.editMessageText(
-      buildSessionWordsReply(result.completedItems, result.failedItems, pageState),
+      buildSessionWordsReply(
+        result.completedItems,
+        result.failedItems,
+        pageState,
+      ),
       buildSessionWordsInlineKeyboard(
         result.completedItems,
         result.failedItems,

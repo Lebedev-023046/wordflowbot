@@ -11,7 +11,9 @@ test('exportSessionCsv returns noActive when there is no active session', () => 
   const sessions = new InMemorySessionRepository();
   const entries = new InMemoryEntryRepository();
 
-  assert.deepEqual(exportSessionCsv(sessions, entries, 1), { kind: 'noActive' });
+  assert.deepEqual(exportSessionCsv(sessions, entries, 1), {
+    kind: 'noActive',
+  });
 });
 
 test('exportSessionCsv returns empty when no completed entries exist', () => {

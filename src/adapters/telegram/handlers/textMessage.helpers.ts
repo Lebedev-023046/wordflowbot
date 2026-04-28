@@ -15,7 +15,9 @@ export function getInitialReplyText(result: HandleTextEntriesResult): string {
   return messages.entries.empty;
 }
 
-export function formatProcessedEntriesReply(result: ProcessEntriesResult): string {
+export function formatProcessedEntriesReply(
+  result: ProcessEntriesResult,
+): string {
   const lines = [
     getProcessedSummaryLine(result),
     '',
@@ -29,9 +31,13 @@ export function formatProcessedEntriesReply(result: ProcessEntriesResult): strin
   return lines.join('\n');
 }
 
-export function getProcessedFailuresReplyText(result: ProcessEntriesResult): string {
-  return [messages.entries.processingNoCompleted(result.failedCount), getFailureSummaryMessage(result)]
-    .join('\n');
+export function getProcessedFailuresReplyText(
+  result: ProcessEntriesResult,
+): string {
+  return [
+    messages.entries.processingNoCompleted(result.failedCount),
+    getFailureSummaryMessage(result),
+  ].join('\n');
 }
 
 function getProcessedSummaryLine(result: ProcessEntriesResult): string {
@@ -39,14 +45,19 @@ function getProcessedSummaryLine(result: ProcessEntriesResult): string {
     return messages.entries.processingCompleted(result.succeeded.length);
   }
 
-  return messages.entries.processingFinished(result.succeeded.length, result.failedCount);
+  return messages.entries.processingFinished(
+    result.succeeded.length,
+    result.failedCount,
+  );
 }
 
 function getFailureSummaryMessage(result: ProcessEntriesResult): string {
   if (
     result.failedCount > 0 &&
     result.failureKinds.length === result.failedCount &&
-    result.failureKinds.every((failureKind) => failureKind === 'insufficient_quota')
+    result.failureKinds.every(
+      (failureKind) => failureKind === 'insufficient_quota',
+    )
   ) {
     return messages.entries.insufficientQuota;
   }

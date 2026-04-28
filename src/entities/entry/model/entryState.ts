@@ -8,7 +8,10 @@ export function markEntryPending(entry: Entry): Entry {
   };
 }
 
-export function completeEntry(entry: Entry, enrichment: EntryEnrichment): Entry {
+export function completeEntry(
+  entry: Entry,
+  enrichment: EntryEnrichment,
+): Entry {
   return {
     ...entry,
     errorMessage: null,

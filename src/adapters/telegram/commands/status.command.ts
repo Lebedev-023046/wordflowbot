@@ -22,6 +22,8 @@ export function registerStatusCommand(
 
     return replyWithSessionState({
       ctx,
+      hasEntries: result.totalEntries > 0,
+      hasFailedEntries: result.failedEntriesCount > 0,
       message: messages.status.active(result),
       isActive: true,
     });

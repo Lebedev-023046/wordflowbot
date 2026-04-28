@@ -37,17 +37,17 @@ export const messages = {
       'You already have an active session.\n\nSend one word or phrase per line.\nYou can also send a bullet list, a numbered list, or one line with items separated by semicolons.',
     clearCancelled: 'Your session was not cleared.',
     cleared: (clearedEntries: number) =>
-      `Session cleared. Removed ${formatItems(clearedEntries)} from this session.`,
+      `🧹 Session cleared. Removed ${formatItems(clearedEntries)} from this session.`,
     clearConfirm:
       'Clear this session? This will remove all words from the current session.',
-    emptyExport: 'Nothing is ready to export yet.',
+    emptyExport: '📭 Nothing is ready to export yet.',
     idle: 'Start a session first, then send words or phrases.',
-    noActive: 'You do not have an active session right now.',
+    noActive: 'ℹ️ You do not have an active session right now.',
     noWordsYet: 'You have not added any words yet.',
     promptStart:
       'Tap Start session to begin.\n\nThis bot turns English words or phrases into ready learning pairs with translations and examples.',
     started:
-      'Your session is ready.\n\nSend one word or phrase per line.\nYou can also send a bullet list, a numbered list, or one line with items separated by semicolons.',
+      '🚀 Your session is ready.\n\nSend one word or phrase per line.\nYou can also send a bullet list, a numbered list, or one line with items separated by semicolons.',
     stopped: 'Your session has been stopped.',
   },
   status: {
@@ -89,7 +89,8 @@ export const messages = {
         ...formatLimitedLines(
           failedEntries,
           MAX_VISIBLE_FAILED_ITEMS,
-          (entry, index) => `${index + 1}. ${entry.text} - ${entry.errorMessage}`,
+          (entry, index) =>
+            `${index + 1}. ${entry.text} - ${entry.errorMessage}`,
         ),
         failedEntries.length > 0 ? '' : null,
         failedEntries.length > 0
@@ -107,14 +108,14 @@ export const messages = {
     processedWithFailures: (failedCount: number) =>
       `I could not finish ${formatItems(failedCount)} this time. Your saved items are still here, and you can try again with Retry failed.`,
     processing: (count: number) =>
-      `Saved ${formatItems(count)}. I am working on them now and will send the results soon.`,
+      `⏳ Saved ${formatItems(count)}. I am working on them now and will send the results soon.`,
     processingCompleted: (succeededCount: number) =>
-      `Done. ${formatItems(succeededCount)} ready.`,
+      `✅ Done. ${formatItems(succeededCount)} ready.`,
     processingFinished: (succeededCount: number, failedCount: number) =>
-      `Finished. ${formatItems(succeededCount)} ready, ${formatNeedsAnotherTry(failedCount)}.`,
+      `⚠️ Finished. ${formatItems(succeededCount)} ready, ${formatNeedsAnotherTry(failedCount)}.`,
     processingNoCompleted: (failedCount: number) =>
       `I could not finish any items this time. ${formatNeedsAnotherTry(failedCount)}.`,
-    retrying: (count: number) => `Trying ${formatItems(count)} again...`,
+    retrying: (count: number) => `🔄 Trying ${formatItems(count)} again...`,
     retryNothingFailed: 'There is nothing to retry right now.',
     saved: (count: number) => `Saved ${formatItems(count)}.`,
   },

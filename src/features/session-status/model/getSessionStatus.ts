@@ -10,5 +10,8 @@ export function getSessionStatus(
   entryRepository: EntryRepository,
   userId: number,
 ): SessionStatusResult {
-  return new GetSessionStatusUseCase(sessionRepository, entryRepository).execute(userId);
+  return new GetSessionStatusUseCase(
+    sessionRepository,
+    entryRepository,
+  ).execute(userId);
 }

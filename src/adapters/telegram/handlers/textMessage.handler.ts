@@ -2,6 +2,7 @@ import type { Telegraf } from 'telegraf';
 import { message } from 'telegraf/filters';
 import type { EnrichmentJobQueue } from '../../../application/ports/EnrichmentJobQueue';
 import type { IntakeEntriesUseCase } from '../../../application/use-cases/IntakeEntriesUseCase';
+import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
 import { buttons } from '../../../shared/i18n/buttons';
 import { messages } from '../../../shared/i18n/messages';
@@ -15,6 +16,7 @@ import {
 
 export function registerTextMessageHandler(
   bot: Telegraf,
+  entries: EntryRepository,
   sessions: SessionRepository,
   intakeEntriesUseCase: IntakeEntriesUseCase,
   enrichmentJobQueue: EnrichmentJobQueue,
@@ -45,11 +47,21 @@ export function registerTextMessageHandler(
     await ctx.reply(getInitialReplyText(result));
 
     const processedEntries = await enrichmentJobQueue.enqueue(result.entries);
+    const hasSessionEntries = entries.findBySessionId(session.id).length > 0;
+    const hasSessionFailures = entries
+      .findBySessionId(session.id)
+      .some((entry) => entry.status === 'failed');
 
     if (processedEntries.succeeded.length === 0) {
-      return ctx.reply(getProcessedFailuresReplyText(processedEntries));
+      return ctx.reply(
+        getProcessedFailuresReplyText(processedEntries),
+        renderSessionKeyboard(true, hasSessionEntries, hasSessionFailures),
+      );
     }
 
-    return ctx.reply(formatProcessedEntriesReply(processedEntries));
+    return ctx.reply(
+      formatProcessedEntriesReply(processedEntries),
+      renderSessionKeyboard(true, hasSessionEntries, hasSessionFailures),
+    );
   });
 }
