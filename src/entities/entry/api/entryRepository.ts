@@ -1,6 +1,7 @@
 import type { Entry } from '../model/entry.types';
 
 export interface EntryRepository {
+  deleteBySessionId(sessionId: string): void;
   existsInSession(sessionId: string, text: string): boolean;
   findById(entryId: string): Entry | null;
   findBySessionId(sessionId: string): Entry[];

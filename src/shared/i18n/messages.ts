@@ -35,6 +35,11 @@ export const messages = {
       'You have an active session.\n\nSend one word or phrase per line.\nYou can also send a bullet list, a numbered list, or one line with items separated by semicolons.',
     alreadyActive:
       'You already have an active session.\n\nSend one word or phrase per line.\nYou can also send a bullet list, a numbered list, or one line with items separated by semicolons.',
+    clearCancelled: 'Your session was not cleared.',
+    cleared: (clearedEntries: number) =>
+      `Session cleared. Removed ${formatItems(clearedEntries)} from this session.`,
+    clearConfirm:
+      'Clear this session? This will remove all words from the current session.',
     emptyExport: 'Nothing is ready to export yet.',
     idle: 'Start a session first, then send words or phrases.',
     noActive: 'You do not have an active session right now.',

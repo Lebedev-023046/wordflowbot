@@ -5,6 +5,7 @@ export interface Session {
 }
 
 export interface SessionRepository {
+  clearSession(userId: number): void;
   getActiveSession(userId: number): Session | null;
   hasActiveSession(userId: number): boolean;
   startSession(userId: number): Session;

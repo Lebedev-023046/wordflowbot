@@ -6,6 +6,7 @@ import { InMemorySessionRepository } from '../../adapters/storage/InMemorySessio
 import { CsvExporter } from '../../application/services/CsvExporter';
 import { EntryFactory } from '../../application/services/EntryFactory';
 import { EntryParser } from '../../application/services/EntryParser';
+import { ClearSessionUseCase } from '../../application/use-cases/ClearSessionUseCase';
 import { ExportSessionCsvUseCase } from '../../application/use-cases/ExportSessionCsvUseCase';
 import { GetSessionStatusUseCase } from '../../application/use-cases/GetSessionStatusUseCase';
 import { GetSessionWordsUseCase } from '../../application/use-cases/GetSessionWordsUseCase';
@@ -56,6 +57,10 @@ export function createContainer() {
 
   const startSessionUseCase = new StartSessionUseCase(sessionRepository);
   const stopSessionUseCase = new StopSessionUseCase(sessionRepository);
+  const clearSessionUseCase = new ClearSessionUseCase(
+    sessionRepository,
+    entryRepository,
+  );
   const getSessionStatusUseCase = new GetSessionStatusUseCase(
     sessionRepository,
     entryRepository,
@@ -92,6 +97,7 @@ export function createContainer() {
       sessions: sessionRepository,
     },
     useCases: {
+      clearSession: clearSessionUseCase,
       exportSessionCsv: exportSessionCsvUseCase,
       getSessionStatus: getSessionStatusUseCase,
       getSessionWords: getSessionWordsUseCase,

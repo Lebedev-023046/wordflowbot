@@ -6,6 +6,16 @@ export class InMemoryEntryRepository implements EntryRepository {
   private readonly entriesById = new Map<string, Entry>();
   private readonly entryIdsBySessionId = new Map<string, string[]>();
 
+  deleteBySessionId(sessionId: string) {
+    const entryIds = this.entryIdsBySessionId.get(sessionId) ?? [];
+
+    for (const entryId of entryIds) {
+      this.entriesById.delete(entryId);
+    }
+
+    this.entryIdsBySessionId.delete(sessionId);
+  }
+
   save(entry: Entry) {
     this.entriesById.set(entry.id, cloneEntry(entry));
 

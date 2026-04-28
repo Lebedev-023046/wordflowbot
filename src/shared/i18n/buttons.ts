@@ -1,4 +1,7 @@
 export const buttons = {
+  cancelClearSession: 'Keep session',
+  clearSession: '🗑️ Clear session',
+  confirmClearSession: 'Clear it',
   exportCsv: '📤 Export CSV',
   retryFailed: '🔄 Retry failed',
   showWords: '📚 Show words',

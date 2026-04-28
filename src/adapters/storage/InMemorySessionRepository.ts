@@ -3,6 +3,10 @@ import type { Session, SessionRepository } from '../../entities/session/api/sess
 export class InMemorySessionRepository implements SessionRepository {
   private sessions = new Map<number, Session>();
 
+  clearSession(userId: number) {
+    this.sessions.delete(userId);
+  }
+
   getActiveSession(userId: number) {
     const session = this.sessions.get(userId);
 
