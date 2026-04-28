@@ -1,4 +1,10 @@
 import type { Entry } from '../../../entities/entry/model/entry.types';
+import { isCompletedEntry } from '../../../entities/entry/model/entryState';
+
+export interface CompletedEntrySummary {
+  text: string;
+  translation: string;
+}
 
 export interface FailedEntrySummary {
   errorMessage: string;
@@ -7,6 +13,7 @@ export interface FailedEntrySummary {
 
 export interface EntryStatusSummary {
   completedEntries: number;
+  completedEntrySummaries: CompletedEntrySummary[];
   failedEntries: FailedEntrySummary[];
   failedEntriesCount: number;
   pendingEntries: number;
@@ -15,7 +22,11 @@ export interface EntryStatusSummary {
 
 export function summarizeEntries(entries: Entry[]): EntryStatusSummary {
   const pendingEntries = entries.filter((entry) => entry.status === 'pending').length;
-  const completedEntries = entries.filter((entry) => entry.status === 'completed').length;
+  const completedEntries = entries.filter(isCompletedEntry);
+  const completedEntrySummaries = completedEntries.map((entry) => ({
+    text: entry.text,
+    translation: entry.translation ?? '',
+  }));
   const failedEntries = entries
     .filter((entry) => entry.status === 'failed' && entry.errorMessage)
     .map((entry) => ({
@@ -24,7 +35,8 @@ export function summarizeEntries(entries: Entry[]): EntryStatusSummary {
     }));
 
   return {
-    completedEntries,
+    completedEntries: completedEntries.length,
+    completedEntrySummaries,
     failedEntries,
     failedEntriesCount: entries.filter((entry) => entry.status === 'failed').length,
     pendingEntries,

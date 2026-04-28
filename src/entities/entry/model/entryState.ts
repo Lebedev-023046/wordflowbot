@@ -1,5 +1,13 @@
 import type { Entry, EntryEnrichment } from './entry.types';
 
+export function markEntryPending(entry: Entry): Entry {
+  return {
+    ...entry,
+    errorMessage: null,
+    status: 'pending',
+  };
+}
+
 export function completeEntry(entry: Entry, enrichment: EntryEnrichment): Entry {
   return {
     ...entry,

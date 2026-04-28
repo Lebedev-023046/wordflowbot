@@ -4,6 +4,7 @@ import type { Entry } from '../../entities/entry/model/entry.types';
 import { completeEntry, failEntry } from '../../entities/entry/model/entryState';
 import { getEntryFailureKind } from '../../processes/entry-enrichment/model/getEntryFailureKind';
 import type {
+  EntryFailureKind,
   ProcessEntriesResult,
   ProcessEntryResult,
 } from '../../processes/entry-enrichment/model/process-entry.types';
@@ -62,8 +63,9 @@ export class ProcessEntriesUseCase {
         translation: enrichment.translation,
       };
     } catch (error) {
-      const errorMessage = getErrorMessage(error, 'Entry enrichment failed.');
       const failureKind = getEntryFailureKind(error);
+      const errorMessage = getErrorMessage(error, 'Entry enrichment failed.');
+      const userFacingMessage = this.getUserFacingFailureMessage(failureKind);
 
       this.logger.error('Entry enrichment failed.', {
         entryId: entry.id,
@@ -73,7 +75,7 @@ export class ProcessEntriesUseCase {
         text: entry.text,
       });
 
-      this.entryRepository.update(failEntry(entry, errorMessage));
+      this.entryRepository.update(failEntry(entry, userFacingMessage));
 
       return {
         kind: 'failed',
@@ -81,5 +83,13 @@ export class ProcessEntriesUseCase {
         text: entry.text,
       };
     }
+  }
+
+  private getUserFacingFailureMessage(failureKind: EntryFailureKind): string {
+    if (failureKind === 'insufficient_quota') {
+      return 'Could not finish this item right now. Please try again later.';
+    }
+
+    return 'Something went wrong while preparing this item. Please try again.';
   }
 }

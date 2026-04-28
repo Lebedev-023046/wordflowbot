@@ -1,23 +1,60 @@
+function formatItems(count: number): string {
+  return `${count} ${count === 1 ? 'item' : 'items'}`;
+}
+
+function formatNeedsAnotherTry(count: number): string {
+  return `${formatItems(count)} ${count === 1 ? 'needs' : 'need'} another try`;
+}
+
 export const messages = {
   session: {
-    active: 'Session is active. Send words or phrases.',
-    alreadyActive: 'Session already active.',
-    emptyExport: 'No completed entries are ready for export yet.',
-    idle: 'Press Start session first.',
-    noActive: 'No active session.',
-    promptStart: 'Press Start session to begin.',
-    started: 'Session started. Send words or phrases.',
-    stopped: 'Session stopped.',
+    active: 'You have an active session. Send words or phrases any time.',
+    alreadyActive: 'You already have an active session. Send words or phrases any time.',
+    emptyExport: 'Nothing is ready to export yet.',
+    idle: 'Start a session first, then send words or phrases.',
+    noActive: 'You do not have an active session right now.',
+    noWordsYet: 'You have not added any words yet.',
+    promptStart: 'Tap Start session to begin.',
+    started: 'Your session is ready. Send words or phrases.',
+    stopped: 'Your session has been stopped.',
+    words: (
+      completedItems: Array<{ text: string; translation: string }>,
+      failedItems: Array<{ text: string }>,
+    ) => {
+      const lines = [
+        'Words in your session:',
+        '',
+        'Ready pairs:',
+        ...(completedItems.length > 0
+          ? completedItems.map((item, index) => `${index + 1}. ${item.text} - ${item.translation}`)
+          : ['None yet.']),
+      ];
+
+      if (failedItems.length > 0) {
+        lines.push(
+          '',
+          'Failed:',
+          ...failedItems.map((item, index) => `${index + 1}. ${item.text}`),
+        );
+      }
+
+      return lines.join('\n');
+    },
   },
   status: {
     active: ({
       completedEntries,
+      completedEntrySummaries,
       failedEntries,
       failedEntriesCount,
       pendingEntries,
       totalEntries,
     }: {
       completedEntries: number;
+      completedEntrySummaries: Array<{
+        text: string;
+        translation: string;
+      }>;
       failedEntries: Array<{
         errorMessage: string;
         text: string;
@@ -27,26 +64,43 @@ export const messages = {
       totalEntries: number;
     }) =>
       [
-        `Total entries: ${totalEntries}`,
-        `Pending: ${pendingEntries}`,
-        `Completed: ${completedEntries}`,
-        `Failed: ${failedEntriesCount}`,
+        `Saved: ${formatItems(totalEntries)}`,
+        `Still processing: ${formatItems(pendingEntries)}`,
+        `Ready: ${formatItems(completedEntries)}`,
+        `Need retry: ${formatItems(failedEntriesCount)}`,
+        completedEntrySummaries.length > 0 ? '' : null,
+        completedEntrySummaries.length > 0 ? 'Ready pairs:' : null,
+        ...completedEntrySummaries.map((entry) => `${entry.text} - ${entry.translation}`),
         failedEntries.length > 0 ? '' : null,
+        failedEntries.length > 0 ? 'Failed items:' : null,
         ...failedEntries.map(
-          (entry, index) => `Failure ${index + 1}: ${entry.text} -> ${entry.errorMessage}`,
+          (entry, index) => `${index + 1}. ${entry.text} - ${entry.errorMessage}`,
         ),
+        failedEntries.length > 0 ? '' : null,
+        failedEntries.length > 0
+          ? 'Tap Retry failed or use /retry_failed to try those items again.'
+          : null,
       ]
         .filter((line): line is string => line !== null)
         .join('\n'),
   },
   entries: {
-    duplicatesOnly: 'All entries already exist in this session.',
-    empty: 'Send at least one word or phrase.',
+    duplicatesOnly: 'These words are already in your current session.',
+    empty: 'Please send at least one word or phrase.',
     insufficientQuota:
-      'OpenAI quota is exhausted right now. Check billing or usage limits, then try again.',
+      'I could not finish those items right now. Your saved items are still here, and you can try again with Retry failed.',
     processedWithFailures: (failedCount: number) =>
-      `${failedCount} item(s) could not be processed.`,
-    processing: (count: number) => `Saved: ${count} item(s). Processing...`,
-    saved: (count: number) => `Saved: ${count} item(s).`,
+      `I could not finish ${formatItems(failedCount)} this time. Your saved items are still here, and you can try again with Retry failed.`,
+    processing: (count: number) =>
+      `Saved ${formatItems(count)}. I am working on them now and will send the results soon.`,
+    processingCompleted: (succeededCount: number) =>
+      `Done. ${formatItems(succeededCount)} ready.`,
+    processingFinished: (succeededCount: number, failedCount: number) =>
+      `Finished. ${formatItems(succeededCount)} ready, ${formatNeedsAnotherTry(failedCount)}.`,
+    processingNoCompleted: (failedCount: number) =>
+      `I could not finish any items this time. ${formatNeedsAnotherTry(failedCount)}.`,
+    retrying: (count: number) => `Trying ${formatItems(count)} again...`,
+    retryNothingFailed: 'There is nothing to retry right now.',
+    saved: (count: number) => `Saved ${formatItems(count)}.`,
   },
 } as const;

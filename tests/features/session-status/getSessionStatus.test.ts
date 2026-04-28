@@ -54,9 +54,15 @@ test('getSessionStatus returns counts and failure details for an active session'
 
   assert.deepEqual(result, {
     completedEntries: 1,
+    completedEntrySummaries: [
+      {
+        text: 'pull through',
+        translation: 'translation for pull through',
+      },
+    ],
     failedEntries: [
       {
-        errorMessage: 'Rate limit exceeded',
+        errorMessage: 'Something went wrong while preparing this item. Please try again.',
         text: 'hilarious',
       },
     ],

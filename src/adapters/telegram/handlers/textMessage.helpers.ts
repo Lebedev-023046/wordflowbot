@@ -16,7 +16,11 @@ export function getInitialReplyText(result: HandleTextEntriesResult): string {
 }
 
 export function formatProcessedEntriesReply(result: ProcessEntriesResult): string {
-  const lines = result.succeeded.map((entry) => `${entry.text} - ${entry.translation}`);
+  const lines = [
+    getProcessedSummaryLine(result),
+    '',
+    ...result.succeeded.map((entry) => `${entry.text} - ${entry.translation}`),
+  ];
 
   if (result.failedCount > 0) {
     lines.push('', getFailureSummaryMessage(result));
@@ -26,7 +30,16 @@ export function formatProcessedEntriesReply(result: ProcessEntriesResult): strin
 }
 
 export function getProcessedFailuresReplyText(result: ProcessEntriesResult): string {
-  return getFailureSummaryMessage(result);
+  return [messages.entries.processingNoCompleted(result.failedCount), getFailureSummaryMessage(result)]
+    .join('\n');
+}
+
+function getProcessedSummaryLine(result: ProcessEntriesResult): string {
+  if (result.failedCount === 0) {
+    return messages.entries.processingCompleted(result.succeeded.length);
+  }
+
+  return messages.entries.processingFinished(result.succeeded.length, result.failedCount);
 }
 
 function getFailureSummaryMessage(result: ProcessEntriesResult): string {

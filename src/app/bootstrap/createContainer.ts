@@ -8,8 +8,10 @@ import { EntryFactory } from '../../application/services/EntryFactory';
 import { EntryParser } from '../../application/services/EntryParser';
 import { ExportSessionCsvUseCase } from '../../application/use-cases/ExportSessionCsvUseCase';
 import { GetSessionStatusUseCase } from '../../application/use-cases/GetSessionStatusUseCase';
+import { GetSessionWordsUseCase } from '../../application/use-cases/GetSessionWordsUseCase';
 import { IntakeEntriesUseCase } from '../../application/use-cases/IntakeEntriesUseCase';
 import { ProcessEntriesUseCase } from '../../application/use-cases/ProcessEntriesUseCase';
+import { RetryFailedEntriesUseCase } from '../../application/use-cases/RetryFailedEntriesUseCase';
 import { StartSessionUseCase } from '../../application/use-cases/StartSessionUseCase';
 import { StopSessionUseCase } from '../../application/use-cases/StopSessionUseCase';
 import { createLogger } from '../../shared/logging/logger';
@@ -58,6 +60,10 @@ export function createContainer() {
     sessionRepository,
     entryRepository,
   );
+  const getSessionWordsUseCase = new GetSessionWordsUseCase(
+    sessionRepository,
+    entryRepository,
+  );
   const exportSessionCsvUseCase = new ExportSessionCsvUseCase(
     sessionRepository,
     entryRepository,
@@ -74,6 +80,11 @@ export function createContainer() {
     processEntriesLogger,
   );
   const enrichmentJobQueue = new ImmediateEnrichmentJobQueue(processEntriesUseCase);
+  const retryFailedEntriesUseCase = new RetryFailedEntriesUseCase(
+    sessionRepository,
+    entryRepository,
+    enrichmentJobQueue,
+  );
 
   return {
     repositories: {
@@ -83,8 +94,10 @@ export function createContainer() {
     useCases: {
       exportSessionCsv: exportSessionCsvUseCase,
       getSessionStatus: getSessionStatusUseCase,
+      getSessionWords: getSessionWordsUseCase,
       intakeEntries: intakeEntriesUseCase,
       processEntries: processEntriesUseCase,
+      retryFailedEntries: retryFailedEntriesUseCase,
       startSession: startSessionUseCase,
       stopSession: stopSessionUseCase,
     },
