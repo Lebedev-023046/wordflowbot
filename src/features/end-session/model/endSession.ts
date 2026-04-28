@@ -1,25 +1,12 @@
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
-
-type EndSessionResult = {
-  isActive: boolean;
-  kind: 'noActive' | 'stopped';
-};
+import {
+  StopSessionUseCase,
+  type StopSessionResult,
+} from '../../../application/use-cases/StopSessionUseCase';
 
 export function endSession(
   sessionRepository: SessionRepository,
   userId: number,
-): EndSessionResult {
-  if (!sessionRepository.hasActiveSession(userId)) {
-    return {
-      kind: 'noActive',
-      isActive: false,
-    };
-  }
-
-  sessionRepository.stopSession(userId);
-
-  return {
-    kind: 'stopped',
-    isActive: false,
-  };
+): StopSessionResult {
+  return new StopSessionUseCase(sessionRepository).execute(userId);
 }

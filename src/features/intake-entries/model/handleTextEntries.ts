@@ -1,7 +1,10 @@
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
-import type { Entry } from '../../../entities/entry/model/entry.types';
-import { parseEntries } from './parseEntries';
-import { saveEntries } from './saveEntries';
+import { EntryFactory } from '../../../application/services/EntryFactory';
+import { EntryParser } from '../../../application/services/EntryParser';
+import {
+  IntakeEntriesUseCase,
+  type IntakeEntriesResult as HandleTextEntriesResult,
+} from '../../../application/use-cases/IntakeEntriesUseCase';
 
 interface HandleTextEntriesParams {
   entryRepository: EntryRepository;
@@ -9,31 +12,19 @@ interface HandleTextEntriesParams {
   text: string;
 }
 
-export type HandleTextEntriesResult =
-  | { kind: 'empty' }
-  | { kind: 'duplicatesOnly' }
-  | { count: number; entries: Entry[]; kind: 'saved' };
+export type { HandleTextEntriesResult };
 
 export function handleTextEntries({
   entryRepository,
   sessionId,
   text,
 }: HandleTextEntriesParams): HandleTextEntriesResult {
-  const parsedEntries = parseEntries(text);
-
-  if (parsedEntries.length === 0) return { kind: 'empty' };
-
-  const savedEntries = saveEntries({
+  return new IntakeEntriesUseCase(
     entryRepository,
+    new EntryParser(),
+    new EntryFactory(),
+  ).execute({
     sessionId,
-    texts: parsedEntries,
+    text,
   });
-
-  if (savedEntries.length === 0) return { kind: 'duplicatesOnly' };
-
-  return {
-    count: savedEntries.length,
-    entries: savedEntries,
-    kind: 'saved',
-  };
 }

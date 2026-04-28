@@ -11,6 +11,8 @@ export function getInitialReplyText(result: HandleTextEntriesResult): string {
     case 'saved':
       return messages.entries.processing(result.count);
   }
+
+  return messages.entries.empty;
 }
 
 export function formatProcessedEntriesReply(result: ProcessEntriesResult): string {

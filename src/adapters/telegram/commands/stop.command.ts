@@ -1,15 +1,14 @@
 import type { Telegraf } from 'telegraf';
-import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
-import { endSession } from '../../../features/end-session/model/endSession';
+import type { StopSessionUseCase } from '../../../application/use-cases/StopSessionUseCase';
 import { buttons } from '../../../shared/i18n/buttons';
 import { messages } from '../../../shared/i18n/messages';
 import { getUserId } from '../lib/getUserId';
 import { replyWithSessionState } from '../lib/replyWithSessionState';
 
-export function registerStopCommand(bot: Telegraf, sessions: SessionRepository) {
+export function registerStopCommand(bot: Telegraf, stopSessionUseCase: StopSessionUseCase) {
   bot.hears(buttons.stopSession, (ctx) => {
     const userId = getUserId(ctx);
-    const result = endSession(sessions, userId);
+    const result = stopSessionUseCase.execute(userId);
 
     if (result.kind === 'noActive') {
       return replyWithSessionState({

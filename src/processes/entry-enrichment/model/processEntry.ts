@@ -2,48 +2,30 @@ import type {
   ProcessEntryParams,
   ProcessEntryResult,
 } from './process-entry.types';
-import { createLogger } from '../../../shared/logging/logger';
-import { getErrorDetails, getErrorMessage } from '../../../shared/utils/errors';
-import { getEntryFailureKind } from './getEntryFailureKind';
-
-const logger = createLogger({
-  scope: 'processEntry',
-});
+import { ProcessEntriesUseCase } from '../../../application/use-cases/ProcessEntriesUseCase';
 
 export async function processEntry({
   entry,
   entryEnrichmentClient,
   entryRepository,
-  }: ProcessEntryParams): Promise<ProcessEntryResult> {
-  try {
-    const enrichment = await entryEnrichmentClient.enrich(entry.text);
-    entryRepository.updateEnrichment(entry.id, enrichment);
-    entryRepository.updateStatus(entry.id, 'completed');
+}: ProcessEntryParams): Promise<ProcessEntryResult> {
+  const result = await new ProcessEntriesUseCase(entryEnrichmentClient, entryRepository, {
+    error: () => undefined,
+    info: () => undefined,
+    warn: () => undefined,
+  }).execute([entry]);
 
+  if (result.succeeded.length > 0) {
     return {
       kind: 'succeeded',
-      text: entry.text,
-      translation: enrichment.translation,
-    };
-  } catch (error) {
-    const errorMessage = getErrorMessage(error, 'Entry enrichment failed.');
-    const failureKind = getEntryFailureKind(error);
-
-    logger.error('Entry enrichment failed.', {
-      entryId: entry.id,
-      error: getErrorDetails(error),
-      errorMessage,
-      failureKind,
-      text: entry.text,
-    });
-
-    entryRepository.updateError(entry.id, errorMessage);
-    entryRepository.updateStatus(entry.id, 'failed');
-
-    return {
-      kind: 'failed',
-      failureKind,
-      text: entry.text,
+      text: result.succeeded[0].text,
+      translation: result.succeeded[0].translation,
     };
   }
+
+  return {
+    kind: 'failed',
+    failureKind: result.failureKinds[0] ?? 'other',
+    text: entry.text,
+  };
 }

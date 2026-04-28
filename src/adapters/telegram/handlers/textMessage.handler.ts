@@ -1,10 +1,8 @@
 import type { Telegraf } from 'telegraf';
 import { message } from 'telegraf/filters';
-import type { EntryEnrichmentClient } from '../../../entities/entry/api/entryEnrichmentClient';
-import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
+import type { EnrichmentJobQueue } from '../../../application/ports/EnrichmentJobQueue';
+import type { IntakeEntriesUseCase } from '../../../application/use-cases/IntakeEntriesUseCase';
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
-import { handleTextEntries } from '../../../features/intake-entries/model/handleTextEntries';
-import { processEntries } from '../../../processes/entry-enrichment/model/processEntries';
 import { buttons } from '../../../shared/i18n/buttons';
 import { messages } from '../../../shared/i18n/messages';
 import { getUserId } from '../lib/getUserId';
@@ -17,9 +15,9 @@ import {
 
 export function registerTextMessageHandler(
   bot: Telegraf,
-  entryEnrichmentClient: EntryEnrichmentClient,
   sessions: SessionRepository,
-  entries: EntryRepository,
+  intakeEntriesUseCase: IntakeEntriesUseCase,
+  enrichmentJobQueue: EnrichmentJobQueue,
 ) {
   bot.on(message('text'), async (ctx) => {
     const text = ctx.message.text;
@@ -35,8 +33,7 @@ export function registerTextMessageHandler(
       return ctx.reply(messages.session.idle, renderSessionKeyboard(false));
     }
 
-    const result = handleTextEntries({
-      entryRepository: entries,
+    const result = intakeEntriesUseCase.execute({
       sessionId: session.id,
       text,
     });
@@ -47,11 +44,7 @@ export function registerTextMessageHandler(
 
     await ctx.reply(getInitialReplyText(result));
 
-    const processedEntries = await processEntries({
-      entries: result.entries,
-      entryEnrichmentClient,
-      entryRepository: entries,
-    });
+    const processedEntries = await enrichmentJobQueue.enqueue(result.entries);
 
     if (processedEntries.succeeded.length === 0) {
       return ctx.reply(getProcessedFailuresReplyText(processedEntries));

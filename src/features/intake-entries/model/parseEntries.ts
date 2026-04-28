@@ -1,21 +1,5 @@
-import { normalizeEntryText } from '../../../shared/utils/entryText';
+import { EntryParser } from '../../../application/services/EntryParser';
 
 export function parseEntries(text: string): string[] {
-  const uniqueEntries = new Map<string, string>();
-
-  for (const line of text.split('\n')) {
-    const trimmedLine = line.trim();
-
-    if (!trimmedLine) {
-      continue;
-    }
-
-    const normalizedLine = normalizeEntryText(trimmedLine);
-
-    if (!uniqueEntries.has(normalizedLine)) {
-      uniqueEntries.set(normalizedLine, trimmedLine);
-    }
-  }
-
-  return [...uniqueEntries.values()];
+  return new EntryParser().parse(text);
 }

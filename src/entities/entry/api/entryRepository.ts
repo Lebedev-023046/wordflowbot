@@ -1,10 +1,10 @@
-import type { Entry, EntryEnrichment, EntryStatus } from '../model/entry.types';
+import type { Entry } from '../model/entry.types';
 
 export interface EntryRepository {
   existsInSession(sessionId: string, text: string): boolean;
+  findById(entryId: string): Entry | null;
   findBySessionId(sessionId: string): Entry[];
+  save(entry: Entry): void;
   saveMany(entries: Entry[]): void;
-  updateError(entryId: string, errorMessage: string): void;
-  updateEnrichment(entryId: string, enrichment: EntryEnrichment): void;
-  updateStatus(entryId: string, status: EntryStatus): void;
+  update(entry: Entry): void;
 }

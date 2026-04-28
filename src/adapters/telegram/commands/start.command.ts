@@ -1,6 +1,6 @@
 import type { Context, Telegraf } from 'telegraf';
+import type { StartSessionUseCase } from '../../../application/use-cases/StartSessionUseCase';
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
-import { startSession } from '../../../features/start-session/model/startSession';
 import { buttons } from '../../../shared/i18n/buttons';
 import { messages } from '../../../shared/i18n/messages';
 import { getUserId } from '../lib/getUserId';
@@ -9,6 +9,7 @@ import { replyWithSessionState } from '../lib/replyWithSessionState';
 export function registerStartCommand(
   bot: Telegraf,
   sessions: SessionRepository,
+  startSessionUseCase: StartSessionUseCase,
 ) {
   const showStartState = (ctx: Context) => {
     const userId = getUserId(ctx);
@@ -23,7 +24,7 @@ export function registerStartCommand(
 
   bot.hears(buttons.startSession, (ctx) => {
     const userId = getUserId(ctx);
-    const result = startSession(sessions, userId);
+    const result = startSessionUseCase.execute(userId);
 
     if (result.kind === 'alreadyActive') {
       return replyWithSessionState({

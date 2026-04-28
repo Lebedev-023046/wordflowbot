@@ -1,20 +1,39 @@
 import type { EntryRepository } from '../../entities/entry/api/entryRepository';
-import type { Entry, EntryEnrichment, EntryStatus } from '../../entities/entry/model/entry.types';
+import type { Entry } from '../../entities/entry/model/entry.types';
 import { normalizeEntryText } from '../../shared/utils/entryText';
 
 export class InMemoryEntryRepository implements EntryRepository {
-  private entries = new Map<string, Entry[]>();
+  private readonly entriesById = new Map<string, Entry>();
+  private readonly entryIdsBySessionId = new Map<string, string[]>();
 
-  saveMany(entries: Entry[]) {
-    for (const entry of entries) {
-      const sessionEntries = this.entries.get(entry.sessionId) ?? [];
-      sessionEntries.push(entry);
-      this.entries.set(entry.sessionId, sessionEntries);
+  save(entry: Entry) {
+    this.entriesById.set(entry.id, cloneEntry(entry));
+
+    const sessionEntryIds = this.entryIdsBySessionId.get(entry.sessionId) ?? [];
+
+    if (!sessionEntryIds.includes(entry.id)) {
+      sessionEntryIds.push(entry.id);
+      this.entryIdsBySessionId.set(entry.sessionId, sessionEntryIds);
     }
   }
 
+  saveMany(entries: Entry[]) {
+    for (const entry of entries) {
+      this.save(entry);
+    }
+  }
+
+  findById(entryId: string) {
+    const entry = this.entriesById.get(entryId);
+    return entry ? cloneEntry(entry) : null;
+  }
+
   findBySessionId(sessionId: string) {
-    return this.entries.get(sessionId) ?? [];
+    const entryIds = this.entryIdsBySessionId.get(sessionId) ?? [];
+    return entryIds
+      .map((entryId) => this.entriesById.get(entryId))
+      .filter((entry): entry is Entry => entry !== undefined)
+      .map((entry) => cloneEntry(entry));
   }
 
   existsInSession(sessionId: string, text: string) {
@@ -25,40 +44,18 @@ export class InMemoryEntryRepository implements EntryRepository {
     );
   }
 
-  updateStatus(entryId: string, status: EntryStatus) {
-    for (const [sessionId, sessionEntries] of this.entries.entries()) {
-      const nextEntries = sessionEntries.map((entry) =>
-        entry.id === entryId ? { ...entry, status } : entry,
-      );
-
-      this.entries.set(sessionId, nextEntries);
+  update(entry: Entry) {
+    if (!this.entriesById.has(entry.id)) {
+      return;
     }
+
+    this.entriesById.set(entry.id, cloneEntry(entry));
   }
+}
 
-  updateEnrichment(entryId: string, enrichment: EntryEnrichment) {
-    for (const [sessionId, sessionEntries] of this.entries.entries()) {
-      const nextEntries = sessionEntries.map((entry) =>
-        entry.id === entryId
-          ? {
-              ...entry,
-              errorMessage: null,
-              examples: enrichment.examples,
-              translation: enrichment.translation,
-            }
-          : entry,
-      );
-
-      this.entries.set(sessionId, nextEntries);
-    }
-  }
-
-  updateError(entryId: string, errorMessage: string) {
-    for (const [sessionId, sessionEntries] of this.entries.entries()) {
-      const nextEntries = sessionEntries.map((entry) =>
-        entry.id === entryId ? { ...entry, errorMessage } : entry,
-      );
-
-      this.entries.set(sessionId, nextEntries);
-    }
-  }
+function cloneEntry(entry: Entry): Entry {
+  return {
+    ...entry,
+    examples: entry.examples.map((example) => ({ ...example })),
+  };
 }
