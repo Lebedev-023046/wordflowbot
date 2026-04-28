@@ -1,3 +1,6 @@
+const MAX_VISIBLE_READY_ITEMS = 10;
+const MAX_VISIBLE_FAILED_ITEMS = 10;
+
 function formatItems(count: number): string {
   return `${count} ${count === 1 ? 'item' : 'items'}`;
 }
@@ -6,40 +9,41 @@ function formatNeedsAnotherTry(count: number): string {
   return `${formatItems(count)} ${count === 1 ? 'needs' : 'need'} another try`;
 }
 
+function formatHiddenItems(count: number): string {
+  return `...and ${formatItems(count)} more.`;
+}
+
+function formatLimitedLines<T>(
+  items: T[],
+  maxVisibleItems: number,
+  renderItem: (item: T, index: number) => string,
+): string[] {
+  const visibleItems = items.slice(0, maxVisibleItems);
+  const hiddenCount = items.length - visibleItems.length;
+  const lines = visibleItems.map((item, index) => renderItem(item, index));
+
+  if (hiddenCount > 0) {
+    lines.push(formatHiddenItems(hiddenCount));
+  }
+
+  return lines;
+}
+
 export const messages = {
   session: {
-    active: 'You have an active session. Send words or phrases any time.',
-    alreadyActive: 'You already have an active session. Send words or phrases any time.',
+    active:
+      'You have an active session.\n\nSend one word or phrase per line.\nYou can also send a bullet list, a numbered list, or one line with items separated by semicolons.',
+    alreadyActive:
+      'You already have an active session.\n\nSend one word or phrase per line.\nYou can also send a bullet list, a numbered list, or one line with items separated by semicolons.',
     emptyExport: 'Nothing is ready to export yet.',
     idle: 'Start a session first, then send words or phrases.',
     noActive: 'You do not have an active session right now.',
     noWordsYet: 'You have not added any words yet.',
-    promptStart: 'Tap Start session to begin.',
-    started: 'Your session is ready. Send words or phrases.',
+    promptStart:
+      'Tap Start session to begin.\n\nThis bot turns English words or phrases into ready learning pairs with translations and examples.',
+    started:
+      'Your session is ready.\n\nSend one word or phrase per line.\nYou can also send a bullet list, a numbered list, or one line with items separated by semicolons.',
     stopped: 'Your session has been stopped.',
-    words: (
-      completedItems: Array<{ text: string; translation: string }>,
-      failedItems: Array<{ text: string }>,
-    ) => {
-      const lines = [
-        'Words in your session:',
-        '',
-        'Ready pairs:',
-        ...(completedItems.length > 0
-          ? completedItems.map((item, index) => `${index + 1}. ${item.text} - ${item.translation}`)
-          : ['None yet.']),
-      ];
-
-      if (failedItems.length > 0) {
-        lines.push(
-          '',
-          'Failed:',
-          ...failedItems.map((item, index) => `${index + 1}. ${item.text}`),
-        );
-      }
-
-      return lines.join('\n');
-    },
   },
   status: {
     active: ({
@@ -70,10 +74,16 @@ export const messages = {
         `Need retry: ${formatItems(failedEntriesCount)}`,
         completedEntrySummaries.length > 0 ? '' : null,
         completedEntrySummaries.length > 0 ? 'Ready pairs:' : null,
-        ...completedEntrySummaries.map((entry) => `${entry.text} - ${entry.translation}`),
+        ...formatLimitedLines(
+          completedEntrySummaries,
+          MAX_VISIBLE_READY_ITEMS,
+          (entry) => `${entry.text} - ${entry.translation}`,
+        ),
         failedEntries.length > 0 ? '' : null,
         failedEntries.length > 0 ? 'Failed items:' : null,
-        ...failedEntries.map(
+        ...formatLimitedLines(
+          failedEntries,
+          MAX_VISIBLE_FAILED_ITEMS,
           (entry, index) => `${index + 1}. ${entry.text} - ${entry.errorMessage}`,
         ),
         failedEntries.length > 0 ? '' : null,
