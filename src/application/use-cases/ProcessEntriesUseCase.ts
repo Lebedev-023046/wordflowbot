@@ -15,6 +15,7 @@ import type { Logger } from '../../shared/logging/logger';
 import { getErrorDetails, getErrorMessage } from '../../shared/utils/errors';
 
 export class ProcessEntriesUseCase {
+  private readonly concurrency: number;
   private readonly entryEnrichmentClient: EntryEnrichmentClient;
   private readonly entryRepository: EntryRepository;
   private readonly logger: Logger;
@@ -23,15 +24,19 @@ export class ProcessEntriesUseCase {
     entryEnrichmentClient: EntryEnrichmentClient,
     entryRepository: EntryRepository,
     logger: Logger,
+    concurrency = Infinity,
   ) {
+    this.concurrency = concurrency;
     this.entryEnrichmentClient = entryEnrichmentClient;
     this.entryRepository = entryRepository;
     this.logger = logger;
   }
 
   async execute(entries: Entry[]): Promise<ProcessEntriesResult> {
-    const results = await Promise.all(
-      entries.map((entry) => this.processEntry(entry)),
+    const results = await mapWithConcurrency(
+      entries,
+      this.concurrency,
+      (entry) => this.processEntry(entry),
     );
 
     return results.reduce<ProcessEntriesResult>(
@@ -97,4 +102,30 @@ export class ProcessEntriesUseCase {
 
     return 'Something went wrong while preparing this item. Please try again.';
   }
+}
+
+async function mapWithConcurrency<Input, Output>(
+  items: Input[],
+  concurrency: number,
+  mapper: (item: Input) => Promise<Output>,
+): Promise<Output[]> {
+  if (items.length === 0) {
+    return [];
+  }
+
+  const limit = Math.min(Math.max(1, concurrency), items.length);
+  const results = new Array<Output>(items.length);
+  let nextIndex = 0;
+
+  const workers = Array.from({ length: limit }, async () => {
+    while (nextIndex < items.length) {
+      const currentIndex = nextIndex;
+      nextIndex += 1;
+      results[currentIndex] = await mapper(items[currentIndex]);
+    }
+  });
+
+  await Promise.all(workers);
+
+  return results;
 }

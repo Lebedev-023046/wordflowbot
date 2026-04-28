@@ -102,3 +102,40 @@ test('processEntries classifies insufficient quota failures', async () => {
     succeeded: [],
   });
 });
+
+test('processEntries limits enrichment concurrency', async () => {
+  const entries = new InMemoryEntryRepository();
+  const saved = await handleTextEntries({
+    entryRepository: entries,
+    sessionId: 'session-1',
+    text: 'hassle\npull through\nrumor\npeasant',
+  });
+
+  assert.equal(saved.kind, 'saved');
+
+  let activeRequests = 0;
+  let maxActiveRequests = 0;
+  const limitedClient: EntryEnrichmentClient = {
+    async enrich(text) {
+      activeRequests += 1;
+      maxActiveRequests = Math.max(maxActiveRequests, activeRequests);
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      activeRequests -= 1;
+
+      return {
+        translation: `translation for ${text}`,
+        examples: [],
+      };
+    },
+  };
+
+  await processEntries({
+    entries: saved.entries,
+    entryEnrichmentClient: limitedClient,
+    entryRepository: entries,
+  });
+
+  assert.equal(maxActiveRequests, 3);
+});

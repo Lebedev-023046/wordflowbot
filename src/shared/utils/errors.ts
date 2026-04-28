@@ -46,3 +46,11 @@ export function isMissingDatabaseTableError(
     error.message.includes(tableName)
   );
 }
+
+export function isUniqueConstraintError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    'code' in error &&
+    (error as ErrorWithMetadata).code === 'P2002'
+  );
+}

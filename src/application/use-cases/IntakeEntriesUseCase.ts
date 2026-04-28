@@ -1,5 +1,6 @@
 import type { EntryRepository } from '../../entities/entry/api/entryRepository';
 import type { Entry } from '../../entities/entry/model/entry.types';
+import { isUniqueConstraintError } from '../../shared/utils/errors';
 import { EntryFactory } from '../services/EntryFactory';
 import { EntryParser } from '../services/EntryParser';
 
@@ -54,12 +55,44 @@ export class IntakeEntriesUseCase {
       this.entryFactory.createPending(sessionId, entryText),
     );
 
-    await this.entryRepository.saveMany(entries);
+    const savedEntries = await this.saveEntries(entries);
+
+    if (savedEntries.length === 0) {
+      return { kind: 'duplicatesOnly' };
+    }
 
     return {
-      count: entries.length,
-      entries,
+      count: savedEntries.length,
+      entries: savedEntries,
       kind: 'saved',
     };
+  }
+
+  private async saveEntries(entries: Entry[]): Promise<Entry[]> {
+    try {
+      await this.entryRepository.saveMany(entries);
+      return entries;
+    } catch (error) {
+      if (!isUniqueConstraintError(error)) {
+        throw error;
+      }
+    }
+
+    const savedEntries: Entry[] = [];
+
+    for (const entry of entries) {
+      try {
+        await this.entryRepository.save(entry);
+        savedEntries.push(entry);
+      } catch (error) {
+        if (isUniqueConstraintError(error)) {
+          continue;
+        }
+
+        throw error;
+      }
+    }
+
+    return savedEntries;
   }
 }

@@ -9,9 +9,14 @@ export async function processEntries({
   entryEnrichmentClient,
   entryRepository,
 }: ProcessEntriesParams): Promise<ProcessEntriesResult> {
-  return new ProcessEntriesUseCase(entryEnrichmentClient, entryRepository, {
-    error: () => undefined,
-    info: () => undefined,
-    warn: () => undefined,
-  }).execute(entries);
+  return new ProcessEntriesUseCase(
+    entryEnrichmentClient,
+    entryRepository,
+    {
+      error: () => undefined,
+      info: () => undefined,
+      warn: () => undefined,
+    },
+    3,
+  ).execute(entries);
 }

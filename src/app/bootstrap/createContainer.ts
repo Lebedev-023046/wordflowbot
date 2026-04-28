@@ -96,6 +96,7 @@ export function createContainer() {
     entryEnrichmentClient,
     entryRepository,
     processEntriesLogger,
+    env.enrichmentConcurrency,
   );
   const enrichmentJobQueue = new ImmediateEnrichmentJobQueue(
     processEntriesUseCase,
