@@ -1,10 +1,12 @@
 import type { EntryRepository } from '../../entities/entry/api/entryRepository';
-import type { SessionRepository } from '../../entities/session/api/sessionRepository';
+import type { EntryUsage } from '../../entities/entry/model/entry.types';
 import { isCompletedEntry } from '../../entities/entry/model/entryState';
+import type { SessionRepository } from '../../entities/session/api/sessionRepository';
 
 export interface CompletedSessionWordItem {
   text: string;
   translation: string;
+  usage: EntryUsage;
 }
 
 export interface FailedSessionWordItem {
@@ -46,12 +48,11 @@ export class GetSessionWordsUseCase {
     }
 
     return {
-      completedItems: entries
-        .filter(isCompletedEntry)
-        .map((entry) => ({
-          text: entry.text,
-          translation: entry.translation,
-        })),
+      completedItems: entries.filter(isCompletedEntry).map((entry) => ({
+        text: entry.text,
+        translation: entry.translation,
+        usage: entry.usage,
+      })),
       failedItems: entries
         .filter((entry) => entry.status === 'failed')
         .map((entry) => ({

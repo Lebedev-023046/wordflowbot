@@ -53,6 +53,7 @@ test('GetSessionWordsUseCase returns completed and failed session words separate
       {
         text: 'hassle',
         translation: 'translation for hassle',
+        usage: 'B',
       },
     ],
     failedItems: [

@@ -37,15 +37,21 @@ export function registerSessionWordsCommand(
 
     return ctx.reply(
       buildSessionWordsReply(result.completedItems, result.failedItems, {
-        completedPage: 0,
+        aPage: 0,
+        bPage: 0,
+        cPage: 0,
         failedPage: 0,
+        view: 'A',
       }),
       buildSessionWordsInlineKeyboard(
         result.completedItems,
         result.failedItems,
         {
-          completedPage: 0,
+          aPage: 0,
+          bPage: 0,
+          cPage: 0,
           failedPage: 0,
+          view: 'A',
         },
       ),
     );
@@ -58,7 +64,7 @@ export function registerSessionWordsCommand(
     await ctx.answerCbQuery();
   });
 
-  bot.action(/^session_words:\d+:\d+$/, async (ctx) => {
+  bot.action(/^session_words:(all|A|B|C):\d+:\d+:\d+:\d+$/, async (ctx) => {
     const data = 'data' in ctx.callbackQuery ? ctx.callbackQuery.data : '';
     const pageState = parseSessionWordsCallbackData(data);
 
