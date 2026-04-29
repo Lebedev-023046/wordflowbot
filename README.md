@@ -53,8 +53,15 @@ npm run bot
 1. Start a session.
 2. Send words, phrases, or a block of text.
 3. Let the bot enrich entries in the background.
-4. End the session.
-5. Export the CSV and import it into ReWord.
+4. Show or export the current session if needed.
+5. Finish the session.
+6. Start a new session when you want to collect new words.
+
+### Session Model
+
+- Each session is isolated.
+- `Show words` and `Export CSV` work only for the current active session.
+- Starting a new session starts with an empty list.
 
 ## 🛠 Technical Setup
 

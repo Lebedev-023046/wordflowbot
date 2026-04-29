@@ -53,7 +53,7 @@ export function registerClearSessionCommand(
     const result = await clearSessionUseCase.execute(userId);
 
     if (result.kind === 'noActive') {
-      await ctx.editMessageText(messages.session.noActive);
+      await ctx.deleteMessage();
       return replyWithSessionState({
         ctx,
         isActive: false,
@@ -61,7 +61,7 @@ export function registerClearSessionCommand(
       });
     }
 
-    await ctx.editMessageText(messages.session.cleared(result.clearedEntries));
+    await ctx.deleteMessage();
     return replyWithSessionState({
       ctx,
       hasEntries: false,
@@ -73,7 +73,7 @@ export function registerClearSessionCommand(
 
   bot.action(CLEAR_SESSION_CANCEL_CALLBACK, async (ctx) => {
     await ctx.answerCbQuery();
-    await ctx.editMessageText(messages.session.clearCancelled);
+    await ctx.deleteMessage();
 
     const userId = getUserId(ctx);
     const state = await getSessionStateFlags(entries, sessions, userId);

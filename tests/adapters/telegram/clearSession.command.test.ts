@@ -27,6 +27,7 @@ class FakeBot {
 
 class FakeContext {
   readonly answeredCallbackQueries: undefined[] = [];
+  readonly deletedMessages: number[] = [];
   readonly editMessageTextCalls: string[] = [];
   readonly replyCalls: Array<{
     extra?: object;
@@ -36,6 +37,10 @@ class FakeContext {
 
   async answerCbQuery() {
     this.answeredCallbackQueries.push(undefined);
+  }
+
+  async deleteMessage() {
+    this.deletedMessages.push(1);
   }
 
   async editMessageText(text: string) {
@@ -117,9 +122,11 @@ test('clear words confirmation removes entries and keeps the session active', as
   await handler(ctx);
 
   assert.equal(ctx.answeredCallbackQueries.length, 1);
-  assert.deepEqual(ctx.editMessageTextCalls, [messages.session.cleared(1)]);
+  assert.equal(ctx.deletedMessages.length, 1);
+  assert.deepEqual(ctx.editMessageTextCalls, []);
   assert.equal(await sessions.hasActiveSession(1), true);
   assert.deepEqual(await entries.findBySessionId(session.id), []);
+  assert.equal(ctx.replyCalls[0]?.text, messages.session.cleared(1));
   assert.deepEqual(normalizeMarkup(ctx.replyCalls[0]?.extra), {
     reply_markup: {
       keyboard: [
@@ -155,9 +162,11 @@ test('clear words cancellation preserves the active session keyboard state', asy
   await handler(ctx);
 
   assert.equal(ctx.answeredCallbackQueries.length, 1);
-  assert.deepEqual(ctx.editMessageTextCalls, [messages.session.clearCancelled]);
+  assert.equal(ctx.deletedMessages.length, 1);
+  assert.deepEqual(ctx.editMessageTextCalls, []);
   assert.equal(await sessions.hasActiveSession(1), true);
   assert.equal((await entries.findBySessionId(session.id)).length, 1);
+  assert.equal(ctx.replyCalls[0]?.text, messages.session.clearCancelled);
   assert.deepEqual(normalizeMarkup(ctx.replyCalls[0]?.extra), {
     reply_markup: {
       keyboard: [

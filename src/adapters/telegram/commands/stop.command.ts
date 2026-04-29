@@ -53,7 +53,7 @@ export function registerStopCommand(
     const result = await stopSessionUseCase.execute(userId);
 
     if (result.kind === 'noActive') {
-      await ctx.editMessageText(messages.session.noActive);
+      await ctx.deleteMessage();
       return replyWithSessionState({
         ctx,
         isActive: false,
@@ -61,7 +61,7 @@ export function registerStopCommand(
       });
     }
 
-    await ctx.editMessageText(messages.session.stopped);
+    await ctx.deleteMessage();
     return replyWithSessionState({
       ctx,
       isActive: result.isActive,
@@ -71,7 +71,7 @@ export function registerStopCommand(
 
   bot.action(STOP_SESSION_CANCEL_CALLBACK, async (ctx) => {
     await ctx.answerCbQuery();
-    await ctx.editMessageText(messages.session.stopCancelled);
+    await ctx.deleteMessage();
 
     const userId = getUserId(ctx);
     const state = await getSessionStateFlags(entries, sessions, userId);

@@ -12,5 +12,5 @@ export const buttons = {
   retryFailed: '🔄 Retry failed',
   showWords: '📚 Show words',
   startSession: '🚀 Start session',
-  stopSession: '✅ Finish session',
+  stopSession: '🏁 Finish session',
 } as const;
