@@ -10,7 +10,12 @@ import { registerTextMessageHandler } from '../../adapters/telegram/handlers/tex
 import type { AppContainer } from './createContainer';
 
 export function registerHandlers(bot: Telegraf, container: AppContainer) {
-  registerClearSessionCommand(bot, container.useCases.clearSession);
+  registerClearSessionCommand(
+    bot,
+    container.repositories.entries,
+    container.repositories.sessions,
+    container.useCases.clearSession,
+  );
   registerStartCommand(
     bot,
     container.repositories.entries,
@@ -31,7 +36,12 @@ export function registerHandlers(bot: Telegraf, container: AppContainer) {
   );
   registerSessionWordsCommand(bot, container.useCases.getSessionWords);
   registerStatusCommand(bot, container.useCases.getSessionStatus);
-  registerStopCommand(bot, container.useCases.stopSession);
+  registerStopCommand(
+    bot,
+    container.repositories.entries,
+    container.repositories.sessions,
+    container.useCases.stopSession,
+  );
   registerTextMessageHandler(
     bot,
     container.repositories.entries,

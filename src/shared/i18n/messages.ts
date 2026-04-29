@@ -35,11 +35,11 @@ export const messages = {
       'You have an active session.\n\nSend one word or phrase per line.\nYou can also send a bullet list, a numbered list, or one line with items separated by semicolons.',
     alreadyActive:
       'You already have an active session.\n\nSend one word or phrase per line.\nYou can also send a bullet list, a numbered list, or one line with items separated by semicolons.',
-    clearCancelled: 'Your session was not cleared.',
+    clearCancelled: 'Your words stay in the current session.',
     cleared: (clearedEntries: number) =>
-      `🧹 Session cleared. Removed ${formatItems(clearedEntries)} from this session.`,
+      `🧹 Cleared ${formatItems(clearedEntries)} from the current session. The session is still active.`,
     clearConfirm:
-      'Clear this session? This will remove all words from the current session.',
+      'Clear all words from this session? The session will stay active.',
     exportChoose: 'Choose which ready words to export:',
     emptyExport: '📭 Nothing is ready to export yet.',
     emptyExportForFilter: (label: string) =>
@@ -51,7 +51,11 @@ export const messages = {
       'Tap Start session to begin.\n\nThis bot turns English words or phrases into ready learning pairs with translations and examples.',
     started:
       '🚀 Your session is ready.\n\nSend one word or phrase per line.\nYou can also send a bullet list, a numbered list, or one line with items separated by semicolons.',
-    stopped: 'Your session has been stopped.',
+    stopCancelled: 'Your session stays active.',
+    stopConfirm:
+      'Finish this session? Your saved words will stay intact, but you will need to start a new session to continue.',
+    stopped:
+      '✅ Session finished. Your saved words stay intact. Start a new session when you want to continue.',
   },
   status: {
     active: ({

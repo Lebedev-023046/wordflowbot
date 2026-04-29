@@ -48,7 +48,6 @@ export class ClearSessionUseCase {
     }
 
     await this.entryRepository.deleteBySessionId(session.id);
-    await this.sessionRepository.clearSession(userId);
 
     return {
       clearedEntries: preview.clearedEntries,

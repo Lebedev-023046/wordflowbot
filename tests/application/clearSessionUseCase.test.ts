@@ -14,7 +14,7 @@ test('ClearSessionUseCase returns noActive when there is no active session', asy
   assert.deepEqual(result, { kind: 'noActive' });
 });
 
-test('ClearSessionUseCase removes the active session and all session entries', async () => {
+test('ClearSessionUseCase removes session entries and keeps the session active', async () => {
   const sessions = new InMemorySessionRepository();
   const entries = new InMemoryEntryRepository();
   const entryFactory = new EntryFactory();
@@ -31,6 +31,6 @@ test('ClearSessionUseCase removes the active session and all session entries', a
     clearedEntries: 2,
     kind: 'cleared',
   });
-  assert.equal(await sessions.hasActiveSession(1), false);
+  assert.equal(await sessions.hasActiveSession(1), true);
   assert.deepEqual(await entries.findBySessionId(session.id), []);
 });

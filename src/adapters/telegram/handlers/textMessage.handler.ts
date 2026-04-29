@@ -21,10 +21,19 @@ export function registerTextMessageHandler(
   intakeEntriesUseCase: IntakeEntriesUseCase,
   enrichmentJobQueue: EnrichmentJobQueue,
 ) {
+  const ignoredButtonTexts = new Set([
+    buttons.clearSession,
+    buttons.exportCsv,
+    buttons.retryFailed,
+    buttons.showWords,
+    buttons.startSession,
+    buttons.stopSession,
+  ]);
+
   bot.on(message('text'), async (ctx) => {
     const text = ctx.message.text;
 
-    if (text === buttons.startSession || text === buttons.stopSession) {
+    if (ignoredButtonTexts.has(text)) {
       return;
     }
 

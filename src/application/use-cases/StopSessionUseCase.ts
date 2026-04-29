@@ -5,6 +5,11 @@ export type StopSessionResult = {
   kind: 'noActive' | 'stopped';
 };
 
+export type StopSessionPreviewResult = {
+  isActive: boolean;
+  kind: 'active' | 'noActive';
+};
+
 export class StopSessionUseCase {
   private readonly sessionRepository: SessionRepository;
 
@@ -12,8 +17,24 @@ export class StopSessionUseCase {
     this.sessionRepository = sessionRepository;
   }
 
-  async execute(userId: number): Promise<StopSessionResult> {
+  async preview(userId: number): Promise<StopSessionPreviewResult> {
     if (!(await this.sessionRepository.hasActiveSession(userId))) {
+      return {
+        kind: 'noActive',
+        isActive: false,
+      };
+    }
+
+    return {
+      kind: 'active',
+      isActive: true,
+    };
+  }
+
+  async execute(userId: number): Promise<StopSessionResult> {
+    const preview = await this.preview(userId);
+
+    if (preview.kind === 'noActive') {
       return {
         kind: 'noActive',
         isActive: false,

@@ -1,17 +1,25 @@
-import type { Telegraf } from 'telegraf';
+import { Markup, type Telegraf } from 'telegraf';
 import type { StopSessionUseCase } from '../../../application/use-cases/StopSessionUseCase';
+import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
+import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
 import { buttons } from '../../../shared/i18n/buttons';
 import { messages } from '../../../shared/i18n/messages';
 import { getUserId } from '../lib/getUserId';
+import { getSessionStateFlags } from '../lib/getSessionStateFlags';
 import { replyWithSessionState } from '../lib/replyWithSessionState';
+
+const STOP_SESSION_CONFIRM_CALLBACK = 'stop_session:confirm';
+const STOP_SESSION_CANCEL_CALLBACK = 'stop_session:cancel';
 
 export function registerStopCommand(
   bot: Telegraf,
+  entries: EntryRepository,
+  sessions: SessionRepository,
   stopSessionUseCase: StopSessionUseCase,
 ) {
   bot.hears(buttons.stopSession, async (ctx) => {
     const userId = getUserId(ctx);
-    const result = await stopSessionUseCase.execute(userId);
+    const result = await stopSessionUseCase.preview(userId);
 
     if (result.kind === 'noActive') {
       return replyWithSessionState({
@@ -21,10 +29,59 @@ export function registerStopCommand(
       });
     }
 
+    return ctx.reply(
+      messages.session.stopConfirm,
+      Markup.inlineKeyboard([
+        [
+          Markup.button.callback(
+            buttons.confirmStopSession,
+            STOP_SESSION_CONFIRM_CALLBACK,
+          ),
+          Markup.button.callback(
+            buttons.cancelStopSession,
+            STOP_SESSION_CANCEL_CALLBACK,
+          ),
+        ],
+      ]),
+    );
+  });
+
+  bot.action(STOP_SESSION_CONFIRM_CALLBACK, async (ctx) => {
+    await ctx.answerCbQuery();
+
+    const userId = getUserId(ctx);
+    const result = await stopSessionUseCase.execute(userId);
+
+    if (result.kind === 'noActive') {
+      await ctx.editMessageText(messages.session.noActive);
+      return replyWithSessionState({
+        ctx,
+        isActive: false,
+        message: messages.session.noActive,
+      });
+    }
+
+    await ctx.editMessageText(messages.session.stopped);
     return replyWithSessionState({
       ctx,
-      message: messages.session.stopped,
       isActive: result.isActive,
+      message: messages.session.stopped,
+    });
+  });
+
+  bot.action(STOP_SESSION_CANCEL_CALLBACK, async (ctx) => {
+    await ctx.answerCbQuery();
+    await ctx.editMessageText(messages.session.stopCancelled);
+
+    const userId = getUserId(ctx);
+    const state = await getSessionStateFlags(entries, sessions, userId);
+
+    return replyWithSessionState({
+      ctx,
+      hasEntries: state.hasEntries,
+      hasFailedEntries: state.hasFailedEntries,
+      isActive: state.isActive,
+      message: messages.session.stopCancelled,
     });
   });
 }

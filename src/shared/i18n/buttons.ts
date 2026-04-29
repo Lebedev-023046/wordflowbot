@@ -1,7 +1,9 @@
 export const buttons = {
-  cancelClearSession: 'Keep session',
-  clearSession: '🗑️ Clear session',
-  confirmClearSession: 'Clear it',
+  cancelClearSession: 'Keep words',
+  cancelStopSession: 'Keep session',
+  clearSession: '🧹 Clear words',
+  confirmClearSession: 'Clear words',
+  confirmStopSession: 'Finish session',
   exportCsv: '📤 Export CSV',
   exportCsvAllWords: '📦 Export all words',
   exportCsvMostUseful: '🔥 Export most useful',
@@ -10,5 +12,5 @@ export const buttons = {
   retryFailed: '🔄 Retry failed',
   showWords: '📚 Show words',
   startSession: '🚀 Start session',
-  stopSession: '🛑 Stop session',
+  stopSession: '✅ Finish session',
 } as const;
