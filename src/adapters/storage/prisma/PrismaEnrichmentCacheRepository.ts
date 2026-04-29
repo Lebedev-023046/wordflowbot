@@ -1,4 +1,4 @@
-import type { PrismaClient, Prisma } from '@prisma/client';
+import type { Prisma, PrismaClient } from '@prisma/client';
 import type {
   EnrichmentCacheKey,
   EnrichmentCacheRecord,
@@ -7,6 +7,7 @@ import type {
 import type {
   EntryEnrichment,
   EntryExample,
+  EntryUsage,
 } from '../../../entities/entry/model/entry.types';
 import type { Logger } from '../../../shared/logging/logger';
 import { isMissingDatabaseTableError } from '../../../shared/utils/errors';
@@ -63,11 +64,13 @@ export class PrismaEnrichmentCacheRepository implements EnrichmentCacheRepositor
           promptVersion: record.promptVersion,
           sourceText: record.sourceText,
           translation: record.enrichment.translation,
+          usage: record.enrichment.usage,
         },
         update: {
           examplesJson: record.enrichment.examples as Prisma.InputJsonValue,
           sourceText: record.sourceText,
           translation: record.enrichment.translation,
+          usage: record.enrichment.usage,
         },
         where: {
           normalizedText_model_promptVersion: {
@@ -108,11 +111,12 @@ export class PrismaEnrichmentCacheRepository implements EnrichmentCacheRepositor
 function mapCacheExamplesToEnrichment(record: {
   examplesJson: Prisma.JsonValue;
   translation: string;
+  usage?: EntryUsage | null;
 }): EntryEnrichment {
   return {
     examples: parseExamples(record.examplesJson),
     translation: record.translation,
-    usage: 'B',
+    usage: record.usage ?? 'B',
   };
 }
 

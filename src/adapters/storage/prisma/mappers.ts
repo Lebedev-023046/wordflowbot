@@ -3,12 +3,16 @@ import type {
   EntryExample as PrismaEntryExample,
   Session as PrismaSession,
 } from '@prisma/client';
-import type { Entry } from '../../../entities/entry/model/entry.types';
+import type {
+  Entry,
+  EntryUsage,
+} from '../../../entities/entry/model/entry.types';
 import type { Session } from '../../../entities/session/api/sessionRepository';
 import { normalizeEntryText } from '../../../shared/utils/entryText';
 
 type PrismaEntryWithExamples = PrismaEntry & {
   examples: PrismaEntryExample[];
+  usage?: EntryUsage | null;
 };
 
 export function mapSessionToDomain(session: PrismaSession): Session {
@@ -36,7 +40,7 @@ export function mapEntryToDomain(entry: PrismaEntryWithExamples): Entry {
       status: 'completed',
       text: entry.text,
       translation: entry.translation,
-      usage: 'B',
+      usage: entry.usage ?? 'B',
     };
   }
 
@@ -72,5 +76,6 @@ export function buildEntryPersistencePayload(entry: Entry) {
     status: entry.status,
     text: entry.text,
     translation: entry.translation,
+    usage: entry.usage,
   };
 }

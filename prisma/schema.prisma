@@ -57,6 +57,7 @@ model EnrichmentCache {
   sourceText     String
   model          String
   promptVersion  String
+  usage          EntryUsage?
   translation    String
   examplesJson   Json
   createdAt      DateTime @default(now())
