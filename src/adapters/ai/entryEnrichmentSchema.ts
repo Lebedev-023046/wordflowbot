@@ -1,6 +1,10 @@
 export const entryEnrichmentSchema = {
   additionalProperties: false,
   properties: {
+    usage: {
+      enum: ['A', 'B', 'C'],
+      type: 'string',
+    },
     examples: {
       items: {
         additionalProperties: false,
@@ -23,6 +27,6 @@ export const entryEnrichmentSchema = {
       type: 'string',
     },
   },
-  required: ['translation', 'examples'],
+  required: ['usage', 'translation', 'examples'],
   type: 'object',
 } as const;
