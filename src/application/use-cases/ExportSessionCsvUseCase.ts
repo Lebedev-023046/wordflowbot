@@ -1,11 +1,18 @@
 import type { EntryRepository } from '../../entities/entry/api/entryRepository';
 import type { SessionRepository } from '../../entities/session/api/sessionRepository';
 import { isCompletedEntry } from '../../entities/entry/model/entryState';
+import type { EntryUsage } from '../../entities/entry/model/entry.types';
 import { CsvExporter } from '../services/CsvExporter';
+
+export type ExportSessionCsvFilter = EntryUsage | 'all';
 
 export type ExportSessionCsvResult =
   | { kind: 'noActive' }
-  | { kind: 'empty' }
+  | {
+      hasEntries: boolean;
+      hasFailedEntries: boolean;
+      kind: 'empty';
+    }
   | {
       content: string;
       fileName: string;
@@ -27,19 +34,32 @@ export class ExportSessionCsvUseCase {
     this.csvExporter = csvExporter;
   }
 
-  async execute(userId: number): Promise<ExportSessionCsvResult> {
+  async execute(
+    userId: number,
+    filter: ExportSessionCsvFilter = 'all',
+  ): Promise<ExportSessionCsvResult> {
     const session = await this.sessionRepository.getActiveSession(userId);
 
     if (!session) {
       return { kind: 'noActive' };
     }
 
-    const completedEntries = (
-      await this.entryRepository.findBySessionId(session.id)
-    ).filter(isCompletedEntry);
+    const sessionEntries = await this.entryRepository.findBySessionId(
+      session.id,
+    );
+
+    const completedEntries = sessionEntries
+      .filter(isCompletedEntry)
+      .filter((entry) => filter === 'all' || entry.usage === filter);
 
     if (completedEntries.length === 0) {
-      return { kind: 'empty' };
+      return {
+        hasEntries: sessionEntries.length > 0,
+        hasFailedEntries: sessionEntries.some(
+          (entry) => entry.status === 'failed',
+        ),
+        kind: 'empty',
+      };
     }
 
     return {

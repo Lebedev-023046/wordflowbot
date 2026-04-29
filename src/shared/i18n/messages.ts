@@ -40,7 +40,10 @@ export const messages = {
       `🧹 Session cleared. Removed ${formatItems(clearedEntries)} from this session.`,
     clearConfirm:
       'Clear this session? This will remove all words from the current session.',
+    exportChoose: 'Choose which ready words to export:',
     emptyExport: '📭 Nothing is ready to export yet.',
+    emptyExportForFilter: (label: string) =>
+      `📭 No ready words in ${label} yet.`,
     idle: 'Start a session first, then send words or phrases.',
     noActive: 'ℹ️ You do not have an active session right now.',
     noWordsYet: 'You have not added any words yet.',
