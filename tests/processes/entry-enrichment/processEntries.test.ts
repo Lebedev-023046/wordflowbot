@@ -9,6 +9,7 @@ import { withMutedConsole } from '../../support/withMutedConsole';
 const entryEnrichmentClient: EntryEnrichmentClient = {
   async enrich(text) {
     return {
+      usage: 'B',
       translation: `translation for ${text}`,
       examples: [
         {
@@ -125,6 +126,7 @@ test('processEntries limits enrichment concurrency', async () => {
       activeRequests -= 1;
 
       return {
+        usage: 'B',
         translation: `translation for ${text}`,
         examples: [],
       };

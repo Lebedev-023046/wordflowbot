@@ -64,6 +64,7 @@ test('RetryFailedEntriesUseCase retries failed items only and resets them to pen
     ...entryFactory.createPending(session.id, 'pull through'),
     status: 'completed' as const,
     translation: 'translation for pull through',
+    usage: 'B' as const,
   };
 
   await entries.saveMany([failedEntry, completedEntry]);

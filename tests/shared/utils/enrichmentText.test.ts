@@ -27,6 +27,7 @@ test('normalizeEnrichmentTextCasing normalizes translation fields', () => {
         },
       ],
       translation: 'ОЧЕНЬ СМЕШНОЙ',
+      usage: 'A',
     }),
     {
       examples: [
@@ -36,6 +37,7 @@ test('normalizeEnrichmentTextCasing normalizes translation fields', () => {
         },
       ],
       translation: 'очень смешной',
+      usage: 'A',
     },
   );
 });

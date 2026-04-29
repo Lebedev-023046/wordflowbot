@@ -12,6 +12,7 @@ export function normalizeEnrichmentTextCasing(
       ),
     })),
     translation: normalizeRussianTextCasing(enrichment.translation),
+    usage: enrichment.usage,
   };
 }
 

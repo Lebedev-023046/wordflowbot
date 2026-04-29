@@ -47,6 +47,7 @@ test('exportSessionCsv returns csv for completed entries only', async () => {
   const entryEnrichmentClient: EntryEnrichmentClient = {
     async enrich(text) {
       return {
+        usage: 'B',
         examples: [
           {
             text: `Example with ${text}.`,

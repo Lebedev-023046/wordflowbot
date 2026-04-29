@@ -1,5 +1,6 @@
 import type { EntryRepository } from '../../entities/entry/api/entryRepository';
 import type { SessionRepository } from '../../entities/session/api/sessionRepository';
+import { isCompletedEntry } from '../../entities/entry/model/entryState';
 
 export interface CompletedSessionWordItem {
   text: string;
@@ -46,12 +47,10 @@ export class GetSessionWordsUseCase {
 
     return {
       completedItems: entries
-        .filter(
-          (entry) => entry.status === 'completed' && entry.translation !== null,
-        )
+        .filter(isCompletedEntry)
         .map((entry) => ({
           text: entry.text,
-          translation: entry.translation ?? '',
+          translation: entry.translation,
         })),
       failedItems: entries
         .filter((entry) => entry.status === 'failed')

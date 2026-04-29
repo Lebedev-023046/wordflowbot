@@ -27,6 +27,7 @@ test('getSessionStatus returns counts and failure details for an active session'
       }
 
       return {
+        usage: 'B',
         examples: [
           {
             text: `Example with ${text}.`,

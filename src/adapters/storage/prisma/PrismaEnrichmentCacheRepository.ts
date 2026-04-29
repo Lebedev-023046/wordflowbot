@@ -112,6 +112,7 @@ function mapCacheExamplesToEnrichment(record: {
   return {
     examples: parseExamples(record.examplesJson),
     translation: record.translation,
+    usage: 'B',
   };
 }
 

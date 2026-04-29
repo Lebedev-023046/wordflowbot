@@ -24,6 +24,7 @@ model Entry {
   text           String
   normalizedText String
   status         EntryStatus
+  usage          EntryUsage?
   translation    String?
   errorMessage   String?
   createdAt      DateTime    @default(now())
@@ -69,4 +70,10 @@ enum EntryStatus {
   pending
   completed
   failed
+}
+
+enum EntryUsage {
+  A
+  B
+  C
 }

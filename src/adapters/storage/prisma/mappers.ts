@@ -20,19 +20,48 @@ export function mapSessionToDomain(session: PrismaSession): Session {
 }
 
 export function mapEntryToDomain(entry: PrismaEntryWithExamples): Entry {
+  const examples = entry.examples
+    .sort((left, right) => left.sortOrder - right.sortOrder)
+    .map((example) => ({
+      text: example.text,
+      translation: example.translation,
+    }));
+
+  if (entry.status === 'completed' && entry.translation !== null) {
+    return {
+      errorMessage: entry.errorMessage,
+      examples,
+      id: entry.id,
+      sessionId: entry.sessionId,
+      status: 'completed',
+      text: entry.text,
+      translation: entry.translation,
+      usage: 'B',
+    };
+  }
+
+  if (entry.status === 'failed') {
+    return {
+      errorMessage: entry.errorMessage,
+      examples,
+      id: entry.id,
+      sessionId: entry.sessionId,
+      status: 'failed',
+      text: entry.text,
+      translation: entry.translation,
+      usage: null,
+    };
+  }
+
   return {
     errorMessage: entry.errorMessage,
-    examples: entry.examples
-      .sort((left, right) => left.sortOrder - right.sortOrder)
-      .map((example) => ({
-        text: example.text,
-        translation: example.translation,
-      })),
+    examples,
     id: entry.id,
     sessionId: entry.sessionId,
-    status: entry.status,
+    status: 'pending',
     text: entry.text,
-    translation: entry.translation,
+    translation: null,
+    usage: null,
   };
 }
 

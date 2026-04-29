@@ -1,27 +1,37 @@
-import type { Entry, EntryEnrichment } from './entry.types';
+import type {
+  CompletedEntry,
+  Entry,
+  EntryEnrichment,
+  FailedEntry,
+  PendingEntry,
+} from './entry.types';
 
-export function markEntryPending(entry: Entry): Entry {
+export function markEntryPending(entry: Entry): PendingEntry {
   return {
     ...entry,
     errorMessage: null,
+    examples: [],
     status: 'pending',
+    translation: null,
+    usage: null,
   };
 }
 
 export function completeEntry(
   entry: Entry,
   enrichment: EntryEnrichment,
-): Entry {
+): CompletedEntry {
   return {
     ...entry,
     errorMessage: null,
     examples: enrichment.examples,
     status: 'completed',
     translation: enrichment.translation,
+    usage: enrichment.usage,
   };
 }
 
-export function failEntry(entry: Entry, errorMessage: string): Entry {
+export function failEntry(entry: Entry, errorMessage: string): FailedEntry {
   return {
     ...entry,
     errorMessage,
@@ -29,6 +39,6 @@ export function failEntry(entry: Entry, errorMessage: string): Entry {
   };
 }
 
-export function isCompletedEntry(entry: Entry): boolean {
-  return entry.status === 'completed' && entry.translation !== null;
+export function isCompletedEntry(entry: Entry): entry is CompletedEntry {
+  return entry.status === 'completed';
 }

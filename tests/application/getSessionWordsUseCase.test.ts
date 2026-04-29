@@ -35,6 +35,7 @@ test('GetSessionWordsUseCase returns completed and failed session words separate
       ...entryFactory.createPending(session.id, 'hassle'),
       status: 'completed',
       translation: 'translation for hassle',
+      usage: 'B',
     },
     entryFactory.createPending(session.id, 'pull through'),
     {

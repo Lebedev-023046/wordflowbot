@@ -9,6 +9,7 @@ export class EntryFactory {
       examples: [],
       status: 'pending',
       translation: null,
+      usage: null,
       errorMessage: null,
     };
   }

@@ -169,11 +169,13 @@ function cloneEnrichment(enrichment: EntryEnrichment): EntryEnrichment {
   return {
     examples: enrichment.examples.map((example) => ({ ...example })),
     translation: enrichment.translation,
+    usage: enrichment.usage,
   };
 }
 
 function createEnrichment(text: string): EntryEnrichment {
   return {
+    usage: 'B',
     examples: [
       {
         text: `Example with ${text}.`,
