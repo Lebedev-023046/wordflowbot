@@ -35,6 +35,7 @@ COPY --from=build /app/package.json ./package.json
 COPY docker/run-bot.sh ./docker/run-bot.sh
 
 RUN chmod +x ./docker/run-bot.sh
+RUN chown -R node:node /app
 
 USER node
 
