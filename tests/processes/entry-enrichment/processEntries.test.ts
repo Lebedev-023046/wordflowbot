@@ -65,6 +65,10 @@ test('processEntries returns word-translation previews and completes entries', a
     processedEntries.map((entry) => entry.translation),
     ['translation for hassle', 'translation for pull through'],
   );
+  assert.deepEqual(
+    processedEntries.map((entry) => entry.usage),
+    ['B', 'B'],
+  );
 });
 
 test('processEntries classifies insufficient quota failures', async () => {
