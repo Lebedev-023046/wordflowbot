@@ -31,6 +31,8 @@ test('mapEntryToDomain preserves usage on completed entries and sorts examples',
     text: 'hassle',
     translation: 'translation for hassle',
     usage: 'A',
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   assert.deepEqual(entry, {
@@ -65,6 +67,8 @@ test('mapEntryToDomain falls back to usage B for older completed entries', () =>
     text: 'hassle',
     translation: 'translation for hassle',
     usage: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
   assert.equal(entry.status, 'completed');

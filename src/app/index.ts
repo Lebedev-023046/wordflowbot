@@ -13,6 +13,7 @@ const healthServer = createHealthServer({
 registerHandlers(bot, container);
 
 await healthServer.listen();
+await bot.telegram.getMe();
 await bot.launch();
 healthServer.setReady(true);
 
