@@ -34,6 +34,14 @@ export const messages = {
     historyEmpty: 'Your history does not have any finished sessions yet.',
     menu: 'Your library',
     noWordsYet: 'Your library does not have any completed words yet.',
+    renamePrompt: (currentTitle: string) =>
+      [
+        'Reply to this message with the session title you want to save.',
+        '',
+        `Current title: ${currentTitle}`,
+      ].join('\n'),
+    renamed: (title: string) => `✏️ Session renamed to: ${title}`,
+    sessionMissing: 'That finished session is no longer available.',
     statistics: ({
       activeSession,
       finishedSessions,
@@ -86,6 +94,7 @@ export const messages = {
     stopCancelled: 'Your session stays active.',
     stopConfirm:
       'Finish this session? This closes the current session. If you want to show or export these words in the bot, do that before finishing.',
+    stopRenameOffer: 'Name this session source now, or skip it for later.',
     stopped:
       '🏁 Session finished. Start a new session when you want to add more words.',
   },
@@ -157,5 +166,8 @@ export const messages = {
     retrying: (count: number) => `🔄 Trying ${formatItems(count)} again...`,
     retryNothingFailed: 'There is nothing to retry right now.',
     saved: (count: number) => `Saved ${formatItems(count)}.`,
+  },
+  rename: {
+    empty: 'Please send a non-empty session title.',
   },
 } as const;

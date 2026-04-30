@@ -19,8 +19,10 @@ import { GetSessionWordsUseCase } from '../../application/use-cases/GetSessionWo
 import { IntakeEntriesUseCase } from '../../application/use-cases/IntakeEntriesUseCase';
 import { ProcessEntriesUseCase } from '../../application/use-cases/ProcessEntriesUseCase';
 import { RetryFailedEntriesUseCase } from '../../application/use-cases/RetryFailedEntriesUseCase';
+import { RenameSessionUseCase } from '../../application/use-cases/RenameSessionUseCase';
 import { StartSessionUseCase } from '../../application/use-cases/StartSessionUseCase';
 import { StopSessionUseCase } from '../../application/use-cases/StopSessionUseCase';
+import { SessionRenameStateStore } from '../../adapters/telegram/lib/sessionRenameState';
 import { createLogger } from '../../shared/logging/logger';
 import { env } from '../config/env';
 
@@ -121,6 +123,8 @@ export function createContainer() {
     entryRepository,
     enrichmentJobQueue,
   );
+  const renameSessionUseCase = new RenameSessionUseCase(sessionRepository);
+  const sessionRenameState = new SessionRenameStateStore();
 
   return {
     prisma,
@@ -138,12 +142,16 @@ export function createContainer() {
       getSessionWords: getSessionWordsUseCase,
       intakeEntries: intakeEntriesUseCase,
       processEntries: processEntriesUseCase,
+      renameSession: renameSessionUseCase,
       retryFailedEntries: retryFailedEntriesUseCase,
       startSession: startSessionUseCase,
       stopSession: stopSessionUseCase,
     },
     queues: {
       enrichment: enrichmentJobQueue,
+    },
+    state: {
+      sessionRename: sessionRenameState,
     },
   };
 }

@@ -12,7 +12,9 @@ test('endSession stops an active session', async () => {
   assert.deepEqual(result, {
     kind: 'stopped',
     isActive: false,
+    session: result.session,
   });
+  assert.ok(result.session);
   assert.equal(await sessions.hasActiveSession(1), false);
 });
 
@@ -24,5 +26,6 @@ test('endSession returns noActive when there is no session', async () => {
   assert.deepEqual(result, {
     kind: 'noActive',
     isActive: false,
+    session: null,
   });
 });

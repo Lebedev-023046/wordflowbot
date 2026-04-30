@@ -8,6 +8,7 @@ import {
 export interface SessionHistoryItem {
   completedWords: number;
   endedAtLabel: string;
+  id: string;
   title: string;
 }
 
@@ -39,9 +40,10 @@ export class GetSessionHistoryUseCase {
       };
     }
 
-    const completedEntries = await this.entryRepository.findCompletedBySessionIds(
-      sessions.map((session) => session.id),
-    );
+    const completedEntries =
+      await this.entryRepository.findCompletedBySessionIds(
+        sessions.map((session) => session.id),
+      );
     const completedWordsBySessionId = new Map<string, number>();
 
     for (const entry of completedEntries) {
@@ -54,7 +56,10 @@ export class GetSessionHistoryUseCase {
     return {
       items: sessions.map((session) => ({
         completedWords: completedWordsBySessionId.get(session.id) ?? 0,
-        endedAtLabel: formatSessionEndDate(session.endedAt ?? session.createdAt),
+        endedAtLabel: formatSessionEndDate(
+          session.endedAt ?? session.createdAt,
+        ),
+        id: session.id,
         title: resolveSessionTitle(session),
       })),
       kind: 'ready',

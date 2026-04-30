@@ -2,12 +2,16 @@ import type { Telegraf } from 'telegraf';
 import { message } from 'telegraf/filters';
 import type { EnrichmentJobQueue } from '../../../application/ports/EnrichmentJobQueue';
 import type { IntakeEntriesUseCase } from '../../../application/use-cases/IntakeEntriesUseCase';
+import type { RenameSessionUseCase } from '../../../application/use-cases/RenameSessionUseCase';
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
-import { buttons } from '../../../shared/i18n/buttons';
+import { buttons, type ButtonText } from '../../../shared/i18n/buttons';
 import { messages } from '../../../shared/i18n/messages';
 import { getUserId } from '../lib/getUserId';
+import { renderLibraryKeyboard } from '../lib/libraryKeyboard';
+import { replyWithSessionState } from '../lib/replyWithSessionState';
 import { renderSessionKeyboard } from '../lib/sessionKeyboard';
+import type { SessionRenameStateStore } from '../lib/sessionRenameState';
 import {
   formatProcessedEntriesReply,
   getInitialReplyText,
@@ -20,8 +24,10 @@ export function registerTextMessageHandler(
   sessions: SessionRepository,
   intakeEntriesUseCase: IntakeEntriesUseCase,
   enrichmentJobQueue: EnrichmentJobQueue,
+  renameSessionUseCase: RenameSessionUseCase,
+  sessionRenameState: SessionRenameStateStore,
 ) {
-  const ignoredButtonTexts = new Set([
+  const ignoredButtonTexts = new Set<ButtonText>([
     buttons.back,
     buttons.clearSession,
     buttons.exportCsv,
@@ -36,13 +42,48 @@ export function registerTextMessageHandler(
   ]);
 
   bot.on(message('text'), async (ctx) => {
-    const text = ctx.message.text;
+    const text = ctx.message.text as ButtonText;
+    const userId = getUserId(ctx);
+    const pendingRename = sessionRenameState.get(userId);
+
+    if (
+      pendingRename &&
+      ctx.message.reply_to_message?.message_id === pendingRename.promptMessageId
+    ) {
+      const renameResult = await renameSessionUseCase.execute(
+        userId,
+        pendingRename.sessionId,
+        text,
+      );
+
+      if (renameResult.kind === 'emptyTitle') {
+        return ctx.reply(messages.rename.empty);
+      }
+
+      sessionRenameState.clear(userId);
+
+      if (renameResult.kind === 'notFound') {
+        return ctx.reply(messages.library.sessionMissing);
+      }
+
+      if (pendingRename.source === 'history') {
+        return ctx.reply(
+          messages.library.renamed(renameResult.title),
+          renderLibraryKeyboard(),
+        );
+      }
+
+      return replyWithSessionState({
+        ctx,
+        isActive: false,
+        message: messages.library.renamed(renameResult.title),
+      });
+    }
 
     if (ignoredButtonTexts.has(text)) {
       return;
     }
 
-    const userId = getUserId(ctx);
     const session = await sessions.getActiveSession(userId);
 
     if (!session) {

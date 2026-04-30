@@ -6,8 +6,9 @@ import type { EntryRepository } from '../../../entities/entry/api/entryRepositor
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
 import { buttons } from '../../../shared/i18n/buttons';
 import { messages } from '../../../shared/i18n/messages';
-import { getUserId } from '../lib/getUserId';
+import { resolveSessionTitle } from '../../../shared/utils/sessionTitle';
 import { getSessionStateFlags } from '../lib/getSessionStateFlags';
+import { getUserId } from '../lib/getUserId';
 import {
   buildLibraryHistoryInlineKeyboard,
   buildLibraryHistoryReply,
@@ -22,6 +23,7 @@ import {
   parseLibraryWordsCallbackData,
 } from '../lib/libraryWordsPagination';
 import { replyWithSessionState } from '../lib/replyWithSessionState';
+import type { SessionRenameStateStore } from '../lib/sessionRenameState';
 
 export function registerLibraryCommand(
   bot: Telegraf,
@@ -30,6 +32,7 @@ export function registerLibraryCommand(
   getLibraryStatisticsUseCase: GetLibraryStatisticsUseCase,
   getLibraryWordsUseCase: GetLibraryWordsUseCase,
   getSessionHistoryUseCase: GetSessionHistoryUseCase,
+  sessionRenameState: SessionRenameStateStore,
 ) {
   bot.hears(buttons.myLibrary, async (ctx) =>
     ctx.reply(messages.library.menu, renderLibraryKeyboard()),
@@ -156,5 +159,45 @@ export function registerLibraryCommand(
       buildLibraryHistoryReply(result.items, page),
       buildLibraryHistoryInlineKeyboard(result.items, page),
     );
+  });
+
+  bot.action(/^library_history_rename:.+:\d+$/, async (ctx) => {
+    await ctx.answerCbQuery();
+
+    const data = 'data' in ctx.callbackQuery ? ctx.callbackQuery.data : '';
+    const match = /^library_history_rename:(.+):(\d+)$/.exec(data);
+
+    if (!match) {
+      return;
+    }
+
+    const [, sessionId] = match;
+    const userId = getUserId(ctx);
+    const session = await sessions.findFinishedSessionById(userId, sessionId);
+
+    if (!session) {
+      return ctx.reply(
+        messages.library.sessionMissing,
+        renderLibraryKeyboard(),
+      );
+    }
+
+    const currentTitle = resolveSessionTitle(session);
+    const prompt = await ctx.reply(
+      messages.library.renamePrompt(currentTitle),
+      {
+        reply_markup: {
+          force_reply: true,
+          input_field_placeholder: currentTitle,
+          selective: true,
+        },
+      },
+    );
+
+    sessionRenameState.set(userId, {
+      promptMessageId: prompt.message_id,
+      sessionId,
+      source: 'history',
+    });
   });
 }

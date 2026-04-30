@@ -3,6 +3,7 @@ import type { SessionHistoryItem } from '../../../application/use-cases/GetSessi
 
 const HISTORY_PAGE_SIZE = 5;
 const HISTORY_CALLBACK_PREFIX = 'library_history';
+const HISTORY_RENAME_CALLBACK_PREFIX = 'library_history_rename';
 
 export const LIBRARY_HISTORY_NOOP_CALLBACK = 'library_history:noop';
 
@@ -26,7 +27,10 @@ export function buildLibraryHistoryReply(
   requestedPage: number,
 ): string {
   const page = getPageSlice(items, requestedPage);
-  const title = page.totalPages > 1 ? `Your history (${page.page + 1}/${page.totalPages})` : 'Your history';
+  const title =
+    page.totalPages > 1
+      ? `Your history (${page.page + 1}/${page.totalPages})`
+      : 'Your history';
 
   return [
     title,
@@ -47,13 +51,15 @@ export function buildLibraryHistoryInlineKeyboard(
   requestedPage: number,
 ) {
   const page = getPageSlice(items, requestedPage);
+  const rows = page.items.map((item) => [
+    Markup.button.callback(
+      `✏️ Rename ${item.title}`,
+      createLibraryHistoryRenameCallbackData(item.id, page.page),
+    ),
+  ]);
 
-  if (page.totalPages <= 1) {
-    return Markup.inlineKeyboard([]);
-  }
-
-  return Markup.inlineKeyboard([
-    [
+  if (page.totalPages > 1) {
+    rows.push([
       Markup.button.callback(
         '◀',
         `${HISTORY_CALLBACK_PREFIX}:${page.page - 1}`,
@@ -68,8 +74,17 @@ export function buildLibraryHistoryInlineKeyboard(
         `${HISTORY_CALLBACK_PREFIX}:${page.page + 1}`,
         page.page >= page.totalPages - 1,
       ),
-    ],
-  ]);
+    ]);
+  }
+
+  return Markup.inlineKeyboard(rows);
+}
+
+export function createLibraryHistoryRenameCallbackData(
+  sessionId: string,
+  page: number,
+) {
+  return `${HISTORY_RENAME_CALLBACK_PREFIX}:${sessionId}:${page}`;
 }
 
 function getPageSlice<T>(items: T[], requestedPage: number): PageSlice<T> {

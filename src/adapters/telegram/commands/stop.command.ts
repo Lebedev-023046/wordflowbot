@@ -4,18 +4,23 @@ import type { EntryRepository } from '../../../entities/entry/api/entryRepositor
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
 import { buttons } from '../../../shared/i18n/buttons';
 import { messages } from '../../../shared/i18n/messages';
+import { resolveSessionTitle } from '../../../shared/utils/sessionTitle';
 import { getUserId } from '../lib/getUserId';
 import { getSessionStateFlags } from '../lib/getSessionStateFlags';
 import { replyWithSessionState } from '../lib/replyWithSessionState';
+import type { SessionRenameStateStore } from '../lib/sessionRenameState';
 
 const STOP_SESSION_CONFIRM_CALLBACK = 'stop_session:confirm';
 const STOP_SESSION_CANCEL_CALLBACK = 'stop_session:cancel';
+const STOP_SESSION_RENAME_CALLBACK = 'stop_session:rename';
+const STOP_SESSION_SKIP_RENAME_CALLBACK = 'stop_session:skip_rename';
 
 export function registerStopCommand(
   bot: Telegraf,
   entries: EntryRepository,
   sessions: SessionRepository,
   stopSessionUseCase: StopSessionUseCase,
+  sessionRenameState: SessionRenameStateStore,
 ) {
   bot.hears(buttons.stopSession, async (ctx) => {
     const userId = getUserId(ctx);
@@ -62,11 +67,31 @@ export function registerStopCommand(
     }
 
     await ctx.deleteMessage();
-    return replyWithSessionState({
+    await replyWithSessionState({
       ctx,
       isActive: result.isActive,
       message: messages.session.stopped,
     });
+
+    if (!result.session) {
+      return;
+    }
+
+    return ctx.reply(
+      messages.session.stopRenameOffer,
+      Markup.inlineKeyboard([
+        [
+          Markup.button.callback(
+            buttons.nameSessionSource,
+            `${STOP_SESSION_RENAME_CALLBACK}:${result.session.id}`,
+          ),
+          Markup.button.callback(
+            buttons.skipRename,
+            `${STOP_SESSION_SKIP_RENAME_CALLBACK}:${result.session.id}`,
+          ),
+        ],
+      ]),
+    );
   });
 
   bot.action(STOP_SESSION_CANCEL_CALLBACK, async (ctx) => {
@@ -84,4 +109,52 @@ export function registerStopCommand(
       message: messages.session.stopCancelled,
     });
   });
+
+  bot.action(
+    new RegExp(`^${STOP_SESSION_RENAME_CALLBACK}:.+$`),
+    async (ctx) => {
+      await ctx.answerCbQuery();
+
+      const userId = getUserId(ctx);
+      const sessionId =
+        'data' in ctx.callbackQuery
+          ? ctx.callbackQuery.data.slice(
+              `${STOP_SESSION_RENAME_CALLBACK}:`.length,
+            )
+          : '';
+      const session = await sessions.findFinishedSessionById(userId, sessionId);
+
+      if (!session) {
+        return ctx.reply(messages.library.sessionMissing);
+      }
+
+      const currentTitle = resolveSessionTitle(session);
+      const prompt = await ctx.reply(
+        messages.library.renamePrompt(currentTitle),
+        {
+          reply_markup: {
+            force_reply: true,
+            input_field_placeholder: currentTitle,
+            selective: true,
+          },
+        },
+      );
+
+      sessionRenameState.set(userId, {
+        promptMessageId: prompt.message_id,
+        sessionId,
+        source: 'post_finish',
+      });
+
+      return ctx.deleteMessage();
+    },
+  );
+
+  bot.action(
+    new RegExp(`^${STOP_SESSION_SKIP_RENAME_CALLBACK}:.+$`),
+    async (ctx) => {
+      await ctx.answerCbQuery();
+      return ctx.deleteMessage();
+    },
+  );
 }

@@ -36,6 +36,7 @@ export function registerHandlers(bot: Telegraf, container: AppContainer) {
     container.useCases.getLibraryStatistics,
     container.useCases.getLibraryWords,
     container.useCases.getSessionHistory,
+    container.state.sessionRename,
   );
   registerRetryFailedCommand(
     bot,
@@ -50,6 +51,7 @@ export function registerHandlers(bot: Telegraf, container: AppContainer) {
     container.repositories.entries,
     container.repositories.sessions,
     container.useCases.stopSession,
+    container.state.sessionRename,
   );
   registerTextMessageHandler(
     bot,
@@ -57,5 +59,7 @@ export function registerHandlers(bot: Telegraf, container: AppContainer) {
     container.repositories.sessions,
     container.useCases.intakeEntries,
     container.queues.enrichment,
+    container.useCases.renameSession,
+    container.state.sessionRename,
   );
 }

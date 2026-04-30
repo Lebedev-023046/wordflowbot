@@ -13,9 +13,13 @@ export const buttons = {
   history: '🕘 History',
   myLibrary: '🗂 My library',
   myWords: '📖 My words',
+  nameSessionSource: '✏️ Name this session source',
   retryFailed: '🔄 Retry failed',
+  skipRename: 'Skip',
   showWords: '📚 Current session words',
   startSession: '🚀 Start session',
   statistics: '📊 Statistics',
   stopSession: '🏁 Finish current session',
 } as const;
+
+export type ButtonText = (typeof buttons)[keyof typeof buttons];

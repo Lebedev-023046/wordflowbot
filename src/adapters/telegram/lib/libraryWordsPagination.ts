@@ -45,9 +45,9 @@ export function parseLibraryWordsCallbackData(
   value: string,
 ): LibraryWordsPageState | null {
   if (
-    !new RegExp(`^${LIBRARY_WORDS_CALLBACK_PREFIX}:(all|A|B|C):\\d+:\\d+:\\d+$`).test(
-      value,
-    )
+    !new RegExp(
+      `^${LIBRARY_WORDS_CALLBACK_PREFIX}:(all|A|B|C):\\d+:\\d+:\\d+$`,
+    ).test(value)
   ) {
     return null;
   }
@@ -89,7 +89,9 @@ export function buildLibraryWordsInlineKeyboard(
 
   for (const section of sections) {
     if (section.page.totalPages > 1) {
-      rows.push(buildNavigationRow(section.label, state, section.page, section.key));
+      rows.push(
+        buildNavigationRow(section.label, state, section.page, section.key),
+      );
     }
   }
 
@@ -125,7 +127,8 @@ function getReadySections(
   items: LibraryWordItem[],
   state: LibraryWordsPageState,
 ): ReadySection[] {
-  const visibleUsages = state.view === SHOW_ALL_VIEW ? USAGE_ORDER : [state.view];
+  const visibleUsages =
+    state.view === SHOW_ALL_VIEW ? USAGE_ORDER : [state.view];
 
   return visibleUsages.map((usage) => {
     const sectionItems = items.filter((item) => item.usage === usage);
@@ -160,8 +163,9 @@ function buildReadySectionLines(section: ReadySection): string[] {
     return ['No words in this filter yet.'];
   }
 
-  return section.page.items.map((item, index) =>
-    `${section.page.page * WORDS_PAGE_SIZE + index + 1}. ${item.text} - ${item.translation}`,
+  return section.page.items.map(
+    (item, index) =>
+      `${section.page.page * WORDS_PAGE_SIZE + index + 1}. ${item.text} - ${item.translation}`,
   );
 }
 

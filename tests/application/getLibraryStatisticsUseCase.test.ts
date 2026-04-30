@@ -35,9 +35,10 @@ test('GetLibraryStatisticsUseCase counts only completed words from finished sess
     }),
   );
 
-  const result = await new GetLibraryStatisticsUseCase(sessions, entries).execute(
-    1,
-  );
+  const result = await new GetLibraryStatisticsUseCase(
+    sessions,
+    entries,
+  ).execute(1);
 
   assert.deepEqual(result, {
     activeSession: true,

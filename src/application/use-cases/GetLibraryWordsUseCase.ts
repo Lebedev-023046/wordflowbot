@@ -28,9 +28,8 @@ export class GetLibraryWordsUseCase {
   }
 
   async execute(userId: number): Promise<GetLibraryWordsResult> {
-    const finishedSessions = await this.sessionRepository.findFinishedSessions(
-      userId,
-    );
+    const finishedSessions =
+      await this.sessionRepository.findFinishedSessions(userId);
     const items = (
       await this.entryRepository.findCompletedBySessionIds(
         finishedSessions.map((session) => session.id),

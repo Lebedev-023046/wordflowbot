@@ -1,8 +1,12 @@
-import type { SessionRepository } from '../../entities/session/api/sessionRepository';
+import type {
+  Session,
+  SessionRepository,
+} from '../../entities/session/api/sessionRepository';
 
 export type StopSessionResult = {
   isActive: boolean;
   kind: 'noActive' | 'stopped';
+  session: Session | null;
 };
 
 export type StopSessionPreviewResult = {
@@ -38,14 +42,16 @@ export class StopSessionUseCase {
       return {
         kind: 'noActive',
         isActive: false,
+        session: null,
       };
     }
 
-    await this.sessionRepository.stopSession(userId);
+    const session = await this.sessionRepository.stopSession(userId);
 
     return {
       kind: 'stopped',
       isActive: false,
+      session,
     };
   }
 }

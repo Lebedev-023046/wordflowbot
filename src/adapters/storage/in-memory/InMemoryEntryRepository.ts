@@ -42,7 +42,9 @@ export class InMemoryEntryRepository implements EntryRepository {
     return entry ? cloneEntry(entry) : null;
   }
 
-  async findCompletedBySessionIds(sessionIds: string[]): Promise<CompletedEntry[]> {
+  async findCompletedBySessionIds(
+    sessionIds: string[],
+  ): Promise<CompletedEntry[]> {
     const sessionIdSet = new Set(sessionIds);
 
     return [...this.entriesById.values()]

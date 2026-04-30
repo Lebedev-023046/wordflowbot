@@ -3,6 +3,7 @@ import test from 'node:test';
 import { registerLibraryCommand } from '../../../src/adapters/telegram/commands/library.command';
 import { InMemoryEntryRepository } from '../../../src/adapters/storage/in-memory/InMemoryEntryRepository';
 import { InMemorySessionRepository } from '../../../src/adapters/storage/in-memory/InMemorySessionRepository';
+import { SessionRenameStateStore } from '../../../src/adapters/telegram/lib/sessionRenameState';
 import { EntryFactory } from '../../../src/application/services/EntryFactory';
 import { GetLibraryStatisticsUseCase } from '../../../src/application/use-cases/GetLibraryStatisticsUseCase';
 import { GetLibraryWordsUseCase } from '../../../src/application/use-cases/GetLibraryWordsUseCase';
@@ -33,15 +34,36 @@ class FakeContext {
     extra?: object;
     text: string;
   }> = [];
+  callbackQuery = { data: '' };
   from = { id: 1 };
+  answeredCallbackQueries: undefined[] = [];
 
   async reply(text: string, extra?: object) {
     this.replyCalls.push({ extra, text });
+    return { message_id: this.replyCalls.length };
+  }
+
+  async answerCbQuery() {
+    this.answeredCallbackQueries.push(undefined);
   }
 }
 
 function normalizeMarkup(value: object | undefined) {
   return value ? JSON.parse(JSON.stringify(value)) : value;
+}
+
+function getActionHandler(bot: FakeBot, trigger: string): Handler | undefined {
+  for (const [registeredTrigger, handler] of bot.actions.entries()) {
+    if (
+      typeof registeredTrigger === 'string'
+        ? registeredTrigger === trigger
+        : registeredTrigger.test(trigger)
+    ) {
+      return handler;
+    }
+  }
+
+  return undefined;
 }
 
 test('my library opens the compact library menu', async () => {
@@ -56,6 +78,7 @@ test('my library opens the compact library menu', async () => {
     new GetLibraryStatisticsUseCase(sessions, entries),
     new GetLibraryWordsUseCase(sessions, entries),
     new GetSessionHistoryUseCase(sessions, entries),
+    new SessionRenameStateStore(),
   );
 
   const handler = bot.hearsHandlers.get(buttons.myLibrary);
@@ -102,6 +125,7 @@ test('statistics shows library-only counts plus active-session status', async ()
     new GetLibraryStatisticsUseCase(sessions, entries),
     new GetLibraryWordsUseCase(sessions, entries),
     new GetSessionHistoryUseCase(sessions, entries),
+    new SessionRenameStateStore(),
   );
 
   const handler = bot.hearsHandlers.get(buttons.statistics);
@@ -155,6 +179,7 @@ test('my words shows completed words from finished sessions', async () => {
     new GetLibraryStatisticsUseCase(sessions, entries),
     new GetLibraryWordsUseCase(sessions, entries),
     new GetSessionHistoryUseCase(sessions, entries),
+    new SessionRenameStateStore(),
   );
 
   const handler = bot.hearsHandlers.get(buttons.myWords);
@@ -203,6 +228,7 @@ test('history shows finished sessions with default title, end date, and complete
     new GetLibraryStatisticsUseCase(sessions, entries),
     new GetLibraryWordsUseCase(sessions, entries),
     new GetSessionHistoryUseCase(sessions, entries),
+    new SessionRenameStateStore(),
   );
 
   const handler = bot.hearsHandlers.get(buttons.history);
@@ -215,4 +241,44 @@ test('history shows finished sessions with default title, end date, and complete
     ctx.replyCalls[0]?.text ?? '',
     /^Your history\n\n1\. session-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}\nEnded: \d{4}-\d{2}-\d{2} \d{2}:\d{2}\nCompleted words: 1$/,
   );
+});
+
+test('history rename action prompts with the current session title', async () => {
+  const bot = new FakeBot();
+  const entries = new InMemoryEntryRepository();
+  const sessions = new InMemorySessionRepository();
+  const session = await sessions.startSession(1);
+  await sessions.stopSession(1);
+  const renameState = new SessionRenameStateStore();
+
+  registerLibraryCommand(
+    bot as unknown as never,
+    entries,
+    sessions,
+    new GetLibraryStatisticsUseCase(sessions, entries),
+    new GetLibraryWordsUseCase(sessions, entries),
+    new GetSessionHistoryUseCase(sessions, entries),
+    renameState,
+  );
+
+  const handler = getActionHandler(
+    bot,
+    `library_history_rename:${session.id}:0`,
+  );
+  const ctx = new FakeContext();
+  ctx.callbackQuery = { data: `library_history_rename:${session.id}:0` };
+
+  assert.ok(handler);
+  await handler(ctx);
+
+  assert.equal(ctx.answeredCallbackQueries.length, 1);
+  assert.equal(
+    ctx.replyCalls[0]?.text.startsWith('Reply to this message'),
+    true,
+  );
+  assert.deepEqual(renameState.get(1), {
+    promptMessageId: 1,
+    sessionId: session.id,
+    source: 'history',
+  });
 });

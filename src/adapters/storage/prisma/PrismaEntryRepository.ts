@@ -36,7 +36,9 @@ export class PrismaEntryRepository implements EntryRepository {
     return entry !== null;
   }
 
-  async findCompletedBySessionIds(sessionIds: string[]): Promise<CompletedEntry[]> {
+  async findCompletedBySessionIds(
+    sessionIds: string[],
+  ): Promise<CompletedEntry[]> {
     if (sessionIds.length === 0) {
       return [];
     }

@@ -21,6 +21,14 @@ export class InMemorySessionRepository implements SessionRepository {
       .reverse();
   }
 
+  async findFinishedSessionById(userId: number, sessionId: string) {
+    return (
+      (this.sessionsByUserId.get(userId) ?? []).find(
+        (session) => session.id === sessionId && !session.isActive,
+      ) ?? null
+    );
+  }
+
   async getActiveSession(userId: number) {
     const sessions = this.sessionsByUserId.get(userId) ?? [];
 
@@ -29,6 +37,24 @@ export class InMemorySessionRepository implements SessionRepository {
 
   async hasActiveSession(userId: number) {
     return (await this.getActiveSession(userId)) !== null;
+  }
+
+  async renameSession(userId: number, sessionId: string, title: string) {
+    const sessions = this.sessionsByUserId.get(userId) ?? [];
+    const sessionIndex = sessions.findIndex(
+      (session) => session.id === sessionId && !session.isActive,
+    );
+
+    if (sessionIndex === -1) {
+      return null;
+    }
+
+    sessions[sessionIndex] = {
+      ...sessions[sessionIndex],
+      title,
+    };
+
+    return sessions[sessionIndex];
   }
 
   async startSession(userId: number) {
@@ -55,7 +81,7 @@ export class InMemorySessionRepository implements SessionRepository {
       .lastIndexOf(true);
 
     if (activeIndex === -1) {
-      return;
+      return null;
     }
 
     sessions[activeIndex] = {
@@ -63,5 +89,7 @@ export class InMemorySessionRepository implements SessionRepository {
       endedAt: new Date(),
       isActive: false,
     };
+
+    return sessions[activeIndex];
   }
 }
