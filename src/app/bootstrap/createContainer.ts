@@ -11,6 +11,7 @@ import { EntryFactory } from '../../application/services/EntryFactory';
 import { EntryParser } from '../../application/services/EntryParser';
 import { ClearSessionUseCase } from '../../application/use-cases/ClearSessionUseCase';
 import { ExportSessionCsvUseCase } from '../../application/use-cases/ExportSessionCsvUseCase';
+import { GetSessionHistoryUseCase } from '../../application/use-cases/GetSessionHistoryUseCase';
 import { GetLibraryStatisticsUseCase } from '../../application/use-cases/GetLibraryStatisticsUseCase';
 import { GetLibraryWordsUseCase } from '../../application/use-cases/GetLibraryWordsUseCase';
 import { GetSessionStatusUseCase } from '../../application/use-cases/GetSessionStatusUseCase';
@@ -88,6 +89,10 @@ export function createContainer() {
     sessionRepository,
     entryRepository,
   );
+  const getSessionHistoryUseCase = new GetSessionHistoryUseCase(
+    sessionRepository,
+    entryRepository,
+  );
   const getSessionWordsUseCase = new GetSessionWordsUseCase(
     sessionRepository,
     entryRepository,
@@ -128,6 +133,7 @@ export function createContainer() {
       exportSessionCsv: exportSessionCsvUseCase,
       getLibraryStatistics: getLibraryStatisticsUseCase,
       getLibraryWords: getLibraryWordsUseCase,
+      getSessionHistory: getSessionHistoryUseCase,
       getSessionStatus: getSessionStatusUseCase,
       getSessionWords: getSessionWordsUseCase,
       intakeEntries: intakeEntriesUseCase,

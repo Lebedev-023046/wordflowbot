@@ -2,6 +2,7 @@ import type { EntryRepository } from '../../entities/entry/api/entryRepository';
 import type { SessionRepository } from '../../entities/session/api/sessionRepository';
 import { isCompletedEntry } from '../../entities/entry/model/entryState';
 import type { EntryUsage } from '../../entities/entry/model/entry.types';
+import { resolveSessionTitle } from '../../shared/utils/sessionTitle';
 import { CsvExporter } from '../services/CsvExporter';
 
 export type ExportSessionCsvFilter = EntryUsage | 'all';
@@ -64,8 +65,18 @@ export class ExportSessionCsvUseCase {
 
     return {
       content: this.csvExporter.export(completedEntries),
-      fileName: `session-${session.id}.csv`,
+      fileName: `${sanitizeFileName(resolveSessionTitle(session))}.csv`,
       kind: 'ready',
     };
   }
+}
+
+function sanitizeFileName(value: string): string {
+  const normalized = value
+    .trim()
+    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, '-')
+    .replace(/\s+/g, ' ')
+    .replace(/-+/g, '-');
+
+  return normalized.length > 0 ? normalized : 'session';
 }

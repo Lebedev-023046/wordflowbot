@@ -6,6 +6,7 @@ import { InMemorySessionRepository } from '../../../src/adapters/storage/in-memo
 import { EntryFactory } from '../../../src/application/services/EntryFactory';
 import { GetLibraryStatisticsUseCase } from '../../../src/application/use-cases/GetLibraryStatisticsUseCase';
 import { GetLibraryWordsUseCase } from '../../../src/application/use-cases/GetLibraryWordsUseCase';
+import { GetSessionHistoryUseCase } from '../../../src/application/use-cases/GetSessionHistoryUseCase';
 import { completeEntry } from '../../../src/entities/entry/model/entryState';
 import { buttons } from '../../../src/shared/i18n/buttons';
 import { messages } from '../../../src/shared/i18n/messages';
@@ -54,6 +55,7 @@ test('my library opens the compact library menu', async () => {
     sessions,
     new GetLibraryStatisticsUseCase(sessions, entries),
     new GetLibraryWordsUseCase(sessions, entries),
+    new GetSessionHistoryUseCase(sessions, entries),
   );
 
   const handler = bot.hearsHandlers.get(buttons.myLibrary);
@@ -99,6 +101,7 @@ test('statistics shows library-only counts plus active-session status', async ()
     sessions,
     new GetLibraryStatisticsUseCase(sessions, entries),
     new GetLibraryWordsUseCase(sessions, entries),
+    new GetSessionHistoryUseCase(sessions, entries),
   );
 
   const handler = bot.hearsHandlers.get(buttons.statistics);
@@ -151,6 +154,7 @@ test('my words shows completed words from finished sessions', async () => {
     sessions,
     new GetLibraryStatisticsUseCase(sessions, entries),
     new GetLibraryWordsUseCase(sessions, entries),
+    new GetSessionHistoryUseCase(sessions, entries),
   );
 
   const handler = bot.hearsHandlers.get(buttons.myWords);
@@ -173,5 +177,42 @@ test('my words shows completed words from finished sessions', async () => {
       '🪶 Rarely used:',
       'No words in this filter yet.',
     ].join('\n'),
+  );
+});
+
+test('history shows finished sessions with default title, end date, and completed words count', async () => {
+  const bot = new FakeBot();
+  const entries = new InMemoryEntryRepository();
+  const sessions = new InMemorySessionRepository();
+  const entryFactory = new EntryFactory();
+
+  const finishedSession = await sessions.startSession(1);
+  await entries.save(
+    completeEntry(entryFactory.createPending(finishedSession.id, 'hassle'), {
+      examples: [],
+      translation: 'translation for hassle',
+      usage: 'A',
+    }),
+  );
+  await sessions.stopSession(1);
+
+  registerLibraryCommand(
+    bot as unknown as never,
+    entries,
+    sessions,
+    new GetLibraryStatisticsUseCase(sessions, entries),
+    new GetLibraryWordsUseCase(sessions, entries),
+    new GetSessionHistoryUseCase(sessions, entries),
+  );
+
+  const handler = bot.hearsHandlers.get(buttons.history);
+  const ctx = new FakeContext();
+
+  assert.ok(handler);
+  await handler(ctx);
+
+  assert.match(
+    ctx.replyCalls[0]?.text ?? '',
+    /^Your history\n\n1\. session-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}\nEnded: \d{4}-\d{2}-\d{2} \d{2}:\d{2}\nCompleted words: 1$/,
   );
 });

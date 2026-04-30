@@ -31,7 +31,7 @@ function formatLimitedLines<T>(
 
 export const messages = {
   library: {
-    historyPending: 'History is the next V3 step. It is not available yet.',
+    historyEmpty: 'Your history does not have any finished sessions yet.',
     menu: 'Your library',
     noWordsYet: 'Your library does not have any completed words yet.',
     statistics: ({

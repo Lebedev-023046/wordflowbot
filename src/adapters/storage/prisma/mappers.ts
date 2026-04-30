@@ -17,8 +17,11 @@ type PrismaEntryWithExamples = PrismaEntry & {
 
 export function mapSessionToDomain(session: PrismaSession): Session {
   return {
+    createdAt: session.createdAt,
+    endedAt: session.endedAt,
     id: session.id,
     isActive: session.endedAt === null,
+    title: null,
     userId: Number(session.userId),
   };
 }

@@ -1,7 +1,10 @@
 export interface Session {
+  createdAt: Date;
+  endedAt: Date | null;
   id: string;
   userId: number;
   isActive: boolean;
+  title: string | null;
 }
 
 export interface SessionRepository {

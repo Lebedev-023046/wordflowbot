@@ -33,7 +33,10 @@ export class InMemorySessionRepository implements SessionRepository {
 
   async startSession(userId: number) {
     const session: Session = {
+      createdAt: new Date(),
+      endedAt: null,
       id: crypto.randomUUID(),
+      title: null,
       userId,
       isActive: true,
     };
@@ -57,6 +60,7 @@ export class InMemorySessionRepository implements SessionRepository {
 
     sessions[activeIndex] = {
       ...sessions[activeIndex],
+      endedAt: new Date(),
       isActive: false,
     };
   }

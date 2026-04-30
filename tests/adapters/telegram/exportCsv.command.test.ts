@@ -215,7 +215,7 @@ test('export callback sends UTF-8 CSV with BOM for the selected filter', async (
 
       return {
         content: '"rumor";"translation for rumor"',
-        fileName: 'session-42.csv',
+        fileName: 'Product meeting.csv',
         kind: 'ready',
       };
     }),
@@ -229,7 +229,7 @@ test('export callback sends UTF-8 CSV with BOM for the selected filter', async (
 
   assert.equal(ctx.answeredCallbackQueries.length, 1);
   assert.equal(ctx.documentCalls.length, 1);
-  assert.equal(ctx.documentCalls[0]?.document.filename, 'session-42.csv');
+  assert.equal(ctx.documentCalls[0]?.document.filename, 'Product meeting.csv');
   assert.equal(
     ctx.documentCalls[0]?.document.source.toString('hex'),
     Buffer.from('\uFEFF"rumor";"translation for rumor"', 'utf8').toString(

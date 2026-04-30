@@ -80,7 +80,7 @@ test('exportSessionCsv returns csv for completed entries only', async () => {
     return;
   }
 
-  assert.equal(result.fileName, `session-${session.id}.csv`);
+  assert.match(result.fileName, /^session-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}\.csv$/);
   assert.equal(
     result.content,
     [
@@ -141,6 +141,47 @@ test('exportSessionCsv filters completed entries by usage', async () => {
     result.content,
     '"hilarious";"translation for hilarious";"Example with hilarious.";"Пример с hilarious."',
   );
+});
+
+test('exportSessionCsv uses the active session title as the csv file name when present', async () => {
+  const sessions = new InMemorySessionRepository();
+  const entries = new InMemoryEntryRepository();
+  const session = await sessions.startSession(1);
+  session.title = 'Product meeting / Q2';
+
+  const saved = await handleTextEntries({
+    entryRepository: entries,
+    sessionId: session.id,
+    text: 'rumor',
+  });
+
+  assert.equal(saved.kind, 'saved');
+
+  const entryEnrichmentClient: EntryEnrichmentClient = {
+    async enrich(text) {
+      return {
+        usage: 'B',
+        examples: [],
+        translation: `translation for ${text}`,
+      };
+    },
+  };
+
+  await processEntries({
+    entries: saved.entries,
+    entryEnrichmentClient,
+    entryRepository: entries,
+  });
+
+  const result = await exportSessionCsv(sessions, entries, 1);
+
+  assert.equal(result.kind, 'ready');
+
+  if (result.kind !== 'ready') {
+    return;
+  }
+
+  assert.equal(result.fileName, 'Product meeting - Q2.csv');
 });
 
 test('exportSessionCsv returns empty for a usage filter with no completed entries', async () => {
