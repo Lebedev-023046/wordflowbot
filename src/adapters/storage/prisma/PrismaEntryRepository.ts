@@ -1,6 +1,10 @@
 import type { PrismaClient } from '@prisma/client';
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
-import type { Entry } from '../../../entities/entry/model/entry.types';
+import { isCompletedEntry } from '../../../entities/entry/model/entryState';
+import type {
+  CompletedEntry,
+  Entry,
+} from '../../../entities/entry/model/entry.types';
 import { normalizeEntryText } from '../../../shared/utils/entryText';
 import { buildEntryPersistencePayload, mapEntryToDomain } from './mappers';
 
@@ -30,6 +34,40 @@ export class PrismaEntryRepository implements EntryRepository {
     });
 
     return entry !== null;
+  }
+
+  async findCompletedBySessionIds(sessionIds: string[]): Promise<CompletedEntry[]> {
+    if (sessionIds.length === 0) {
+      return [];
+    }
+
+    const entries = await this.prisma.entry.findMany({
+      include: {
+        examples: {
+          orderBy: {
+            sortOrder: 'asc',
+          },
+        },
+      },
+      orderBy: [
+        {
+          session: {
+            endedAt: 'desc',
+          },
+        },
+        {
+          createdAt: 'asc',
+        },
+      ],
+      where: {
+        sessionId: {
+          in: sessionIds,
+        },
+        status: 'completed',
+      },
+    });
+
+    return entries.map(mapEntryToDomain).filter(isCompletedEntry);
   }
 
   async findById(entryId: string): Promise<Entry | null> {

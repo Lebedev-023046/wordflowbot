@@ -161,7 +161,9 @@ test('export command uses empty-result session metadata to render the active key
       keyboard: [
         [buttons.showWords],
         [buttons.exportCsv],
-        [buttons.clearSession, buttons.stopSession, buttons.retryFailed],
+        [buttons.myLibrary],
+        [buttons.stopSession, buttons.retryFailed],
+        [buttons.clearSession],
       ],
       resize_keyboard: true,
     },

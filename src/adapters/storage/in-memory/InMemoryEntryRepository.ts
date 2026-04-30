@@ -1,5 +1,9 @@
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
-import type { Entry } from '../../../entities/entry/model/entry.types';
+import { isCompletedEntry } from '../../../entities/entry/model/entryState';
+import type {
+  CompletedEntry,
+  Entry,
+} from '../../../entities/entry/model/entry.types';
 import { normalizeEntryText } from '../../../shared/utils/entryText';
 
 export class InMemoryEntryRepository implements EntryRepository {
@@ -36,6 +40,15 @@ export class InMemoryEntryRepository implements EntryRepository {
   async findById(entryId: string) {
     const entry = this.entriesById.get(entryId);
     return entry ? cloneEntry(entry) : null;
+  }
+
+  async findCompletedBySessionIds(sessionIds: string[]): Promise<CompletedEntry[]> {
+    const sessionIdSet = new Set(sessionIds);
+
+    return [...this.entriesById.values()]
+      .filter((entry) => sessionIdSet.has(entry.sessionId))
+      .map((entry) => cloneEntry(entry))
+      .filter(isCompletedEntry);
   }
 
   async findBySessionId(sessionId: string) {

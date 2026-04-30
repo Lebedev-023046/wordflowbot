@@ -30,6 +30,38 @@ function formatLimitedLines<T>(
 }
 
 export const messages = {
+  library: {
+    historyPending: 'History is the next V3 step. It is not available yet.',
+    menu: 'Your library',
+    noWordsYet: 'Your library does not have any completed words yet.',
+    statistics: ({
+      activeSession,
+      finishedSessions,
+      totalWords,
+      usageA,
+      usageB,
+      usageC,
+    }: {
+      activeSession: boolean;
+      finishedSessions: number;
+      totalWords: number;
+      usageA: number;
+      usageB: number;
+      usageC: number;
+    }) =>
+      [
+        'Your statistics',
+        '',
+        `Words in your library: ${totalWords}`,
+        `Finished sessions: ${finishedSessions}`,
+        `Active session: ${activeSession ? 'yes' : 'no'}`,
+        '',
+        'By usage',
+        `🔥 Most useful: ${usageA}`,
+        `👌 Good to know: ${usageB}`,
+        `🪶 Rarely used: ${usageC}`,
+      ].join('\n'),
+  },
   session: {
     active:
       'You have an active session.\n\nSend one word or phrase per line.\nYou can also send a bullet list, a numbered list, or one line with items separated by semicolons.',

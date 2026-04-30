@@ -10,13 +10,14 @@ export function renderSessionKeyboard(
     ? [
         [buttons.showWords],
         [buttons.exportCsv],
+        [buttons.myLibrary],
         [
-          ...(hasEntries ? [buttons.clearSession] : []),
           buttons.stopSession,
           ...(hasFailedEntries ? [buttons.retryFailed] : []),
         ],
+        ...(hasEntries ? [[buttons.clearSession]] : []),
       ]
-    : [[buttons.startSession]];
+    : [[buttons.startSession], [buttons.myLibrary]];
 
   return Markup.keyboard(rows).resize();
 }

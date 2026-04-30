@@ -22,11 +22,16 @@ export function registerTextMessageHandler(
   enrichmentJobQueue: EnrichmentJobQueue,
 ) {
   const ignoredButtonTexts = new Set([
+    buttons.back,
     buttons.clearSession,
     buttons.exportCsv,
+    buttons.history,
+    buttons.myLibrary,
+    buttons.myWords,
     buttons.retryFailed,
     buttons.showWords,
     buttons.startSession,
+    buttons.statistics,
     buttons.stopSession,
   ]);
 

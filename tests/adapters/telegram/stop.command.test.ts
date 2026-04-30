@@ -125,7 +125,7 @@ test('finish session confirmation closes the session and switches to the idle ke
   assert.equal(ctx.replyCalls[0]?.text, messages.session.stopped);
   assert.deepEqual(normalizeMarkup(ctx.replyCalls[0]?.extra), {
     reply_markup: {
-      keyboard: [[buttons.startSession]],
+      keyboard: [[buttons.startSession], [buttons.myLibrary]],
       resize_keyboard: true,
     },
   });
@@ -167,7 +167,9 @@ test('finish session cancellation keeps the current active-session keyboard stat
       keyboard: [
         [buttons.showWords],
         [buttons.exportCsv],
-        [buttons.clearSession, buttons.stopSession, buttons.retryFailed],
+        [buttons.myLibrary],
+        [buttons.stopSession, buttons.retryFailed],
+        [buttons.clearSession],
       ],
       resize_keyboard: true,
     },

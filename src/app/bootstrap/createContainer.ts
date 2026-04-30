@@ -11,6 +11,8 @@ import { EntryFactory } from '../../application/services/EntryFactory';
 import { EntryParser } from '../../application/services/EntryParser';
 import { ClearSessionUseCase } from '../../application/use-cases/ClearSessionUseCase';
 import { ExportSessionCsvUseCase } from '../../application/use-cases/ExportSessionCsvUseCase';
+import { GetLibraryStatisticsUseCase } from '../../application/use-cases/GetLibraryStatisticsUseCase';
+import { GetLibraryWordsUseCase } from '../../application/use-cases/GetLibraryWordsUseCase';
 import { GetSessionStatusUseCase } from '../../application/use-cases/GetSessionStatusUseCase';
 import { GetSessionWordsUseCase } from '../../application/use-cases/GetSessionWordsUseCase';
 import { IntakeEntriesUseCase } from '../../application/use-cases/IntakeEntriesUseCase';
@@ -78,6 +80,14 @@ export function createContainer() {
     sessionRepository,
     entryRepository,
   );
+  const getLibraryStatisticsUseCase = new GetLibraryStatisticsUseCase(
+    sessionRepository,
+    entryRepository,
+  );
+  const getLibraryWordsUseCase = new GetLibraryWordsUseCase(
+    sessionRepository,
+    entryRepository,
+  );
   const getSessionWordsUseCase = new GetSessionWordsUseCase(
     sessionRepository,
     entryRepository,
@@ -116,6 +126,8 @@ export function createContainer() {
     useCases: {
       clearSession: clearSessionUseCase,
       exportSessionCsv: exportSessionCsvUseCase,
+      getLibraryStatistics: getLibraryStatisticsUseCase,
+      getLibraryWords: getLibraryWordsUseCase,
       getSessionStatus: getSessionStatusUseCase,
       getSessionWords: getSessionWordsUseCase,
       intakeEntries: intakeEntriesUseCase,

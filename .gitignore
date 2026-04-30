@@ -26,4 +26,5 @@ dist-ssr
 docs
 .env
 
-V2_IMPLEMENTATION_PLAN.md
+V2_PLAN.md
+V3_PLAN.md

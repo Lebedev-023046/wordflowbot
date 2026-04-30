@@ -21,6 +21,22 @@ export class PrismaSessionRepository implements SessionRepository {
     });
   }
 
+  async findFinishedSessions(userId: number): Promise<Session[]> {
+    const sessions = await this.prisma.session.findMany({
+      orderBy: {
+        endedAt: 'desc',
+      },
+      where: {
+        endedAt: {
+          not: null,
+        },
+        userId: BigInt(userId),
+      },
+    });
+
+    return sessions.map(mapSessionToDomain);
+  }
+
   async getActiveSession(userId: number): Promise<Session | null> {
     const session = await this.prisma.session.findFirst({
       orderBy: {

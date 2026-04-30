@@ -4,20 +4,27 @@ import type {
 } from '../../../entities/session/api/sessionRepository';
 
 export class InMemorySessionRepository implements SessionRepository {
-  private sessions = new Map<number, Session>();
+  private readonly sessionsByUserId = new Map<number, Session[]>();
 
   async clearSession(userId: number) {
-    this.sessions.delete(userId);
+    const sessions = this.sessionsByUserId.get(userId) ?? [];
+
+    this.sessionsByUserId.set(
+      userId,
+      sessions.filter((session) => !session.isActive),
+    );
+  }
+
+  async findFinishedSessions(userId: number) {
+    return [...(this.sessionsByUserId.get(userId) ?? [])]
+      .filter((session) => !session.isActive)
+      .reverse();
   }
 
   async getActiveSession(userId: number) {
-    const session = this.sessions.get(userId);
+    const sessions = this.sessionsByUserId.get(userId) ?? [];
 
-    if (!session || !session.isActive) {
-      return null;
-    }
-
-    return session;
+    return [...sessions].reverse().find((session) => session.isActive) ?? null;
   }
 
   async hasActiveSession(userId: number) {
@@ -31,21 +38,26 @@ export class InMemorySessionRepository implements SessionRepository {
       isActive: true,
     };
 
-    this.sessions.set(userId, session);
+    const sessions = this.sessionsByUserId.get(userId) ?? [];
+    sessions.push(session);
+    this.sessionsByUserId.set(userId, sessions);
 
     return session;
   }
 
   async stopSession(userId: number) {
-    const session = this.sessions.get(userId);
+    const sessions = this.sessionsByUserId.get(userId) ?? [];
+    const activeIndex = [...sessions]
+      .map((session) => session.isActive)
+      .lastIndexOf(true);
 
-    if (!session) {
+    if (activeIndex === -1) {
       return;
     }
 
-    this.sessions.set(userId, {
-      ...session,
+    sessions[activeIndex] = {
+      ...sessions[activeIndex],
       isActive: false,
-    });
+    };
   }
 }
