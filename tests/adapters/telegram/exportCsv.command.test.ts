@@ -7,7 +7,7 @@ import type {
   ExportSessionCsvFilter,
   ExportSessionCsvResult,
   ExportSessionCsvUseCase,
-} from '../../../src/application/use-cases/ExportSessionCsvUseCase';
+} from '../../../src/application/export/commands/ExportSessionCsvUseCase';
 import { buttons } from '../../../src/shared/i18n/buttons';
 import { messages } from '../../../src/shared/i18n/messages';
 

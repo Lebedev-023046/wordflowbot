@@ -3,7 +3,7 @@ import { Markup } from 'telegraf';
 import type {
   ExportSessionCsvFilter,
   ExportSessionCsvUseCase,
-} from '../../../application/use-cases/ExportSessionCsvUseCase';
+} from '../../../application/export/commands/ExportSessionCsvUseCase';
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
 import { buttons } from '../../../shared/i18n/buttons';

@@ -1,15 +1,15 @@
 import type { EnrichmentJobQueue } from '../../application/ports/EnrichmentJobQueue';
-import type { ProcessEntriesUseCase } from '../../application/use-cases/ProcessEntriesUseCase';
+import type { EnrichEntriesUseCase } from '../../application/entries/commands/EnrichEntriesUseCase';
 import type { Entry } from '../../entities/entry/model/entry.types';
 
 export class ImmediateEnrichmentJobQueue implements EnrichmentJobQueue {
-  private readonly processEntriesUseCase: ProcessEntriesUseCase;
+  private readonly enrichEntriesUseCase: EnrichEntriesUseCase;
 
-  constructor(processEntriesUseCase: ProcessEntriesUseCase) {
-    this.processEntriesUseCase = processEntriesUseCase;
+  constructor(enrichEntriesUseCase: EnrichEntriesUseCase) {
+    this.enrichEntriesUseCase = enrichEntriesUseCase;
   }
 
   enqueue(entries: Entry[]) {
-    return this.processEntriesUseCase.execute(entries);
+    return this.enrichEntriesUseCase.execute(entries);
   }
 }

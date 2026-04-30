@@ -1,5 +1,5 @@
 import { Markup } from 'telegraf';
-import type { SessionHistoryItem } from '../../../application/use-cases/GetSessionHistoryUseCase';
+import type { SessionHistoryItem } from '../../../application/library/queries/GetLibraryHistoryUseCase';
 
 const HISTORY_PAGE_SIZE = 5;
 const HISTORY_CALLBACK_PREFIX = 'library_history';

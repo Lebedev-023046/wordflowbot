@@ -3,7 +3,7 @@ import { registerClearSessionCommand } from '../../adapters/telegram/commands/cl
 import { registerExportCsvCommand } from '../../adapters/telegram/commands/exportCsv.command';
 import { registerLibraryCommand } from '../../adapters/telegram/commands/library.command';
 import { registerRetryFailedCommand } from '../../adapters/telegram/commands/retryFailed.command';
-import { registerSessionWordsCommand } from '../../adapters/telegram/commands/sessionWords.command';
+import { registerCurrentSessionWordsCommand } from '../../adapters/telegram/commands/currentSessionWords.command';
 import { registerStartCommand } from '../../adapters/telegram/commands/start.command';
 import { registerStatusCommand } from '../../adapters/telegram/commands/status.command';
 import { registerStopCommand } from '../../adapters/telegram/commands/stop.command';
@@ -35,7 +35,7 @@ export function registerHandlers(bot: Telegraf, container: AppContainer) {
     container.repositories.sessions,
     container.useCases.getLibraryStatistics,
     container.useCases.getLibraryWords,
-    container.useCases.getSessionHistory,
+    container.useCases.getLibraryHistory,
     container.state.sessionRename,
   );
   registerRetryFailedCommand(
@@ -44,7 +44,7 @@ export function registerHandlers(bot: Telegraf, container: AppContainer) {
     container.repositories.sessions,
     container.useCases.retryFailedEntries,
   );
-  registerSessionWordsCommand(bot, container.useCases.getSessionWords);
+  registerCurrentSessionWordsCommand(bot, container.useCases.getSessionWords);
   registerStatusCommand(bot, container.useCases.getSessionStatus);
   registerStopCommand(
     bot,

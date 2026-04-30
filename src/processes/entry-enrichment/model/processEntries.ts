@@ -1,4 +1,4 @@
-import { ProcessEntriesUseCase } from '../../../application/use-cases/ProcessEntriesUseCase';
+import { EnrichEntriesUseCase } from '../../../application/entries/commands/EnrichEntriesUseCase';
 import type {
   ProcessEntriesParams,
   ProcessEntriesResult,
@@ -9,7 +9,7 @@ export async function processEntries({
   entryEnrichmentClient,
   entryRepository,
 }: ProcessEntriesParams): Promise<ProcessEntriesResult> {
-  return new ProcessEntriesUseCase(
+  return new EnrichEntriesUseCase(
     entryEnrichmentClient,
     entryRepository,
     {

@@ -1,12 +1,11 @@
 import type { Context, Telegraf } from 'telegraf';
-import type { GetLibraryStatisticsUseCase } from '../../../application/use-cases/GetLibraryStatisticsUseCase';
-import type { GetLibraryWordsUseCase } from '../../../application/use-cases/GetLibraryWordsUseCase';
-import type { GetSessionHistoryUseCase } from '../../../application/use-cases/GetSessionHistoryUseCase';
+import type { GetLibraryHistoryUseCase } from '../../../application/library/queries/GetLibraryHistoryUseCase';
+import type { GetLibraryStatisticsUseCase } from '../../../application/library/queries/GetLibraryStatisticsUseCase';
+import type { GetLibraryWordsUseCase } from '../../../application/library/queries/GetLibraryWordsUseCase';
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
 import { buttons } from '../../../shared/i18n/buttons';
 import { messages } from '../../../shared/i18n/messages';
-import { resolveSessionTitle } from '../../../shared/utils/sessionTitle';
 import { getSessionStateFlags } from '../lib/getSessionStateFlags';
 import { getUserId } from '../lib/getUserId';
 import {
@@ -22,8 +21,9 @@ import {
   LIBRARY_WORDS_NOOP_CALLBACK,
   parseLibraryWordsCallbackData,
 } from '../lib/libraryWordsPagination';
+import type { PendingSessionRenameStore } from '../lib/pendingSessionRenameState';
 import { replyWithSessionState } from '../lib/replyWithSessionState';
-import type { SessionRenameStateStore } from '../lib/sessionRenameState';
+import { promptSessionRename } from '../lib/sessionRenamePrompt';
 
 export function registerLibraryCommand(
   bot: Telegraf,
@@ -31,8 +31,8 @@ export function registerLibraryCommand(
   sessions: SessionRepository,
   getLibraryStatisticsUseCase: GetLibraryStatisticsUseCase,
   getLibraryWordsUseCase: GetLibraryWordsUseCase,
-  getSessionHistoryUseCase: GetSessionHistoryUseCase,
-  sessionRenameState: SessionRenameStateStore,
+  getLibraryHistoryUseCase: GetLibraryHistoryUseCase,
+  pendingSessionRenameState: PendingSessionRenameStore,
 ) {
   bot.hears(buttons.myLibrary, async (ctx) =>
     ctx.reply(messages.library.menu, renderLibraryKeyboard()),
@@ -87,7 +87,7 @@ export function registerLibraryCommand(
   bot.hears(buttons.myWords, handleMyWords);
 
   const handleHistory = async (ctx: Context) => {
-    const result = await getSessionHistoryUseCase.execute(getUserId(ctx));
+    const result = await getLibraryHistoryUseCase.execute(getUserId(ctx));
 
     if (result.kind === 'empty') {
       return ctx.reply(messages.library.historyEmpty, renderLibraryKeyboard());
@@ -145,7 +145,7 @@ export function registerLibraryCommand(
       return;
     }
 
-    const result = await getSessionHistoryUseCase.execute(getUserId(ctx));
+    const result = await getLibraryHistoryUseCase.execute(getUserId(ctx));
 
     if (result.kind === 'empty') {
       return ctx.editMessageText(messages.library.historyEmpty, {
@@ -172,31 +172,11 @@ export function registerLibraryCommand(
     }
 
     const [, sessionId] = match;
-    const userId = getUserId(ctx);
-    const session = await sessions.findFinishedSessionById(userId, sessionId);
-
-    if (!session) {
-      return ctx.reply(
-        messages.library.sessionMissing,
-        renderLibraryKeyboard(),
-      );
-    }
-
-    const currentTitle = resolveSessionTitle(session);
-    const prompt = await ctx.reply(
-      messages.library.renamePrompt(currentTitle),
-      {
-        reply_markup: {
-          force_reply: true,
-          input_field_placeholder: currentTitle,
-          selective: true,
-        },
-      },
-    );
-
-    sessionRenameState.set(userId, {
-      promptMessageId: prompt.message_id,
+    await promptSessionRename({
+      ctx,
       sessionId,
+      pendingSessionRenameState,
+      sessions,
       source: 'history',
     });
   });

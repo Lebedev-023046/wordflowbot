@@ -6,23 +6,23 @@ import { PrismaEntryRepository } from '../../adapters/storage/prisma/PrismaEntry
 import { PrismaEnrichmentCacheRepository } from '../../adapters/storage/prisma/PrismaEnrichmentCacheRepository';
 import { createPrismaClient } from '../../adapters/storage/prisma/createPrismaClient';
 import { PrismaSessionRepository } from '../../adapters/storage/prisma/PrismaSessionRepository';
+import { PendingSessionRenameStore } from '../../adapters/telegram/lib/pendingSessionRenameState';
+import { AddEntriesFromTextUseCase } from '../../application/entries/commands/AddEntriesFromTextUseCase';
+import { EnrichEntriesUseCase } from '../../application/entries/commands/EnrichEntriesUseCase';
+import { RetryFailedEntriesUseCase } from '../../application/entries/commands/RetryFailedEntriesUseCase';
+import { ExportSessionCsvUseCase } from '../../application/export/commands/ExportSessionCsvUseCase';
+import { GetLibraryHistoryUseCase } from '../../application/library/queries/GetLibraryHistoryUseCase';
+import { GetLibraryStatisticsUseCase } from '../../application/library/queries/GetLibraryStatisticsUseCase';
+import { GetLibraryWordsUseCase } from '../../application/library/queries/GetLibraryWordsUseCase';
 import { CsvExporter } from '../../application/services/CsvExporter';
 import { EntryFactory } from '../../application/services/EntryFactory';
 import { EntryParser } from '../../application/services/EntryParser';
-import { ClearSessionUseCase } from '../../application/use-cases/ClearSessionUseCase';
-import { ExportSessionCsvUseCase } from '../../application/use-cases/ExportSessionCsvUseCase';
-import { GetSessionHistoryUseCase } from '../../application/use-cases/GetSessionHistoryUseCase';
-import { GetLibraryStatisticsUseCase } from '../../application/use-cases/GetLibraryStatisticsUseCase';
-import { GetLibraryWordsUseCase } from '../../application/use-cases/GetLibraryWordsUseCase';
-import { GetSessionStatusUseCase } from '../../application/use-cases/GetSessionStatusUseCase';
-import { GetSessionWordsUseCase } from '../../application/use-cases/GetSessionWordsUseCase';
-import { IntakeEntriesUseCase } from '../../application/use-cases/IntakeEntriesUseCase';
-import { ProcessEntriesUseCase } from '../../application/use-cases/ProcessEntriesUseCase';
-import { RetryFailedEntriesUseCase } from '../../application/use-cases/RetryFailedEntriesUseCase';
-import { RenameSessionUseCase } from '../../application/use-cases/RenameSessionUseCase';
-import { StartSessionUseCase } from '../../application/use-cases/StartSessionUseCase';
-import { StopSessionUseCase } from '../../application/use-cases/StopSessionUseCase';
-import { SessionRenameStateStore } from '../../adapters/telegram/lib/sessionRenameState';
+import { ClearSessionUseCase } from '../../application/session/commands/ClearSessionUseCase';
+import { RenameSessionUseCase } from '../../application/session/commands/RenameSessionUseCase';
+import { StartSessionUseCase } from '../../application/session/commands/StartSessionUseCase';
+import { StopSessionUseCase } from '../../application/session/commands/StopSessionUseCase';
+import { GetSessionStatusUseCase } from '../../application/session/queries/GetSessionStatusUseCase';
+import { GetCurrentSessionWordsUseCase } from '../../application/session/queries/GetCurrentSessionWordsUseCase';
 import { createLogger } from '../../shared/logging/logger';
 import { env } from '../config/env';
 
@@ -44,7 +44,7 @@ export function createContainer() {
     scope: 'PrismaEnrichmentCacheRepository',
   });
   const processEntriesLogger = createLogger({
-    scope: 'ProcessEntriesUseCase',
+    scope: 'EnrichEntriesUseCase',
   });
 
   const sessionRepository = new PrismaSessionRepository(prisma);
@@ -91,11 +91,11 @@ export function createContainer() {
     sessionRepository,
     entryRepository,
   );
-  const getSessionHistoryUseCase = new GetSessionHistoryUseCase(
+  const getLibraryHistoryUseCase = new GetLibraryHistoryUseCase(
     sessionRepository,
     entryRepository,
   );
-  const getSessionWordsUseCase = new GetSessionWordsUseCase(
+  const getCurrentSessionWordsUseCase = new GetCurrentSessionWordsUseCase(
     sessionRepository,
     entryRepository,
   );
@@ -104,19 +104,19 @@ export function createContainer() {
     entryRepository,
     csvExporter,
   );
-  const intakeEntriesUseCase = new IntakeEntriesUseCase(
+  const addEntriesFromTextUseCase = new AddEntriesFromTextUseCase(
     entryRepository,
     entryParser,
     entryFactory,
   );
-  const processEntriesUseCase = new ProcessEntriesUseCase(
+  const enrichEntriesUseCase = new EnrichEntriesUseCase(
     entryEnrichmentClient,
     entryRepository,
     processEntriesLogger,
     env.enrichmentConcurrency,
   );
   const enrichmentJobQueue = new ImmediateEnrichmentJobQueue(
-    processEntriesUseCase,
+    enrichEntriesUseCase,
   );
   const retryFailedEntriesUseCase = new RetryFailedEntriesUseCase(
     sessionRepository,
@@ -124,7 +124,7 @@ export function createContainer() {
     enrichmentJobQueue,
   );
   const renameSessionUseCase = new RenameSessionUseCase(sessionRepository);
-  const sessionRenameState = new SessionRenameStateStore();
+  const pendingSessionRenameState = new PendingSessionRenameStore();
 
   return {
     prisma,
@@ -137,11 +137,11 @@ export function createContainer() {
       exportSessionCsv: exportSessionCsvUseCase,
       getLibraryStatistics: getLibraryStatisticsUseCase,
       getLibraryWords: getLibraryWordsUseCase,
-      getSessionHistory: getSessionHistoryUseCase,
+      getLibraryHistory: getLibraryHistoryUseCase,
       getSessionStatus: getSessionStatusUseCase,
-      getSessionWords: getSessionWordsUseCase,
-      intakeEntries: intakeEntriesUseCase,
-      processEntries: processEntriesUseCase,
+      getSessionWords: getCurrentSessionWordsUseCase,
+      intakeEntries: addEntriesFromTextUseCase,
+      processEntries: enrichEntriesUseCase,
       renameSession: renameSessionUseCase,
       retryFailedEntries: retryFailedEntriesUseCase,
       startSession: startSessionUseCase,
@@ -151,7 +151,7 @@ export function createContainer() {
       enrichment: enrichmentJobQueue,
     },
     state: {
-      sessionRename: sessionRenameState,
+      sessionRename: pendingSessionRenameState,
     },
   };
 }

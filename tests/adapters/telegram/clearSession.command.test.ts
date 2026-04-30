@@ -4,7 +4,7 @@ import { registerClearSessionCommand } from '../../../src/adapters/telegram/comm
 import { InMemoryEntryRepository } from '../../../src/adapters/storage/in-memory/InMemoryEntryRepository';
 import { InMemorySessionRepository } from '../../../src/adapters/storage/in-memory/InMemorySessionRepository';
 import { EntryFactory } from '../../../src/application/services/EntryFactory';
-import { ClearSessionUseCase } from '../../../src/application/use-cases/ClearSessionUseCase';
+import { ClearSessionUseCase } from '../../../src/application/session/commands/ClearSessionUseCase';
 import { buttons } from '../../../src/shared/i18n/buttons';
 import { messages } from '../../../src/shared/i18n/messages';
 

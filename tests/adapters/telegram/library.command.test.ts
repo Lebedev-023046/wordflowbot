@@ -3,11 +3,11 @@ import test from 'node:test';
 import { registerLibraryCommand } from '../../../src/adapters/telegram/commands/library.command';
 import { InMemoryEntryRepository } from '../../../src/adapters/storage/in-memory/InMemoryEntryRepository';
 import { InMemorySessionRepository } from '../../../src/adapters/storage/in-memory/InMemorySessionRepository';
-import { SessionRenameStateStore } from '../../../src/adapters/telegram/lib/sessionRenameState';
+import { PendingSessionRenameStore } from '../../../src/adapters/telegram/lib/pendingSessionRenameState';
 import { EntryFactory } from '../../../src/application/services/EntryFactory';
-import { GetLibraryStatisticsUseCase } from '../../../src/application/use-cases/GetLibraryStatisticsUseCase';
-import { GetLibraryWordsUseCase } from '../../../src/application/use-cases/GetLibraryWordsUseCase';
-import { GetSessionHistoryUseCase } from '../../../src/application/use-cases/GetSessionHistoryUseCase';
+import { GetLibraryStatisticsUseCase } from '../../../src/application/library/queries/GetLibraryStatisticsUseCase';
+import { GetLibraryWordsUseCase } from '../../../src/application/library/queries/GetLibraryWordsUseCase';
+import { GetLibraryHistoryUseCase } from '../../../src/application/library/queries/GetLibraryHistoryUseCase';
 import { completeEntry } from '../../../src/entities/entry/model/entryState';
 import { buttons } from '../../../src/shared/i18n/buttons';
 import { messages } from '../../../src/shared/i18n/messages';
@@ -77,8 +77,8 @@ test('my library opens the compact library menu', async () => {
     sessions,
     new GetLibraryStatisticsUseCase(sessions, entries),
     new GetLibraryWordsUseCase(sessions, entries),
-    new GetSessionHistoryUseCase(sessions, entries),
-    new SessionRenameStateStore(),
+    new GetLibraryHistoryUseCase(sessions, entries),
+    new PendingSessionRenameStore(),
   );
 
   const handler = bot.hearsHandlers.get(buttons.myLibrary);
@@ -124,8 +124,8 @@ test('statistics shows library-only counts plus active-session status', async ()
     sessions,
     new GetLibraryStatisticsUseCase(sessions, entries),
     new GetLibraryWordsUseCase(sessions, entries),
-    new GetSessionHistoryUseCase(sessions, entries),
-    new SessionRenameStateStore(),
+    new GetLibraryHistoryUseCase(sessions, entries),
+    new PendingSessionRenameStore(),
   );
 
   const handler = bot.hearsHandlers.get(buttons.statistics);
@@ -178,8 +178,8 @@ test('my words shows completed words from finished sessions', async () => {
     sessions,
     new GetLibraryStatisticsUseCase(sessions, entries),
     new GetLibraryWordsUseCase(sessions, entries),
-    new GetSessionHistoryUseCase(sessions, entries),
-    new SessionRenameStateStore(),
+    new GetLibraryHistoryUseCase(sessions, entries),
+    new PendingSessionRenameStore(),
   );
 
   const handler = bot.hearsHandlers.get(buttons.myWords);
@@ -227,8 +227,8 @@ test('history shows finished sessions with default title, end date, and complete
     sessions,
     new GetLibraryStatisticsUseCase(sessions, entries),
     new GetLibraryWordsUseCase(sessions, entries),
-    new GetSessionHistoryUseCase(sessions, entries),
-    new SessionRenameStateStore(),
+    new GetLibraryHistoryUseCase(sessions, entries),
+    new PendingSessionRenameStore(),
   );
 
   const handler = bot.hearsHandlers.get(buttons.history);
@@ -249,7 +249,7 @@ test('history rename action prompts with the current session title', async () =>
   const sessions = new InMemorySessionRepository();
   const session = await sessions.startSession(1);
   await sessions.stopSession(1);
-  const renameState = new SessionRenameStateStore();
+  const renameState = new PendingSessionRenameStore();
 
   registerLibraryCommand(
     bot as unknown as never,
@@ -257,7 +257,7 @@ test('history rename action prompts with the current session title', async () =>
     sessions,
     new GetLibraryStatisticsUseCase(sessions, entries),
     new GetLibraryWordsUseCase(sessions, entries),
-    new GetSessionHistoryUseCase(sessions, entries),
+    new GetLibraryHistoryUseCase(sessions, entries),
     renameState,
   );
 

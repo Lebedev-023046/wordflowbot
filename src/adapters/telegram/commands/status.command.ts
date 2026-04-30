@@ -1,5 +1,5 @@
 import type { Telegraf } from 'telegraf';
-import type { GetSessionStatusUseCase } from '../../../application/use-cases/GetSessionStatusUseCase';
+import type { GetSessionStatusUseCase } from '../../../application/session/queries/GetSessionStatusUseCase';
 import { messages } from '../../../shared/i18n/messages';
 import { getUserId } from '../lib/getUserId';
 import { replyWithSessionState } from '../lib/replyWithSessionState';

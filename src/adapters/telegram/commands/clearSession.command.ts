@@ -1,5 +1,5 @@
 import { Markup, type Telegraf } from 'telegraf';
-import type { ClearSessionUseCase } from '../../../application/use-cases/ClearSessionUseCase';
+import type { ClearSessionUseCase } from '../../../application/session/commands/ClearSessionUseCase';
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
 import { buttons } from '../../../shared/i18n/buttons';

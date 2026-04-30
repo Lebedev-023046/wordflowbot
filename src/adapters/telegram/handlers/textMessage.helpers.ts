@@ -1,8 +1,8 @@
-import type { HandleTextEntriesResult } from '../../../features/intake-entries/model/handleTextEntries';
+import type { AddEntriesFromTextResult } from '../../../application/entries/commands/AddEntriesFromTextUseCase';
 import type { ProcessEntriesResult } from '../../../processes/entry-enrichment/model/process-entry.types';
 import { messages } from '../../../shared/i18n/messages';
 
-export function getInitialReplyText(result: HandleTextEntriesResult): string {
+export function getInitialReplyText(result: AddEntriesFromTextResult): string {
   switch (result.kind) {
     case 'empty':
       return messages.entries.empty;

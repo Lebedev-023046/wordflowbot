@@ -3,9 +3,9 @@ import test from 'node:test';
 import { registerTextMessageHandler } from '../../../src/adapters/telegram/handlers/textMessage.handler';
 import { InMemoryEntryRepository } from '../../../src/adapters/storage/in-memory/InMemoryEntryRepository';
 import { InMemorySessionRepository } from '../../../src/adapters/storage/in-memory/InMemorySessionRepository';
-import { SessionRenameStateStore } from '../../../src/adapters/telegram/lib/sessionRenameState';
+import { PendingSessionRenameStore } from '../../../src/adapters/telegram/lib/pendingSessionRenameState';
 import type { EnrichmentJobQueue } from '../../../src/application/ports/EnrichmentJobQueue';
-import { RenameSessionUseCase } from '../../../src/application/use-cases/RenameSessionUseCase';
+import { RenameSessionUseCase } from '../../../src/application/session/commands/RenameSessionUseCase';
 
 type TextHandler = (ctx: FakeContext) => Promise<unknown>;
 
@@ -54,7 +54,7 @@ test('text message handler applies a pending session rename reply instead of int
   const bot = new FakeBot();
   const entries = new InMemoryEntryRepository();
   const sessions = new InMemorySessionRepository();
-  const renameState = new SessionRenameStateStore();
+  const renameState = new PendingSessionRenameStore();
   const session = await sessions.startSession(1);
   await sessions.stopSession(1);
 

@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { InMemoryEntryRepository } from '../../../src/adapters/storage/in-memory/InMemoryEntryRepository';
+import { AddEntriesFromTextUseCase } from '../../../src/application/entries/commands/AddEntriesFromTextUseCase';
+import { EntryFactory } from '../../../src/application/services/EntryFactory';
+import { EntryParser } from '../../../src/application/services/EntryParser';
 import type { EntryEnrichmentClient } from '../../../src/entities/entry/api/entryEnrichmentClient';
-import { handleTextEntries } from '../../../src/features/intake-entries/model/handleTextEntries';
 import { processEntries } from '../../../src/processes/entry-enrichment/model/processEntries';
 import { withMutedConsole } from '../../support/withMutedConsole';
 
@@ -27,8 +29,12 @@ const entryEnrichmentClient: EntryEnrichmentClient = {
 
 test('processEntries returns word-translation previews and completes entries', async () => {
   const entries = new InMemoryEntryRepository();
-  const saved = await handleTextEntries({
-    entryRepository: entries,
+  const intakeEntries = new AddEntriesFromTextUseCase(
+    entries,
+    new EntryParser(),
+    new EntryFactory(),
+  );
+  const saved = await intakeEntries.execute({
     sessionId: 'session-1',
     text: 'hassle\npull through',
   });
@@ -73,8 +79,12 @@ test('processEntries returns word-translation previews and completes entries', a
 
 test('processEntries classifies insufficient quota failures', async () => {
   const entries = new InMemoryEntryRepository();
-  const saved = await handleTextEntries({
-    entryRepository: entries,
+  const intakeEntries = new AddEntriesFromTextUseCase(
+    entries,
+    new EntryParser(),
+    new EntryFactory(),
+  );
+  const saved = await intakeEntries.execute({
     sessionId: 'session-1',
     text: 'hilarious',
   });
@@ -110,8 +120,12 @@ test('processEntries classifies insufficient quota failures', async () => {
 
 test('processEntries limits enrichment concurrency', async () => {
   const entries = new InMemoryEntryRepository();
-  const saved = await handleTextEntries({
-    entryRepository: entries,
+  const intakeEntries = new AddEntriesFromTextUseCase(
+    entries,
+    new EntryParser(),
+    new EntryFactory(),
+  );
+  const saved = await intakeEntries.execute({
     sessionId: 'session-1',
     text: 'hassle\npull through\nrumor\npeasant',
   });

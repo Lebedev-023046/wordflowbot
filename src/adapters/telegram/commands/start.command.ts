@@ -1,5 +1,5 @@
 import type { Context, Telegraf } from 'telegraf';
-import type { StartSessionUseCase } from '../../../application/use-cases/StartSessionUseCase';
+import type { StartSessionUseCase } from '../../../application/session/commands/StartSessionUseCase';
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
 import { buttons } from '../../../shared/i18n/buttons';

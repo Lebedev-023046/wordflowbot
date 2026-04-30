@@ -1,5 +1,5 @@
 import { Markup } from 'telegraf';
-import type { LibraryWordItem } from '../../../application/use-cases/GetLibraryWordsUseCase';
+import type { LibraryWordItem } from '../../../application/library/queries/GetLibraryWordsUseCase';
 import type { EntryUsage } from '../../../entities/entry/model/entry.types';
 
 const WORDS_PAGE_SIZE = 10;

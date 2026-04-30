@@ -3,9 +3,9 @@ import test from 'node:test';
 import { InMemoryEntryRepository } from '../../../src/adapters/storage/in-memory/InMemoryEntryRepository';
 import { InMemorySessionRepository } from '../../../src/adapters/storage/in-memory/InMemorySessionRepository';
 import { registerStopCommand } from '../../../src/adapters/telegram/commands/stop.command';
-import { SessionRenameStateStore } from '../../../src/adapters/telegram/lib/sessionRenameState';
+import { PendingSessionRenameStore } from '../../../src/adapters/telegram/lib/pendingSessionRenameState';
 import { EntryFactory } from '../../../src/application/services/EntryFactory';
-import { StopSessionUseCase } from '../../../src/application/use-cases/StopSessionUseCase';
+import { StopSessionUseCase } from '../../../src/application/session/commands/StopSessionUseCase';
 import { failEntry } from '../../../src/entities/entry/model/entryState';
 import { buttons } from '../../../src/shared/i18n/buttons';
 import { messages } from '../../../src/shared/i18n/messages';
@@ -84,7 +84,7 @@ test('finish session asks for confirmation with renamed actions', async () => {
     new InMemoryEntryRepository(),
     sessions,
     new StopSessionUseCase(sessions),
-    new SessionRenameStateStore(),
+    new PendingSessionRenameStore(),
   );
 
   const handler = bot.hearsHandlers.get(buttons.stopSession);
@@ -128,7 +128,7 @@ test('finish session confirmation closes the session and switches to the idle ke
     entries,
     sessions,
     new StopSessionUseCase(sessions),
-    new SessionRenameStateStore(),
+    new PendingSessionRenameStore(),
   );
 
   const handler = getActionHandler(bot, 'stop_session:confirm');
@@ -169,7 +169,7 @@ test('finish session cancellation keeps the current active-session keyboard stat
     entries,
     sessions,
     new StopSessionUseCase(sessions),
-    new SessionRenameStateStore(),
+    new PendingSessionRenameStore(),
   );
 
   const handler = getActionHandler(bot, 'stop_session:cancel');
@@ -202,7 +202,7 @@ test('finish session rename action prompts with the current title in force reply
   const session = await sessions.startSession(1);
   await sessions.stopSession(1);
   const bot = new FakeBot();
-  const renameState = new SessionRenameStateStore();
+  const renameState = new PendingSessionRenameStore();
 
   registerStopCommand(
     bot as unknown as never,

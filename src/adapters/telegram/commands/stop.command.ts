@@ -1,14 +1,14 @@
 import { Markup, type Telegraf } from 'telegraf';
-import type { StopSessionUseCase } from '../../../application/use-cases/StopSessionUseCase';
+import type { StopSessionUseCase } from '../../../application/session/commands/StopSessionUseCase';
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
 import { buttons } from '../../../shared/i18n/buttons';
 import { messages } from '../../../shared/i18n/messages';
-import { resolveSessionTitle } from '../../../shared/utils/sessionTitle';
 import { getUserId } from '../lib/getUserId';
 import { getSessionStateFlags } from '../lib/getSessionStateFlags';
+import { promptSessionRename } from '../lib/sessionRenamePrompt';
 import { replyWithSessionState } from '../lib/replyWithSessionState';
-import type { SessionRenameStateStore } from '../lib/sessionRenameState';
+import type { PendingSessionRenameStore } from '../lib/pendingSessionRenameState';
 
 const STOP_SESSION_CONFIRM_CALLBACK = 'stop_session:confirm';
 const STOP_SESSION_CANCEL_CALLBACK = 'stop_session:cancel';
@@ -20,7 +20,7 @@ export function registerStopCommand(
   entries: EntryRepository,
   sessions: SessionRepository,
   stopSessionUseCase: StopSessionUseCase,
-  sessionRenameState: SessionRenameStateStore,
+  pendingSessionRenameState: PendingSessionRenameStore,
 ) {
   bot.hears(buttons.stopSession, async (ctx) => {
     const userId = getUserId(ctx);
@@ -115,36 +115,23 @@ export function registerStopCommand(
     async (ctx) => {
       await ctx.answerCbQuery();
 
-      const userId = getUserId(ctx);
       const sessionId =
         'data' in ctx.callbackQuery
           ? ctx.callbackQuery.data.slice(
               `${STOP_SESSION_RENAME_CALLBACK}:`.length,
             )
           : '';
-      const session = await sessions.findFinishedSessionById(userId, sessionId);
-
-      if (!session) {
-        return ctx.reply(messages.library.sessionMissing);
-      }
-
-      const currentTitle = resolveSessionTitle(session);
-      const prompt = await ctx.reply(
-        messages.library.renamePrompt(currentTitle),
-        {
-          reply_markup: {
-            force_reply: true,
-            input_field_placeholder: currentTitle,
-            selective: true,
-          },
-        },
-      );
-
-      sessionRenameState.set(userId, {
-        promptMessageId: prompt.message_id,
+      const prompted = await promptSessionRename({
+        ctx,
         sessionId,
+        pendingSessionRenameState,
+        sessions,
         source: 'post_finish',
       });
+
+      if (!prompted) {
+        return;
+      }
 
       return ctx.deleteMessage();
     },
