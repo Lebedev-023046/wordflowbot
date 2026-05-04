@@ -4,6 +4,7 @@ import type {
   FailedSessionWordItem,
 } from '../../../application/session/queries/GetCurrentSessionWordsUseCase';
 import type { EntryUsage } from '../../../entities/entry/model/entry.types';
+import { shouldShowWordViewFilters } from './wordViewLayout';
 
 const WORDS_PAGE_SIZE = 10;
 const SESSION_WORDS_CALLBACK_PREFIX = 'session_words';
@@ -90,6 +91,19 @@ export function buildSessionWordsReply(
   state: SessionWordsPageState,
 ): string {
   const lines = ['Current session'];
+  const showFilters = shouldShowWordViewFilters(completedItems.length);
+
+  if (!showFilters) {
+    lines.push('', 'All');
+    lines.push(...buildCompactReadyLines(completedItems));
+
+    if (failedItems.length > 0) {
+      lines.push(...buildFailedSectionLines(failedItems, state.failedPage));
+    }
+
+    return lines.join('\n');
+  }
+
   const readySections = getReadySections(completedItems, state);
 
   for (const section of readySections) {
@@ -109,14 +123,17 @@ export function buildSessionWordsInlineKeyboard(
   failedItems: FailedSessionWordItem[],
   state: SessionWordsPageState,
 ) {
+  const showFilters = shouldShowWordViewFilters(completedItems.length);
   const readySections = getReadySections(completedItems, state);
-  const rows = buildViewSelectorRows(state);
+  const rows = showFilters ? buildViewSelectorRows(state) : [];
 
-  for (const section of readySections) {
-    if (section.page.totalPages > 1) {
-      rows.push(
-        buildNavigationRow(section.label, state, section.page, section.key),
-      );
+  if (showFilters) {
+    for (const section of readySections) {
+      if (section.page.totalPages > 1) {
+        rows.push(
+          buildNavigationRow(section.label, state, section.page, section.key),
+        );
+      }
     }
   }
 
@@ -127,6 +144,18 @@ export function buildSessionWordsInlineKeyboard(
   }
 
   return Markup.inlineKeyboard(rows);
+}
+
+function buildCompactReadyLines(
+  completedItems: CompletedSessionWordItem[],
+): string[] {
+  if (completedItems.length === 0) {
+    return ['No words in this section yet.'];
+  }
+
+  return completedItems.map((item, index) =>
+    formatWordLine(item.text, item.translation, 0, index),
+  );
 }
 
 function buildViewSelectorRows(state: SessionWordsPageState) {

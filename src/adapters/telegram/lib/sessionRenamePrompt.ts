@@ -10,13 +10,20 @@ import type {
 
 export async function promptSessionRename(params: {
   ctx: Context;
+  historyPage?: number;
   sessionId: string;
   pendingSessionRenameState: PendingSessionRenameStore;
   sessions: SessionRepository;
   source: SessionRenameSource;
 }) {
-  const { ctx, sessionId, pendingSessionRenameState, sessions, source } =
-    params;
+  const {
+    ctx,
+    historyPage,
+    sessionId,
+    pendingSessionRenameState,
+    sessions,
+    source,
+  } = params;
   const userId = getUserId(ctx);
   const session = await sessions.findFinishedSessionById(userId, sessionId);
 
@@ -35,6 +42,7 @@ export async function promptSessionRename(params: {
   });
 
   pendingSessionRenameState.set(userId, {
+    historyPage,
     promptMessageId: prompt.message_id,
     sessionId,
     source,

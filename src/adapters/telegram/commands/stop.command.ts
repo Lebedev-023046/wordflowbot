@@ -6,21 +6,19 @@ import { buttons } from '../../../shared/i18n/buttons';
 import { messages } from '../../../shared/i18n/messages';
 import { getSessionStateFlags } from '../lib/getSessionStateFlags';
 import { getUserId } from '../lib/getUserId';
+import { renderHomeKeyboard } from '../lib/homeKeyboard';
 import type { PendingSessionRenameStore } from '../lib/pendingSessionRenameState';
 import { replyWithSessionState } from '../lib/replyWithSessionState';
-import { promptSessionRename } from '../lib/sessionRenamePrompt';
 
 const STOP_SESSION_CONFIRM_CALLBACK = 'stop_session:confirm';
 const STOP_SESSION_CANCEL_CALLBACK = 'stop_session:cancel';
-const STOP_SESSION_RENAME_CALLBACK = 'stop_session:rename';
-const STOP_SESSION_SKIP_RENAME_CALLBACK = 'stop_session:skip_rename';
 
 export function registerStopCommand(
   bot: Telegraf,
   entries: EntryRepository,
   sessions: SessionRepository,
   stopSessionUseCase: StopSessionUseCase,
-  pendingSessionRenameState: PendingSessionRenameStore,
+  _pendingSessionRenameState: PendingSessionRenameStore,
 ) {
   bot.hears(buttons.stopSession, async (ctx) => {
     const userId = getUserId(ctx);
@@ -67,31 +65,7 @@ export function registerStopCommand(
     }
 
     await ctx.deleteMessage();
-    await replyWithSessionState({
-      ctx,
-      isActive: result.isActive,
-      message: messages.session.stopped,
-    });
-
-    if (!result.session) {
-      return;
-    }
-
-    return ctx.reply(
-      messages.session.stopRenameOffer,
-      Markup.inlineKeyboard([
-        [
-          Markup.button.callback(
-            buttons.skipRename,
-            `${STOP_SESSION_SKIP_RENAME_CALLBACK}:${result.session.id}`,
-          ),
-          Markup.button.callback(
-            buttons.nameSessionSource,
-            `${STOP_SESSION_RENAME_CALLBACK}:${result.session.id}`,
-          ),
-        ],
-      ]),
-    );
+    await ctx.reply(messages.session.stopped, renderHomeKeyboard('returning'));
   });
 
   bot.action(STOP_SESSION_CANCEL_CALLBACK, async (ctx) => {
@@ -103,45 +77,8 @@ export function registerStopCommand(
 
     return replyWithSessionState({
       ctx,
-      hasEntries: state.hasEntries,
-      hasFailedEntries: state.hasFailedEntries,
       isActive: state.isActive,
       message: messages.session.stopCancelled,
     });
   });
-
-  bot.action(
-    new RegExp(`^${STOP_SESSION_RENAME_CALLBACK}:.+$`),
-    async (ctx) => {
-      await ctx.answerCbQuery();
-
-      const sessionId =
-        'data' in ctx.callbackQuery
-          ? ctx.callbackQuery.data.slice(
-              `${STOP_SESSION_RENAME_CALLBACK}:`.length,
-            )
-          : '';
-      const prompted = await promptSessionRename({
-        ctx,
-        sessionId,
-        pendingSessionRenameState,
-        sessions,
-        source: 'post_finish',
-      });
-
-      if (!prompted) {
-        return;
-      }
-
-      return ctx.deleteMessage();
-    },
-  );
-
-  bot.action(
-    new RegExp(`^${STOP_SESSION_SKIP_RENAME_CALLBACK}:.+$`),
-    async (ctx) => {
-      await ctx.answerCbQuery();
-      return ctx.deleteMessage();
-    },
-  );
 }

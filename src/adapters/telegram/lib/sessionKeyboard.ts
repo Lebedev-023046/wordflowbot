@@ -3,19 +3,15 @@ import { buttons } from '../../../shared/i18n/buttons';
 
 export function renderSessionKeyboard(
   isActive: boolean,
-  hasEntries = false,
-  hasFailedEntries = false,
+  _hasEntries = false,
+  _hasFailedEntries = false,
 ) {
   const rows = isActive
     ? [
         [buttons.showWords],
         [buttons.exportCsv],
+        [buttons.stopSession],
         [buttons.myLibrary],
-        [
-          buttons.stopSession,
-          ...(hasFailedEntries ? [buttons.retryFailed] : []),
-        ],
-        ...(hasEntries ? [[buttons.clearSession]] : []),
       ]
     : [[buttons.startSession], [buttons.myLibrary]];
 

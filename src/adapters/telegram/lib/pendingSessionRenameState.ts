@@ -1,6 +1,7 @@
 export type SessionRenameSource = 'history' | 'post_finish';
 
 export interface PendingSessionRename {
+  historyPage?: number;
   promptMessageId: number;
   sessionId: string;
   source: SessionRenameSource;

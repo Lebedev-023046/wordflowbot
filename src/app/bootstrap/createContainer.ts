@@ -10,10 +10,9 @@ import { PendingSessionRenameStore } from '../../adapters/telegram/lib/pendingSe
 import { AddEntriesFromTextUseCase } from '../../application/entries/commands/AddEntriesFromTextUseCase';
 import { EnrichEntriesUseCase } from '../../application/entries/commands/EnrichEntriesUseCase';
 import { RetryFailedEntriesUseCase } from '../../application/entries/commands/RetryFailedEntriesUseCase';
+import { ExportFinishedSessionCsvUseCase } from '../../application/export/commands/ExportFinishedSessionCsvUseCase';
 import { ExportSessionCsvUseCase } from '../../application/export/commands/ExportSessionCsvUseCase';
 import { GetLibraryHistoryUseCase } from '../../application/library/queries/GetLibraryHistoryUseCase';
-import { GetLibraryStatisticsUseCase } from '../../application/library/queries/GetLibraryStatisticsUseCase';
-import { GetLibraryWordsUseCase } from '../../application/library/queries/GetLibraryWordsUseCase';
 import { GetFinishedSessionWordsUseCase } from '../../application/library/queries/GetFinishedSessionWordsUseCase';
 import { CsvExporter } from '../../application/services/CsvExporter';
 import { EntryFactory } from '../../application/services/EntryFactory';
@@ -84,14 +83,6 @@ export function createContainer() {
     sessionRepository,
     entryRepository,
   );
-  const getLibraryStatisticsUseCase = new GetLibraryStatisticsUseCase(
-    sessionRepository,
-    entryRepository,
-  );
-  const getLibraryWordsUseCase = new GetLibraryWordsUseCase(
-    sessionRepository,
-    entryRepository,
-  );
   const getLibraryHistoryUseCase = new GetLibraryHistoryUseCase(
     sessionRepository,
     entryRepository,
@@ -105,6 +96,11 @@ export function createContainer() {
     entryRepository,
   );
   const exportSessionCsvUseCase = new ExportSessionCsvUseCase(
+    sessionRepository,
+    entryRepository,
+    csvExporter,
+  );
+  const exportFinishedSessionCsvUseCase = new ExportFinishedSessionCsvUseCase(
     sessionRepository,
     entryRepository,
     csvExporter,
@@ -139,9 +135,8 @@ export function createContainer() {
     },
     useCases: {
       clearSession: clearSessionUseCase,
+      exportFinishedSessionCsv: exportFinishedSessionCsvUseCase,
       exportSessionCsv: exportSessionCsvUseCase,
-      getLibraryStatistics: getLibraryStatisticsUseCase,
-      getLibraryWords: getLibraryWordsUseCase,
       getLibraryHistory: getLibraryHistoryUseCase,
       getFinishedSessionWords: getFinishedSessionWordsUseCase,
       getSessionStatus: getSessionStatusUseCase,

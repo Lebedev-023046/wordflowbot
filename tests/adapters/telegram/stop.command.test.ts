@@ -114,7 +114,7 @@ test('finish session asks for confirmation with renamed actions', async () => {
   assert.equal(ctx.replyCalls[0]?.text, messages.session.stopConfirm);
 });
 
-test('finish session confirmation closes the session and switches to the idle keyboard', async () => {
+test('finish session confirmation closes the session and shows returning-user actions', async () => {
   const sessions = new InMemorySessionRepository();
   const entries = new InMemoryEntryRepository();
   const entryFactory = new EntryFactory();
@@ -142,10 +142,14 @@ test('finish session confirmation closes the session and switches to the idle ke
   assert.deepEqual(ctx.editMessageTextCalls, []);
   assert.equal(await sessions.hasActiveSession(1), false);
   assert.equal(ctx.replyCalls[0]?.text, messages.session.stopped);
-  assert.equal(ctx.replyCalls[1]?.text, messages.session.stopRenameOffer);
+  assert.equal(ctx.replyCalls.length, 1);
   assert.deepEqual(normalizeMarkup(ctx.replyCalls[0]?.extra), {
     reply_markup: {
-      keyboard: [[buttons.startSession], [buttons.myLibrary]],
+      keyboard: [
+        [buttons.startSession],
+        [buttons.openLastSession],
+        [buttons.myLibrary],
+      ],
       resize_keyboard: true,
     },
   });
@@ -188,48 +192,10 @@ test('finish session cancellation keeps the current active-session keyboard stat
       keyboard: [
         [buttons.showWords],
         [buttons.exportCsv],
+        [buttons.stopSession],
         [buttons.myLibrary],
-        [buttons.stopSession, buttons.retryFailed],
-        [buttons.clearSession],
       ],
       resize_keyboard: true,
     },
-  });
-});
-
-test('finish session rename action prompts with the current title in force reply', async () => {
-  const sessions = new InMemorySessionRepository();
-  const session = await sessions.startSession(1);
-  await sessions.stopSession(1);
-  const bot = new FakeBot();
-  const renameState = new PendingSessionRenameStore();
-
-  registerStopCommand(
-    bot as unknown as never,
-    new InMemoryEntryRepository(),
-    sessions,
-    new StopSessionUseCase(sessions),
-    renameState,
-  );
-
-  const handler = getActionHandler(bot, `stop_session:rename:${session.id}`);
-  const ctx = new FakeContext();
-  ctx.callbackQuery = { data: `stop_session:rename:${session.id}` };
-
-  assert.ok(handler);
-  await handler(ctx);
-
-  assert.equal(
-    ctx.replyCalls[0]?.text.startsWith('Reply with the session name.'),
-    true,
-  );
-  assert.equal(
-    normalizeMarkup(ctx.replyCalls[0]?.extra)?.reply_markup?.force_reply,
-    true,
-  );
-  assert.deepEqual(renameState.get(1), {
-    promptMessageId: 1,
-    sessionId: session.id,
-    source: 'post_finish',
   });
 });

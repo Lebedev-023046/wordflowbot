@@ -32,71 +32,69 @@ function formatLimitedLines<T>(
 export const messages = {
   library: {
     historyEmpty: 'No finished sessions yet.',
-    menu: 'Library',
-    noWordsYet: 'No saved words yet.',
-    sessionWordsEmpty: 'No words were saved in this session yet.',
+    sessionWordsEmpty: 'No saved words in this session yet.',
     renamePrompt: (currentTitle: string) =>
       [
-        'Reply with the session name.',
+        'Send a new session name.',
         '',
-        `Current title: ${currentTitle}`,
+        'Examples:',
+        'Podcast',
+        'Lesson 8',
+        'Article about health',
+        '',
+        `Current name: ${currentTitle}`,
       ].join('\n'),
-    renamed: (title: string) => `✏️ Session renamed to: ${title}`,
+    renamed: (title: string) => `Session renamed.\n\n${title}`,
     sessionMissing: 'That finished session is no longer available.',
-    statistics: ({
-      activeSession,
-      finishedSessions,
-      totalWords,
-      usageA,
-      usageB,
-      usageC,
-    }: {
-      activeSession: boolean;
-      finishedSessions: number;
-      totalWords: number;
-      usageA: number;
-      usageB: number;
-      usageC: number;
-    }) =>
-      [
-        'Library stats',
-        '',
-        `Saved words: ${totalWords}`,
-        `Finished sessions: ${finishedSessions}`,
-        `Active session: ${activeSession ? 'yes' : 'no'}`,
-        '',
-        'Usage split',
-        `🔥 Most useful: ${usageA}`,
-        `👌 Good to know: ${usageB}`,
-        `🪶 Rarely used: ${usageC}`,
-      ].join('\n'),
   },
   session: {
     active:
-      'Session is active.\n\nSend words or phrases:\n• one per line\n• as a list\n• or separated with semicolons\n\nIn the bot you will see translations only.\nExamples are in the exported file.',
+      'Your session is open.\n\nKeep adding words, open Current session, or export what is ready.',
     alreadyActive:
-      'You already have an active session.\n\nSend words or phrases:\n• one per line\n• as a list\n• or separated with semicolons\n\nIn the bot you will see translations only.\nExamples are in the exported file.',
+      'Your session is already open.\n\nKeep adding words, open Current session, or export what is ready.',
     clearCancelled: 'Your words stay in the current session.',
     cleared: (clearedEntries: number) =>
       `🧹 Cleared ${formatItems(clearedEntries)}. The session stays active.`,
     clearConfirm:
       'Clear all words from this session? The session stays active.',
-    exportChoose: 'Export ready words with examples:',
+    exportChoose: 'Export this session with examples:',
     emptyExport: '📭 Nothing is ready to export yet.',
     emptyExportForFilter: (label: string) =>
       `📭 No ready words in ${label} yet.`,
     idle: 'Start a session first, then send words or phrases.',
     noActive: 'ℹ️ You do not have an active session right now.',
     noWordsYet: 'You have not added any words yet.',
-    promptStart:
-      'Tap Start.\n\nFlow: send words → see translations in the bot → export the file for examples.',
-    started:
-      '🚀 Session started.\n\nSend words or phrases:\n• one per line\n• as a list\n• or separated with semicolons\n\nIn the bot you will see translations only.\nExamples are in the exported file.',
+    promptStart: [
+      'Send English words from any article, video, book, or lesson.',
+      '',
+      'I will:',
+      '• save them as one session',
+      '• add translations',
+      '• prepare examples for export',
+      '',
+      'Examples are in the export file.',
+      'Translations are visible here in Telegram.',
+    ].join('\n'),
+    returningStart:
+      'Ready to collect more words?\n\nYou can start a new session or reopen a past one.',
+    started: [
+      'Session started.',
+      '',
+      'Send:',
+      '• one word per line',
+      '• a pasted list',
+      '• or words separated by semicolons',
+    ].join('\n'),
     stopCancelled: 'Your session stays active.',
-    stopConfirm: 'Finish this session?',
-    stopRenameOffer: 'Name this session now, or do it later in History.',
-    stopped:
-      '🏁 Session finished.\nFind it anytime in  🗂 Library → 🕘 History.',
+    stopConfirm:
+      'Finish this session?\nYou can reopen it anytime in Past sessions.',
+    stopRenameOffer: 'Name this session now, or do it later in Past sessions.',
+    stopped: [
+      'Session finished.',
+      '',
+      'Find it anytime in Past sessions.',
+      'You can open it, rename it, or export it later.',
+    ].join('\n'),
   },
   status: {
     active: ({
@@ -156,11 +154,21 @@ export const messages = {
     processedWithFailures: (failedCount: number) =>
       `I could not finish ${formatItems(failedCount)} this time. They stay saved, and you can try Retry failed.`,
     processing: (count: number) =>
-      `⏳ Saved ${formatItems(count)}. Processing now.`,
+      `Saved ${formatItems(count)}. Processing now.`,
     processingCompleted: (succeededCount: number) =>
-      `✅ Done. ${formatItems(succeededCount)} ready.`,
+      [
+        `${formatItems(succeededCount)} ready.`,
+        '',
+        'Send more words, or open Current session.',
+        'Examples will be in the export file.',
+      ].join('\n'),
     processingFinished: (succeededCount: number, failedCount: number) =>
-      `⚠️ Done. ${formatItems(succeededCount)} ready, ${formatNeedsAnotherTry(failedCount)}.`,
+      [
+        `${formatItems(succeededCount)} ready. ${formatNeedsAnotherTry(failedCount)}.`,
+        '',
+        'Send more words, or open Current session.',
+        'Examples will be in the export file.',
+      ].join('\n'),
     processingNoCompleted: (failedCount: number) =>
       `No items finished this time. ${formatNeedsAnotherTry(failedCount)}.`,
     retrying: (count: number) => `🔄 Trying ${formatItems(count)} again...`,

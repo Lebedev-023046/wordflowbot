@@ -5,16 +5,19 @@ import type {
   PendingFinishedSessionWordItem,
 } from '../../../application/library/queries/GetFinishedSessionWordsUseCase';
 import type { EntryUsage } from '../../../entities/entry/model/entry.types';
+import { shouldShowWordViewFilters } from './wordViewLayout';
 
 const WORDS_PAGE_SIZE = 10;
 const FINISHED_SESSION_WORDS_CALLBACK_PREFIX = 'fsw';
 const FINISHED_SESSION_WORDS_NOOP_CALLBACK = 'fsw:noop';
+const FINISHED_SESSION_EXPORT_CALLBACK_PREFIX = 'fse';
 const FINISHED_SESSION_RENAME_CALLBACK_PREFIX = 'fsr';
 const FINISHED_SESSION_BACK_CALLBACK_PREFIX = 'fsb';
 const SHOW_ALL_VIEW = 'all';
 
 export {
   FINISHED_SESSION_BACK_CALLBACK_PREFIX,
+  FINISHED_SESSION_EXPORT_CALLBACK_PREFIX,
   FINISHED_SESSION_RENAME_CALLBACK_PREFIX,
   FINISHED_SESSION_WORDS_NOOP_CALLBACK,
 };
@@ -110,6 +113,23 @@ export function buildFinishedSessionWordsReply(
   state: FinishedSessionWordsPageState,
 ): string {
   const lines = [title];
+  const showFilters = shouldShowWordViewFilters(completedItems.length);
+
+  if (!showFilters) {
+    lines.push('', 'All');
+    lines.push(...buildCompactReadyLines(completedItems));
+
+    if (pendingItems.length > 0) {
+      lines.push(...buildPendingSectionLines(pendingItems, state.pendingPage));
+    }
+
+    if (failedItems.length > 0) {
+      lines.push(...buildFailedSectionLines(failedItems, state.failedPage));
+    }
+
+    return lines.join('\n');
+  }
+
   const readySections = getReadySections(completedItems, state);
 
   for (const section of readySections) {
@@ -136,30 +156,35 @@ export function buildFinishedSessionWordsInlineKeyboard(
   failedItems: FailedFinishedSessionWordItem[],
   state: FinishedSessionWordsPageState,
 ) {
+  const showFilters = shouldShowWordViewFilters(completedItems.length);
   const readySections = getReadySections(completedItems, state);
-  const rows = [
-    [
-      createViewButton(sessionId, historyPage, 'A', state),
-      createViewButton(sessionId, historyPage, 'B', state),
-    ],
-    [
-      createViewButton(sessionId, historyPage, 'C', state),
-      createViewButton(sessionId, historyPage, SHOW_ALL_VIEW, state),
-    ],
-  ];
+  const rows = showFilters
+    ? [
+        [
+          createViewButton(sessionId, historyPage, 'A', state),
+          createViewButton(sessionId, historyPage, 'B', state),
+        ],
+        [
+          createViewButton(sessionId, historyPage, 'C', state),
+          createViewButton(sessionId, historyPage, SHOW_ALL_VIEW, state),
+        ],
+      ]
+    : [];
 
-  for (const section of readySections) {
-    if (section.page.totalPages > 1) {
-      rows.push(
-        buildNavigationRow(
-          sessionId,
-          historyPage,
-          section.label,
-          state,
-          section.page,
-          section.key,
-        ),
-      );
+  if (showFilters) {
+    for (const section of readySections) {
+      if (section.page.totalPages > 1) {
+        rows.push(
+          buildNavigationRow(
+            sessionId,
+            historyPage,
+            section.label,
+            state,
+            section.page,
+            section.key,
+          ),
+        );
+      }
     }
   }
 
@@ -195,6 +220,13 @@ export function buildFinishedSessionWordsInlineKeyboard(
 
   rows.push([
     Markup.button.callback(
+      '📤 Export',
+      `${FINISHED_SESSION_EXPORT_CALLBACK_PREFIX}:${sessionId}:${historyPage}`,
+    ),
+  ]);
+
+  rows.push([
+    Markup.button.callback(
       '✏️ Rename',
       `${FINISHED_SESSION_RENAME_CALLBACK_PREFIX}:${sessionId}:${historyPage}`,
     ),
@@ -205,6 +237,18 @@ export function buildFinishedSessionWordsInlineKeyboard(
   ]);
 
   return Markup.inlineKeyboard(rows);
+}
+
+function buildCompactReadyLines(
+  completedItems: CompletedFinishedSessionWordItem[],
+): string[] {
+  if (completedItems.length === 0) {
+    return ['No words in this section yet.'];
+  }
+
+  return completedItems.map((item, index) =>
+    formatWordLine(item.text, item.translation, 0, index),
+  );
 }
 
 function createViewButton(
@@ -250,7 +294,7 @@ function buildSectionTitle(section: ReadySection): string {
 
 function buildReadySectionLines(section: ReadySection): string[] {
   if (section.page.items.length === 0) {
-    return ['No ready words here yet.'];
+    return ['No words in this section yet.'];
   }
 
   return section.page.items.map((item, index) =>

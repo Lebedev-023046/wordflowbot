@@ -41,7 +41,7 @@ export function registerCurrentSessionWordsCommand(
         bPage: 0,
         cPage: 0,
         failedPage: 0,
-        view: 'A',
+        view: 'all',
       }),
       buildSessionWordsInlineKeyboard(
         result.completedItems,
@@ -51,7 +51,7 @@ export function registerCurrentSessionWordsCommand(
           bPage: 0,
           cPage: 0,
           failedPage: 0,
-          view: 'A',
+          view: 'all',
         },
       ),
     );

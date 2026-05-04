@@ -132,8 +132,8 @@ test('clear words confirmation removes entries and keeps the session active', as
       keyboard: [
         [buttons.showWords],
         [buttons.exportCsv],
-        [buttons.myLibrary],
         [buttons.stopSession],
+        [buttons.myLibrary],
       ],
       resize_keyboard: true,
     },
@@ -173,9 +173,8 @@ test('clear words cancellation preserves the active session keyboard state', asy
       keyboard: [
         [buttons.showWords],
         [buttons.exportCsv],
-        [buttons.myLibrary],
         [buttons.stopSession],
-        [buttons.clearSession],
+        [buttons.myLibrary],
       ],
       resize_keyboard: true,
     },

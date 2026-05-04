@@ -29,8 +29,8 @@ export function buildLibraryHistoryReply(
 ): string {
   const page = getPageSlice(items, requestedPage);
   return page.totalPages > 1
-    ? `📖 Session history\nTap a session below to open it.\nPage ${page.page + 1}/${page.totalPages}`
-    : '📖 Session history\nTap a session below to open it.';
+    ? `Past sessions\n\nTap a session to open it.\nPage ${page.page + 1}/${page.totalPages}`
+    : 'Past sessions\n\nTap a session to open it.';
 }
 
 export function buildLibraryHistoryInlineKeyboard(

@@ -4,7 +4,9 @@ import type { EntryRepository } from '../../../entities/entry/api/entryRepositor
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
 import { buttons } from '../../../shared/i18n/buttons';
 import { messages } from '../../../shared/i18n/messages';
+import { getHomeScreenState } from '../lib/getHomeScreenState';
 import { getUserId } from '../lib/getUserId';
+import { replyWithHomeScreenState } from '../lib/replyWithHomeScreenState';
 import { replyWithSessionState } from '../lib/replyWithSessionState';
 
 export function registerStartCommand(
@@ -14,21 +16,9 @@ export function registerStartCommand(
   startSessionUseCase: StartSessionUseCase,
 ) {
   const showStartState = async (ctx: Context) => {
-    const userId = getUserId(ctx);
-    const session = await sessions.getActiveSession(userId);
-    const isActive = session !== null;
-    const message = isActive
-      ? messages.session.active
-      : messages.session.promptStart;
-    return replyWithSessionState({
-      ctx,
-      hasEntries: session ? await hasEntries(entries, session.id) : false,
-      hasFailedEntries: session
-        ? await hasFailedEntries(entries, session.id)
-        : false,
-      message,
-      isActive,
-    });
+    const state = await getHomeScreenState(entries, sessions, getUserId(ctx));
+
+    return replyWithHomeScreenState(ctx, state);
   };
 
   bot.start(showStartState);
@@ -38,15 +28,19 @@ export function registerStartCommand(
     const result = await startSessionUseCase.execute(userId);
 
     if (result.kind === 'alreadyActive') {
-      const session = await sessions.getActiveSession(userId);
+      const state = await getHomeScreenState(
+        entries,
+        sessions,
+        userId,
+        messages.session.alreadyActive,
+      );
+
       return replyWithSessionState({
         ctx,
-        hasEntries: session ? await hasEntries(entries, session.id) : false,
-        hasFailedEntries: session
-          ? await hasFailedEntries(entries, session.id)
-          : false,
-        message: messages.session.alreadyActive,
-        isActive: result.isActive,
+        hasEntries: state.hasEntries,
+        hasFailedEntries: state.hasFailedEntries,
+        message: state.message,
+        isActive: state.isActive,
       });
     }
 
@@ -56,34 +50,4 @@ export function registerStartCommand(
       isActive: result.isActive,
     });
   });
-}
-
-function hasFailedEntries(
-  entryRepository: EntryRepository,
-  sessionId: string,
-): Promise<boolean> {
-  return hasFailedEntriesInternal(entryRepository, sessionId);
-}
-
-async function hasFailedEntriesInternal(
-  entryRepository: EntryRepository,
-  sessionId: string,
-): Promise<boolean> {
-  return (await entryRepository.findBySessionId(sessionId)).some(
-    (entry) => entry.status === 'failed',
-  );
-}
-
-function hasEntries(
-  entryRepository: EntryRepository,
-  sessionId: string,
-): Promise<boolean> {
-  return hasEntriesInternal(entryRepository, sessionId);
-}
-
-async function hasEntriesInternal(
-  entryRepository: EntryRepository,
-  sessionId: string,
-): Promise<boolean> {
-  return (await entryRepository.findBySessionId(sessionId)).length > 0;
 }

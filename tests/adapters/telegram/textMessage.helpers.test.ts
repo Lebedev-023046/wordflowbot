@@ -13,7 +13,7 @@ test('getInitialReplyText explains that processing has started', () => {
       entries: [],
       kind: 'saved',
     }),
-    '⏳ Saved 2 items. Processing now.',
+    'Saved 2 items. Processing now.',
   );
 });
 
@@ -34,7 +34,10 @@ test('formatProcessedEntriesReply includes a completion summary and ready pairs'
       ],
     }),
     [
-      '⚠️ Done. 2 items ready, 1 item needs another try.',
+      '2 items ready. 1 item needs another try.',
+      '',
+      'Send more words, or open Current session.',
+      'Examples will be in the export file.',
       '',
       'hassle - translation for hassle',
       'pull through - translation for pull through',

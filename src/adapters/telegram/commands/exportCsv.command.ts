@@ -25,11 +25,21 @@ const EXPORT_FILTER_BUTTONS: Array<{
 const EMPTY_INLINE_KEYBOARD = { reply_markup: { inline_keyboard: [] } };
 
 function buildExportInlineKeyboard() {
-  return Markup.inlineKeyboard(
-    EXPORT_FILTER_BUTTONS.map(({ filter, label }) => [
+  return Markup.inlineKeyboard([
+    EXPORT_FILTER_BUTTONS.slice(1, 3).map(({ filter, label }) =>
       Markup.button.callback(label, createExportCallbackData(filter)),
-    ]),
-  );
+    ),
+    [
+      Markup.button.callback(
+        EXPORT_FILTER_BUTTONS[3].label,
+        createExportCallbackData(EXPORT_FILTER_BUTTONS[3].filter),
+      ),
+      Markup.button.callback(
+        EXPORT_FILTER_BUTTONS[0].label,
+        createExportCallbackData(EXPORT_FILTER_BUTTONS[0].filter),
+      ),
+    ],
+  ]);
 }
 
 function createExportCallbackData(filter: ExportSessionCsvFilter): string {

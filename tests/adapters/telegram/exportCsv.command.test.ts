@@ -75,7 +75,7 @@ function normalizeMarkup(value: object | undefined) {
   return value ? JSON.parse(JSON.stringify(value)) : value;
 }
 
-test('export command shows one-button-per-row filter chooser for ready exports', async () => {
+test('export command shows compact filter chooser for ready exports', async () => {
   const bot = new FakeBot();
 
   registerExportCsvCommand(
@@ -102,19 +102,10 @@ test('export command shows one-button-per-row filter chooser for ready exports',
       inline_keyboard: [
         [
           {
-            callback_data: 'export_csv:all',
-            hide: false,
-            text: buttons.exportCsvAllWords,
-          },
-        ],
-        [
-          {
             callback_data: 'export_csv:A',
             hide: false,
             text: buttons.exportCsvMostUseful,
           },
-        ],
-        [
           {
             callback_data: 'export_csv:B',
             hide: false,
@@ -126,6 +117,11 @@ test('export command shows one-button-per-row filter chooser for ready exports',
             callback_data: 'export_csv:C',
             hide: false,
             text: buttons.exportCsvRarelyUsed,
+          },
+          {
+            callback_data: 'export_csv:all',
+            hide: false,
+            text: buttons.exportCsvAllWords,
           },
         ],
       ],
@@ -161,9 +157,8 @@ test('export command uses empty-result session metadata to render the active key
       keyboard: [
         [buttons.showWords],
         [buttons.exportCsv],
+        [buttons.stopSession],
         [buttons.myLibrary],
-        [buttons.stopSession, buttons.retryFailed],
-        [buttons.clearSession],
       ],
       resize_keyboard: true,
     },

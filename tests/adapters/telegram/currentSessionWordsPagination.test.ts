@@ -6,7 +6,7 @@ import {
   parseSessionWordsCallbackData,
 } from '../../../src/adapters/telegram/lib/currentSessionWordsPagination';
 
-test('session words reply shows filtered usage first and failed items second', () => {
+test('session words reply uses a compact all-words layout for very small sessions', () => {
   assert.equal(
     buildSessionWordsReply(
       [
@@ -32,7 +32,7 @@ test('session words reply shows filtered usage first and failed items second', (
     [
       'Current session',
       '',
-      'Useful',
+      'All',
       '1. hassle - translation for hassle',
       '',
       'Failed:',
@@ -60,12 +60,9 @@ test('session words reply omits the failed section when there are no failed item
         view: 'A',
       },
     ),
-    [
-      'Current session',
-      '',
-      'Useful',
-      '1. hassle - translation for hassle',
-    ].join('\n'),
+    ['Current session', '', 'All', '1. hassle - translation for hassle'].join(
+      '\n',
+    ),
   );
 });
 
@@ -109,7 +106,7 @@ test('session words reply paginates filtered usage and failed sections independe
   );
 });
 
-test('session words reply groups show all words by usage order', () => {
+test('session words reply keeps small mixed sessions as one simple list', () => {
   assert.equal(
     buildSessionWordsReply(
       [
@@ -141,14 +138,10 @@ test('session words reply groups show all words by usage order', () => {
     [
       'Current session',
       '',
-      'Useful',
+      'All',
       '1. hassle - translation for hassle',
-      '',
-      'Common',
-      '1. rumor - translation for rumor',
-      '',
-      'Rare',
-      '1. peasant - translation for peasant',
+      '2. rumor - translation for rumor',
+      '3. peasant - translation for peasant',
     ].join('\n'),
   );
 });

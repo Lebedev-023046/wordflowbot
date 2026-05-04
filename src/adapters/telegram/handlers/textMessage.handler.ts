@@ -2,6 +2,7 @@ import type { Telegraf } from 'telegraf';
 import { message } from 'telegraf/filters';
 import type { EnrichmentJobQueue } from '../../../application/ports/EnrichmentJobQueue';
 import type { AddEntriesFromTextUseCase } from '../../../application/entries/commands/AddEntriesFromTextUseCase';
+import type { GetFinishedSessionWordsUseCase } from '../../../application/library/queries/GetFinishedSessionWordsUseCase';
 import type { RenameSessionUseCase } from '../../../application/session/commands/RenameSessionUseCase';
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
@@ -23,6 +24,7 @@ export function registerTextMessageHandler(
   sessions: SessionRepository,
   addEntriesFromTextUseCase: AddEntriesFromTextUseCase,
   enrichmentJobQueue: EnrichmentJobQueue,
+  getFinishedSessionWordsUseCase: GetFinishedSessionWordsUseCase,
   renameSessionUseCase: RenameSessionUseCase,
   pendingSessionRenameState: PendingSessionRenameStore,
 ) {
@@ -30,13 +32,11 @@ export function registerTextMessageHandler(
     buttons.back,
     buttons.clearSession,
     buttons.exportCsv,
-    buttons.history,
     buttons.myLibrary,
-    buttons.myWords,
+    buttons.openLastSession,
     buttons.retryFailed,
     buttons.showWords,
     buttons.startSession,
-    buttons.statistics,
     buttons.stopSession,
   ]);
 
@@ -44,6 +44,7 @@ export function registerTextMessageHandler(
     if (
       await handleSessionRenameReply({
         ctx,
+        getFinishedSessionWordsUseCase,
         renameSessionUseCase,
         pendingSessionRenameState,
       })

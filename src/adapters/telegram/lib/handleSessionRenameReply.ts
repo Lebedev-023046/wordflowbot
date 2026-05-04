@@ -1,17 +1,24 @@
 import type { Context } from 'telegraf';
+import type { GetFinishedSessionWordsUseCase } from '../../../application/library/queries/GetFinishedSessionWordsUseCase';
 import type { RenameSessionUseCase } from '../../../application/session/commands/RenameSessionUseCase';
 import { messages } from '../../../shared/i18n/messages';
 import { getUserId } from './getUserId';
-import { renderLibraryKeyboard } from './libraryKeyboard';
 import { replyWithSessionState } from './replyWithSessionState';
 import type { PendingSessionRenameStore } from './pendingSessionRenameState';
+import { replyWithFinishedSessionDetail } from './replyWithFinishedSessionDetail';
 
 export async function handleSessionRenameReply(params: {
   ctx: Context;
+  getFinishedSessionWordsUseCase: GetFinishedSessionWordsUseCase;
   renameSessionUseCase: RenameSessionUseCase;
   pendingSessionRenameState: PendingSessionRenameStore;
 }): Promise<boolean> {
-  const { ctx, renameSessionUseCase, pendingSessionRenameState } = params;
+  const {
+    ctx,
+    getFinishedSessionWordsUseCase,
+    renameSessionUseCase,
+    pendingSessionRenameState,
+  } = params;
   const pendingRename = pendingSessionRenameState.get(getUserId(ctx));
 
   if (
@@ -44,10 +51,12 @@ export async function handleSessionRenameReply(params: {
   }
 
   if (pendingRename.source === 'history') {
-    await ctx.reply(
-      messages.library.renamed(renameResult.title),
-      renderLibraryKeyboard(),
-    );
+    await replyWithFinishedSessionDetail({
+      ctx,
+      getFinishedSessionWordsUseCase,
+      historyPage: pendingRename.historyPage ?? 0,
+      sessionId: pendingRename.sessionId,
+    });
     return true;
   }
 
