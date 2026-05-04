@@ -15,10 +15,10 @@ type ReadyPageKey = 'aPage' | 'bPage' | 'cPage';
 const USAGE_ORDER: EntryUsage[] = ['A', 'B', 'C'];
 
 const VIEW_LABELS: Record<LibraryWordsView, string> = {
-  A: '🔥 Most useful',
-  B: '👌 Good to know',
-  C: '🪶 Rarely used',
-  all: '📚 All words',
+  A: 'Useful',
+  B: 'Common',
+  C: 'Rare',
+  all: 'All',
 };
 
 interface PageSlice<T> {
@@ -83,8 +83,8 @@ export function buildLibraryWordsInlineKeyboard(
 ) {
   const sections = getReadySections(items, state);
   const rows = [
-    ...USAGE_ORDER.map((usage) => [createViewButton(usage, state)]),
-    [createViewButton(SHOW_ALL_VIEW, state)],
+    [createViewButton('A', state), createViewButton('B', state)],
+    [createViewButton('C', state), createViewButton(SHOW_ALL_VIEW, state)],
   ];
 
   for (const section of sections) {
@@ -155,7 +155,7 @@ function getReadyPageKey(usage: EntryUsage): ReadyPageKey {
 }
 
 function buildSectionTitle(section: ReadySection): string {
-  return `${section.label}${formatPageSuffix(section.page)}:`;
+  return `${section.label}${formatPageSuffix(section.page)}`;
 }
 
 function buildReadySectionLines(section: ReadySection): string[] {

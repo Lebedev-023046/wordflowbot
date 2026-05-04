@@ -32,7 +32,7 @@ test('session words reply shows filtered usage first and failed items second', (
     [
       'Current session',
       '',
-      '🔥 Most useful:',
+      'Useful',
       '1. hassle - translation for hassle',
       '',
       'Failed:',
@@ -63,7 +63,7 @@ test('session words reply omits the failed section when there are no failed item
     [
       'Current session',
       '',
-      '🔥 Most useful:',
+      'Useful',
       '1. hassle - translation for hassle',
     ].join('\n'),
   );
@@ -98,7 +98,7 @@ test('session words reply paginates filtered usage and failed sections independe
     [
       'Current session',
       '',
-      '🔥 Most useful (2/2):',
+      'Useful (2/2)',
       '11. word-a-11 - translation-a-11',
       '12. word-a-12 - translation-a-12',
       '',
@@ -141,13 +141,13 @@ test('session words reply groups show all words by usage order', () => {
     [
       'Current session',
       '',
-      '🔥 Most useful:',
+      'Useful',
       '1. hassle - translation for hassle',
       '',
-      '👌 Good to know:',
+      'Common',
       '1. rumor - translation for rumor',
       '',
-      '🪶 Rarely used:',
+      'Rare',
       '1. peasant - translation for peasant',
     ].join('\n'),
   );

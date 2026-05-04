@@ -1,4 +1,5 @@
 import type { Context, Telegraf } from 'telegraf';
+import type { GetFinishedSessionWordsUseCase } from '../../../application/library/queries/GetFinishedSessionWordsUseCase';
 import type { GetLibraryHistoryUseCase } from '../../../application/library/queries/GetLibraryHistoryUseCase';
 import type { GetLibraryStatisticsUseCase } from '../../../application/library/queries/GetLibraryStatisticsUseCase';
 import type { GetLibraryWordsUseCase } from '../../../application/library/queries/GetLibraryWordsUseCase';
@@ -6,6 +7,14 @@ import type { EntryRepository } from '../../../entities/entry/api/entryRepositor
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
 import { buttons } from '../../../shared/i18n/buttons';
 import { messages } from '../../../shared/i18n/messages';
+import {
+  buildFinishedSessionWordsInlineKeyboard,
+  buildFinishedSessionWordsReply,
+  FINISHED_SESSION_BACK_CALLBACK_PREFIX,
+  FINISHED_SESSION_RENAME_CALLBACK_PREFIX,
+  FINISHED_SESSION_WORDS_NOOP_CALLBACK,
+  parseFinishedSessionWordsCallbackData,
+} from '../lib/finishedSessionWordsPagination';
 import { getSessionStateFlags } from '../lib/getSessionStateFlags';
 import { getUserId } from '../lib/getUserId';
 import {
@@ -32,6 +41,7 @@ export function registerLibraryCommand(
   getLibraryStatisticsUseCase: GetLibraryStatisticsUseCase,
   getLibraryWordsUseCase: GetLibraryWordsUseCase,
   getLibraryHistoryUseCase: GetLibraryHistoryUseCase,
+  getFinishedSessionWordsUseCase: GetFinishedSessionWordsUseCase,
   pendingSessionRenameState: PendingSessionRenameStore,
 ) {
   bot.hears(buttons.myLibrary, async (ctx) =>
@@ -109,6 +119,10 @@ export function registerLibraryCommand(
     await ctx.answerCbQuery();
   });
 
+  bot.action(FINISHED_SESSION_WORDS_NOOP_CALLBACK, async (ctx) => {
+    await ctx.answerCbQuery();
+  });
+
   bot.action(/^library_words:(all|A|B|C):\d+:\d+:\d+$/, async (ctx) => {
     const data = 'data' in ctx.callbackQuery ? ctx.callbackQuery.data : '';
     const pageState = parseLibraryWordsCallbackData(data);
@@ -180,4 +194,171 @@ export function registerLibraryCommand(
       source: 'history',
     });
   });
+
+  bot.action(/^library_history_words:.+:\d+$/, async (ctx) => {
+    await ctx.answerCbQuery();
+
+    const data = 'data' in ctx.callbackQuery ? ctx.callbackQuery.data : '';
+    const match = /^library_history_words:(.+):(\d+)$/.exec(data);
+
+    if (!match) {
+      return;
+    }
+
+    const [, sessionId, page] = match;
+    const result = await getFinishedSessionWordsUseCase.execute(
+      getUserId(ctx),
+      sessionId,
+    );
+
+    if (result.kind === 'missing') {
+      return ctx.reply(
+        messages.library.sessionMissing,
+        renderLibraryKeyboard(),
+      );
+    }
+
+    if (result.kind === 'empty') {
+      return ctx.reply(
+        `${messages.library.sessionWordsEmpty}\n\nSession: ${result.title}`,
+      );
+    }
+
+    const initialPageState = {
+      aPage: 0,
+      bPage: 0,
+      cPage: 0,
+      failedPage: 0,
+      pendingPage: 0,
+      view: 'A' as const,
+    };
+
+    return ctx.reply(
+      buildFinishedSessionWordsReply(
+        result.title,
+        result.completedItems,
+        result.pendingItems,
+        result.failedItems,
+        initialPageState,
+      ),
+      buildFinishedSessionWordsInlineKeyboard(
+        sessionId,
+        Number(page),
+        result.completedItems,
+        result.pendingItems,
+        result.failedItems,
+        initialPageState,
+      ),
+    );
+  });
+
+  bot.action(/^fsw:.+:\d+:(all|A|B|C):\d\d\d\d\d$/, async (ctx) => {
+    await ctx.answerCbQuery();
+
+    const data = 'data' in ctx.callbackQuery ? ctx.callbackQuery.data : '';
+    const parsed = parseFinishedSessionWordsCallbackData(data);
+
+    if (!parsed) {
+      return;
+    }
+
+    const result = await getFinishedSessionWordsUseCase.execute(
+      getUserId(ctx),
+      parsed.sessionId,
+    );
+
+    if (result.kind === 'missing') {
+      return ctx.editMessageText(messages.library.sessionMissing, {
+        reply_markup: {
+          inline_keyboard: [],
+        },
+      });
+    }
+
+    if (result.kind === 'empty') {
+      return ctx.editMessageText(
+        `${messages.library.sessionWordsEmpty}\n\nSession: ${result.title}`,
+        {
+          reply_markup: {
+            inline_keyboard: [],
+          },
+        },
+      );
+    }
+
+    return ctx.editMessageText(
+      buildFinishedSessionWordsReply(
+        result.title,
+        result.completedItems,
+        result.pendingItems,
+        result.failedItems,
+        parsed.pageState,
+      ),
+      buildFinishedSessionWordsInlineKeyboard(
+        parsed.sessionId,
+        parsed.historyPage,
+        result.completedItems,
+        result.pendingItems,
+        result.failedItems,
+        parsed.pageState,
+      ),
+    );
+  });
+
+  bot.action(
+    new RegExp(`^${FINISHED_SESSION_RENAME_CALLBACK_PREFIX}:.+:\\d+$`),
+    async (ctx) => {
+      await ctx.answerCbQuery();
+
+      const data = 'data' in ctx.callbackQuery ? ctx.callbackQuery.data : '';
+      const match = new RegExp(
+        `^${FINISHED_SESSION_RENAME_CALLBACK_PREFIX}:(.+):(\\d+)$`,
+      ).exec(data);
+
+      if (!match) {
+        return;
+      }
+
+      const [, sessionId] = match;
+      await promptSessionRename({
+        ctx,
+        sessionId,
+        pendingSessionRenameState,
+        sessions,
+        source: 'history',
+      });
+    },
+  );
+
+  bot.action(
+    new RegExp(`^${FINISHED_SESSION_BACK_CALLBACK_PREFIX}:\\d+$`),
+    async (ctx) => {
+      await ctx.answerCbQuery();
+
+      const data = 'data' in ctx.callbackQuery ? ctx.callbackQuery.data : '';
+      const match = new RegExp(
+        `^${FINISHED_SESSION_BACK_CALLBACK_PREFIX}:(\\d+)$`,
+      ).exec(data);
+
+      if (!match) {
+        return;
+      }
+
+      const [, page] = match;
+      const result = await getLibraryHistoryUseCase.execute(getUserId(ctx));
+
+      if (result.kind === 'empty') {
+        return ctx.editMessageText(messages.library.historyEmpty, {
+          reply_markup: {
+            inline_keyboard: [],
+          },
+        });
+      }
+
+      return ctx.editMessageText(
+        buildLibraryHistoryReply(result.items, Number(page)),
+        buildLibraryHistoryInlineKeyboard(result.items, Number(page)),
+      );
+    },
+  );
 }

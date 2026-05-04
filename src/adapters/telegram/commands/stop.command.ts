@@ -4,11 +4,11 @@ import type { EntryRepository } from '../../../entities/entry/api/entryRepositor
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
 import { buttons } from '../../../shared/i18n/buttons';
 import { messages } from '../../../shared/i18n/messages';
-import { getUserId } from '../lib/getUserId';
 import { getSessionStateFlags } from '../lib/getSessionStateFlags';
-import { promptSessionRename } from '../lib/sessionRenamePrompt';
-import { replyWithSessionState } from '../lib/replyWithSessionState';
+import { getUserId } from '../lib/getUserId';
 import type { PendingSessionRenameStore } from '../lib/pendingSessionRenameState';
+import { replyWithSessionState } from '../lib/replyWithSessionState';
+import { promptSessionRename } from '../lib/sessionRenamePrompt';
 
 const STOP_SESSION_CONFIRM_CALLBACK = 'stop_session:confirm';
 const STOP_SESSION_CANCEL_CALLBACK = 'stop_session:cancel';
@@ -82,12 +82,12 @@ export function registerStopCommand(
       Markup.inlineKeyboard([
         [
           Markup.button.callback(
-            buttons.nameSessionSource,
-            `${STOP_SESSION_RENAME_CALLBACK}:${result.session.id}`,
-          ),
-          Markup.button.callback(
             buttons.skipRename,
             `${STOP_SESSION_SKIP_RENAME_CALLBACK}:${result.session.id}`,
+          ),
+          Markup.button.callback(
+            buttons.nameSessionSource,
+            `${STOP_SESSION_RENAME_CALLBACK}:${result.session.id}`,
           ),
         ],
       ]),

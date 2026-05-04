@@ -34,6 +34,7 @@ export const messages = {
     historyEmpty: 'No finished sessions yet.',
     menu: 'Library',
     noWordsYet: 'No saved words yet.',
+    sessionWordsEmpty: 'No words were saved in this session yet.',
     renamePrompt: (currentTitle: string) =>
       [
         'Reply with the session name.',
@@ -92,9 +93,10 @@ export const messages = {
     started:
       '🚀 Session started.\n\nSend words or phrases:\n• one per line\n• as a list\n• or separated with semicolons\n\nIn the bot you will see translations only.\nExamples are in the exported file.',
     stopCancelled: 'Your session stays active.',
-    stopConfirm: 'Finish this session?\nExport what you need before finishing.',
+    stopConfirm: 'Finish this session?',
     stopRenameOffer: 'Name this session now, or do it later in History.',
-    stopped: '🏁 Session finished. Start a new one anytime.',
+    stopped:
+      '🏁 Session finished.\nFind it anytime in  🗂 Library → 🕘 History.',
   },
   status: {
     active: ({

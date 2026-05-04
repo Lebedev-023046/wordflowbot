@@ -39,7 +39,7 @@ test('GetLibraryHistoryUseCase returns finished sessions with default titles and
   assert.equal(result.items.length, 1);
   assert.match(
     result.items[0]?.title ?? '',
-    /^session-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}$/,
+    /^\d{2} [A-Z][a-z]{2} \d{2}:\d{2}$/,
   );
   assert.match(
     result.items[0]?.endedAtLabel ?? '',

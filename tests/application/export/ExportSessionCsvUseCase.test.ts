@@ -106,7 +106,7 @@ test('exportSessionCsv returns csv for completed entries only', async () => {
     return;
   }
 
-  assert.match(result.fileName, /^session-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}\.csv$/);
+  assert.match(result.fileName, /^\d{2} [A-Z][a-z]{2} \d{2}-\d{2}\.csv$/);
   assert.equal(
     result.content,
     [

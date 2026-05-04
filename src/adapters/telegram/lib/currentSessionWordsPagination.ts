@@ -19,10 +19,10 @@ type PaginationKey = ReadyPageKey | 'failedPage';
 const USAGE_ORDER: EntryUsage[] = ['A', 'B', 'C'];
 
 const VIEW_LABELS: Record<SessionWordsView, string> = {
-  A: '🔥 Most useful',
-  B: '👌 Good to know',
-  C: '🪶 Rarely used',
-  all: '📚 All session words',
+  A: 'Useful',
+  B: 'Common',
+  C: 'Rare',
+  all: 'All',
 };
 
 interface PageSlice<T> {
@@ -131,8 +131,8 @@ export function buildSessionWordsInlineKeyboard(
 
 function buildViewSelectorRows(state: SessionWordsPageState) {
   return [
-    ...USAGE_ORDER.map((usage) => [createViewButton(usage, state)]),
-    [createViewButton(SHOW_ALL_VIEW, state)],
+    [createViewButton('A', state), createViewButton('B', state)],
+    [createViewButton('C', state), createViewButton(SHOW_ALL_VIEW, state)],
   ];
 }
 
@@ -178,7 +178,7 @@ function getVisibleUsages(view: SessionWordsView): EntryUsage[] {
 }
 
 function buildSectionTitle(section: ReadySection): string {
-  return `${section.label}${formatPageSuffix(section.page)}:`;
+  return `${section.label}${formatPageSuffix(section.page)}`;
 }
 
 function buildReadySectionLines(section: ReadySection): string[] {

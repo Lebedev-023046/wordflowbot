@@ -3,6 +3,7 @@ import type { SessionHistoryItem } from '../../../application/library/queries/Ge
 
 const HISTORY_PAGE_SIZE = 5;
 const HISTORY_CALLBACK_PREFIX = 'library_history';
+const HISTORY_VIEW_WORDS_CALLBACK_PREFIX = 'library_history_words';
 const HISTORY_RENAME_CALLBACK_PREFIX = 'library_history_rename';
 
 export const LIBRARY_HISTORY_NOOP_CALLBACK = 'library_history:noop';
@@ -27,23 +28,9 @@ export function buildLibraryHistoryReply(
   requestedPage: number,
 ): string {
   const page = getPageSlice(items, requestedPage);
-  const title =
-    page.totalPages > 1
-      ? `Session history (${page.page + 1}/${page.totalPages})`
-      : 'Session history';
-
-  return [
-    title,
-    '',
-    ...page.items.flatMap((item, index) => [
-      `${page.page * HISTORY_PAGE_SIZE + index + 1}. ${item.title}`,
-      `Ended: ${item.endedAtLabel}`,
-      `Ready words: ${item.completedWords}`,
-      '',
-    ]),
-  ]
-    .slice(0, -1)
-    .join('\n');
+  return page.totalPages > 1
+    ? `📖 Session history\nTap a session below to open it.\nPage ${page.page + 1}/${page.totalPages}`
+    : '📖 Session history\nTap a session below to open it.';
 }
 
 export function buildLibraryHistoryInlineKeyboard(
@@ -51,10 +38,10 @@ export function buildLibraryHistoryInlineKeyboard(
   requestedPage: number,
 ) {
   const page = getPageSlice(items, requestedPage);
-  const rows = page.items.map((item) => [
+  const rows = page.items.map((item, index) => [
     Markup.button.callback(
-      `✏️ Rename ${item.title}`,
-      createLibraryHistoryRenameCallbackData(item.id, page.page),
+      `${page.page * HISTORY_PAGE_SIZE + index + 1}. ${item.title}`,
+      createLibraryHistoryViewWordsCallbackData(item.id, page.page),
     ),
   ]);
 
@@ -85,6 +72,13 @@ export function createLibraryHistoryRenameCallbackData(
   page: number,
 ) {
   return `${HISTORY_RENAME_CALLBACK_PREFIX}:${sessionId}:${page}`;
+}
+
+export function createLibraryHistoryViewWordsCallbackData(
+  sessionId: string,
+  page: number,
+) {
+  return `${HISTORY_VIEW_WORDS_CALLBACK_PREFIX}:${sessionId}:${page}`;
 }
 
 function getPageSlice<T>(items: T[], requestedPage: number): PageSlice<T> {

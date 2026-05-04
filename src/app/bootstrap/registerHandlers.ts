@@ -36,6 +36,7 @@ export function registerHandlers(bot: Telegraf, container: AppContainer) {
     container.useCases.getLibraryStatistics,
     container.useCases.getLibraryWords,
     container.useCases.getLibraryHistory,
+    container.useCases.getFinishedSessionWords,
     container.state.sessionRename,
   );
   registerRetryFailedCommand(

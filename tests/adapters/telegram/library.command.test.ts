@@ -5,10 +5,14 @@ import { InMemoryEntryRepository } from '../../../src/adapters/storage/in-memory
 import { InMemorySessionRepository } from '../../../src/adapters/storage/in-memory/InMemorySessionRepository';
 import { PendingSessionRenameStore } from '../../../src/adapters/telegram/lib/pendingSessionRenameState';
 import { EntryFactory } from '../../../src/application/services/EntryFactory';
+import { GetFinishedSessionWordsUseCase } from '../../../src/application/library/queries/GetFinishedSessionWordsUseCase';
 import { GetLibraryStatisticsUseCase } from '../../../src/application/library/queries/GetLibraryStatisticsUseCase';
 import { GetLibraryWordsUseCase } from '../../../src/application/library/queries/GetLibraryWordsUseCase';
 import { GetLibraryHistoryUseCase } from '../../../src/application/library/queries/GetLibraryHistoryUseCase';
-import { completeEntry } from '../../../src/entities/entry/model/entryState';
+import {
+  completeEntry,
+  failEntry,
+} from '../../../src/entities/entry/model/entryState';
 import { buttons } from '../../../src/shared/i18n/buttons';
 import { messages } from '../../../src/shared/i18n/messages';
 
@@ -30,6 +34,10 @@ class FakeBot {
 }
 
 class FakeContext {
+  readonly editMessageTextCalls: Array<{
+    extra?: object;
+    text: string;
+  }> = [];
   readonly replyCalls: Array<{
     extra?: object;
     text: string;
@@ -45,6 +53,10 @@ class FakeContext {
 
   async answerCbQuery() {
     this.answeredCallbackQueries.push(undefined);
+  }
+
+  async editMessageText(text: string, extra?: object) {
+    this.editMessageTextCalls.push({ extra, text });
   }
 }
 
@@ -78,6 +90,7 @@ test('my library opens the compact library menu', async () => {
     new GetLibraryStatisticsUseCase(sessions, entries),
     new GetLibraryWordsUseCase(sessions, entries),
     new GetLibraryHistoryUseCase(sessions, entries),
+    new GetFinishedSessionWordsUseCase(sessions, entries),
     new PendingSessionRenameStore(),
   );
 
@@ -125,6 +138,7 @@ test('statistics shows library-only counts plus active-session status', async ()
     new GetLibraryStatisticsUseCase(sessions, entries),
     new GetLibraryWordsUseCase(sessions, entries),
     new GetLibraryHistoryUseCase(sessions, entries),
+    new GetFinishedSessionWordsUseCase(sessions, entries),
     new PendingSessionRenameStore(),
   );
 
@@ -179,6 +193,7 @@ test('my words shows completed words from finished sessions', async () => {
     new GetLibraryStatisticsUseCase(sessions, entries),
     new GetLibraryWordsUseCase(sessions, entries),
     new GetLibraryHistoryUseCase(sessions, entries),
+    new GetFinishedSessionWordsUseCase(sessions, entries),
     new PendingSessionRenameStore(),
   );
 
@@ -193,13 +208,13 @@ test('my words shows completed words from finished sessions', async () => {
     [
       'Saved words',
       '',
-      '🔥 Most useful:',
+      'Useful',
       '1. hassle - translation for hassle',
       '',
-      '👌 Good to know:',
+      'Common',
       '1. rumor - translation for rumor',
       '',
-      '🪶 Rarely used:',
+      'Rare',
       'No words here yet.',
     ].join('\n'),
   );
@@ -228,6 +243,7 @@ test('history shows finished sessions with default title, end date, and complete
     new GetLibraryStatisticsUseCase(sessions, entries),
     new GetLibraryWordsUseCase(sessions, entries),
     new GetLibraryHistoryUseCase(sessions, entries),
+    new GetFinishedSessionWordsUseCase(sessions, entries),
     new PendingSessionRenameStore(),
   );
 
@@ -237,13 +253,22 @@ test('history shows finished sessions with default title, end date, and complete
   assert.ok(handler);
   await handler(ctx);
 
-  assert.match(
-    ctx.replyCalls[0]?.text ?? '',
-    /^Session history\n\n1\. session-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}\nEnded: \d{4}-\d{2}-\d{2} \d{2}:\d{2}\nReady words: 1$/,
+  assert.equal(
+    ctx.replyCalls[0]?.text,
+    'Session history\nTap a session below to open it.',
   );
+  const historyButton = normalizeMarkup(ctx.replyCalls[0]?.extra)?.reply_markup
+    ?.inline_keyboard?.[0]?.[0];
+  assert.equal(
+    historyButton?.callback_data,
+    `library_history_words:${finishedSession.id}:0`,
+  );
+  assert.equal(typeof historyButton?.text, 'string');
+  assert.equal((historyButton?.text as string).startsWith('1. '), true);
+  assert.match(historyButton?.text ?? '', /^1\. \d{2} [A-Z][a-z]{2} \d{2}:\d{2}$/);
 });
 
-test('history rename action prompts with the current session title', async () => {
+test('finished session rename action prompts with the current session title', async () => {
   const bot = new FakeBot();
   const entries = new InMemoryEntryRepository();
   const sessions = new InMemorySessionRepository();
@@ -258,15 +283,13 @@ test('history rename action prompts with the current session title', async () =>
     new GetLibraryStatisticsUseCase(sessions, entries),
     new GetLibraryWordsUseCase(sessions, entries),
     new GetLibraryHistoryUseCase(sessions, entries),
+    new GetFinishedSessionWordsUseCase(sessions, entries),
     renameState,
   );
 
-  const handler = getActionHandler(
-    bot,
-    `library_history_rename:${session.id}:0`,
-  );
+  const handler = getActionHandler(bot, `fsr:${session.id}:0`);
   const ctx = new FakeContext();
-  ctx.callbackQuery = { data: `library_history_rename:${session.id}:0` };
+  ctx.callbackQuery = { data: `fsr:${session.id}:0` };
 
   assert.ok(handler);
   await handler(ctx);
@@ -280,5 +303,102 @@ test('history rename action prompts with the current session title', async () =>
     promptMessageId: 1,
     sessionId: session.id,
     source: 'history',
+  });
+});
+
+test('history view words action opens a read-only finished session viewer', async () => {
+  const bot = new FakeBot();
+  const entries = new InMemoryEntryRepository();
+  const sessions = new InMemorySessionRepository();
+  const entryFactory = new EntryFactory();
+  const session = await sessions.startSession(1);
+
+  await entries.saveMany([
+    completeEntry(entryFactory.createPending(session.id, 'hassle'), {
+      examples: [],
+      translation: 'translation for hassle',
+      usage: 'A',
+    }),
+    entryFactory.createPending(session.id, 'pending item'),
+    failEntry(entryFactory.createPending(session.id, 'rumor'), 'Rate limited'),
+  ]);
+  await sessions.stopSession(1);
+
+  registerLibraryCommand(
+    bot as unknown as never,
+    entries,
+    sessions,
+    new GetLibraryStatisticsUseCase(sessions, entries),
+    new GetLibraryWordsUseCase(sessions, entries),
+    new GetLibraryHistoryUseCase(sessions, entries),
+    new GetFinishedSessionWordsUseCase(sessions, entries),
+    new PendingSessionRenameStore(),
+  );
+
+  const handler = getActionHandler(
+    bot,
+    `library_history_words:${session.id}:0`,
+  );
+  const ctx = new FakeContext();
+  ctx.callbackQuery = { data: `library_history_words:${session.id}:0` };
+
+  assert.ok(handler);
+  await handler(ctx);
+
+  assert.equal(ctx.answeredCallbackQueries.length, 1);
+  assert.match(
+    ctx.replyCalls[0]?.text ?? '',
+    /^\d{2} [A-Z][a-z]{2} \d{2}:\d{2}/,
+  );
+  assert.match(
+    ctx.replyCalls[0]?.text ?? '',
+    /\n\nUseful\n1\. hassle - translation for hassle/,
+  );
+  assert.match(
+    ctx.replyCalls[0]?.text ?? '',
+    /\n\nProcessing:\n1\. pending item/,
+  );
+  assert.match(ctx.replyCalls[0]?.text ?? '', /\n\nFailed:\n1\. rumor$/);
+  assert.deepEqual(normalizeMarkup(ctx.replyCalls[0]?.extra), {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            callback_data: 'fsw:noop',
+            hide: false,
+            text: '✓ Useful',
+          },
+          {
+            callback_data: `fsw:${session.id}:0:B:00000`,
+            hide: false,
+            text: 'Common',
+          },
+        ],
+        [
+          {
+            callback_data: `fsw:${session.id}:0:C:00000`,
+            hide: false,
+            text: 'Rare',
+          },
+          {
+            callback_data: `fsw:${session.id}:0:all:00000`,
+            hide: false,
+            text: 'All',
+          },
+        ],
+        [
+          {
+            callback_data: `fsr:${session.id}:0`,
+            hide: false,
+            text: '✏️ Rename',
+          },
+          {
+            callback_data: 'fsb:0',
+            hide: false,
+            text: '⬅ Back',
+          },
+        ],
+      ],
+    },
   });
 });
