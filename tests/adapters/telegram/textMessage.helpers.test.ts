@@ -13,7 +13,7 @@ test('getInitialReplyText explains that processing has started', () => {
       entries: [],
       kind: 'saved',
     }),
-    '⏳ Saved 2 items. I am working on them now and will send the results soon.',
+    '⏳ Saved 2 items. Processing now.',
   );
 });
 
@@ -34,12 +34,12 @@ test('formatProcessedEntriesReply includes a completion summary and ready pairs'
       ],
     }),
     [
-      '⚠️ Finished. 2 items ready, 1 item needs another try.',
+      '⚠️ Done. 2 items ready, 1 item needs another try.',
       '',
       'hassle - translation for hassle',
       'pull through - translation for pull through',
       '',
-      'I could not finish 1 item this time. Your saved items are still here, and you can try again with Retry failed.',
+      'I could not finish 1 item this time. They stay saved, and you can try Retry failed.',
     ].join('\n'),
   );
 });
@@ -52,8 +52,8 @@ test('getProcessedFailuresReplyText explains that no items were completed', () =
       succeeded: [],
     }),
     [
-      'I could not finish any items this time. 1 item needs another try.',
-      'I could not finish those items right now. Your saved items are still here, and you can try again with Retry failed.',
+      'No items finished this time. 1 item needs another try.',
+      'I could not finish those items right now. They stay saved, and you can try Retry failed.',
     ].join('\n'),
   );
 });

@@ -66,7 +66,7 @@ export function buildLibraryWordsReply(
   items: LibraryWordItem[],
   state: LibraryWordsPageState,
 ): string {
-  const lines = ['My words'];
+  const lines = ['Saved words'];
   const sections = getReadySections(items, state);
 
   for (const section of sections) {
@@ -160,7 +160,7 @@ function buildSectionTitle(section: ReadySection): string {
 
 function buildReadySectionLines(section: ReadySection): string[] {
   if (section.items.length === 0) {
-    return ['No words in this filter yet.'];
+    return ['No words here yet.'];
   }
 
   return section.page.items.map(

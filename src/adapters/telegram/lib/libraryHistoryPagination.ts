@@ -29,8 +29,8 @@ export function buildLibraryHistoryReply(
   const page = getPageSlice(items, requestedPage);
   const title =
     page.totalPages > 1
-      ? `Your history (${page.page + 1}/${page.totalPages})`
-      : 'Your history';
+      ? `Session history (${page.page + 1}/${page.totalPages})`
+      : 'Session history';
 
   return [
     title,
@@ -38,7 +38,7 @@ export function buildLibraryHistoryReply(
     ...page.items.flatMap((item, index) => [
       `${page.page * HISTORY_PAGE_SIZE + index + 1}. ${item.title}`,
       `Ended: ${item.endedAtLabel}`,
-      `Completed words: ${item.completedWords}`,
+      `Ready words: ${item.completedWords}`,
       '',
     ]),
   ]

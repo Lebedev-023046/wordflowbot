@@ -137,13 +137,13 @@ test('statistics shows library-only counts plus active-session status', async ()
   assert.equal(
     ctx.replyCalls[0]?.text,
     [
-      'Your statistics',
+      'Library stats',
       '',
-      'Words in your library: 1',
+      'Saved words: 1',
       'Finished sessions: 1',
       'Active session: yes',
       '',
-      'By usage',
+      'Usage split',
       '🔥 Most useful: 1',
       '👌 Good to know: 0',
       '🪶 Rarely used: 0',
@@ -191,7 +191,7 @@ test('my words shows completed words from finished sessions', async () => {
   assert.equal(
     ctx.replyCalls[0]?.text,
     [
-      'My words',
+      'Saved words',
       '',
       '🔥 Most useful:',
       '1. hassle - translation for hassle',
@@ -200,7 +200,7 @@ test('my words shows completed words from finished sessions', async () => {
       '1. rumor - translation for rumor',
       '',
       '🪶 Rarely used:',
-      'No words in this filter yet.',
+      'No words here yet.',
     ].join('\n'),
   );
 });
@@ -239,7 +239,7 @@ test('history shows finished sessions with default title, end date, and complete
 
   assert.match(
     ctx.replyCalls[0]?.text ?? '',
-    /^Your history\n\n1\. session-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}\nEnded: \d{4}-\d{2}-\d{2} \d{2}:\d{2}\nCompleted words: 1$/,
+    /^Session history\n\n1\. session-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}\nEnded: \d{4}-\d{2}-\d{2} \d{2}:\d{2}\nReady words: 1$/,
   );
 });
 
@@ -273,7 +273,7 @@ test('history rename action prompts with the current session title', async () =>
 
   assert.equal(ctx.answeredCallbackQueries.length, 1);
   assert.equal(
-    ctx.replyCalls[0]?.text.startsWith('Reply to this message'),
+    ctx.replyCalls[0]?.text.startsWith('Reply with the session name.'),
     true,
   );
   assert.deepEqual(renameState.get(1), {

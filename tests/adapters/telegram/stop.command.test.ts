@@ -220,7 +220,7 @@ test('finish session rename action prompts with the current title in force reply
   await handler(ctx);
 
   assert.equal(
-    ctx.replyCalls[0]?.text.startsWith('Reply to this message'),
+    ctx.replyCalls[0]?.text.startsWith('Reply with the session name.'),
     true,
   );
   assert.equal(

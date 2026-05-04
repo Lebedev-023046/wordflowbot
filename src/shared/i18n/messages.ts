@@ -31,12 +31,12 @@ function formatLimitedLines<T>(
 
 export const messages = {
   library: {
-    historyEmpty: 'Your history does not have any finished sessions yet.',
-    menu: 'Your library',
-    noWordsYet: 'Your library does not have any completed words yet.',
+    historyEmpty: 'No finished sessions yet.',
+    menu: 'Library',
+    noWordsYet: 'No saved words yet.',
     renamePrompt: (currentTitle: string) =>
       [
-        'Reply to this message with the session title you want to save.',
+        'Reply with the session name.',
         '',
         `Current title: ${currentTitle}`,
       ].join('\n'),
@@ -58,13 +58,13 @@ export const messages = {
       usageC: number;
     }) =>
       [
-        'Your statistics',
+        'Library stats',
         '',
-        `Words in your library: ${totalWords}`,
+        `Saved words: ${totalWords}`,
         `Finished sessions: ${finishedSessions}`,
         `Active session: ${activeSession ? 'yes' : 'no'}`,
         '',
-        'By usage',
+        'Usage split',
         `🔥 Most useful: ${usageA}`,
         `👌 Good to know: ${usageB}`,
         `🪶 Rarely used: ${usageC}`,
@@ -72,15 +72,15 @@ export const messages = {
   },
   session: {
     active:
-      'You have an active session.\n\nSend one word or phrase per line.\nYou can also send a bullet list, a numbered list, or one line with items separated by semicolons.',
+      'Session is active.\n\nSend words or phrases:\n• one per line\n• as a list\n• or separated with semicolons\n\nIn the bot you will see translations only.\nExamples are in the exported file.',
     alreadyActive:
-      'You already have an active session.\n\nSend one word or phrase per line.\nYou can also send a bullet list, a numbered list, or one line with items separated by semicolons.',
+      'You already have an active session.\n\nSend words or phrases:\n• one per line\n• as a list\n• or separated with semicolons\n\nIn the bot you will see translations only.\nExamples are in the exported file.',
     clearCancelled: 'Your words stay in the current session.',
     cleared: (clearedEntries: number) =>
-      `🧹 Cleared ${formatItems(clearedEntries)} from the current session. The session is still active.`,
+      `🧹 Cleared ${formatItems(clearedEntries)}. The session stays active.`,
     clearConfirm:
-      'Clear all words from this session? The session will stay active.',
-    exportChoose: 'Choose which ready words to export:',
+      'Clear all words from this session? The session stays active.',
+    exportChoose: 'Export ready words with examples:',
     emptyExport: '📭 Nothing is ready to export yet.',
     emptyExportForFilter: (label: string) =>
       `📭 No ready words in ${label} yet.`,
@@ -88,15 +88,13 @@ export const messages = {
     noActive: 'ℹ️ You do not have an active session right now.',
     noWordsYet: 'You have not added any words yet.',
     promptStart:
-      'Tap Start session to begin.\n\nThis bot turns English words or phrases into ready learning pairs with translations and examples.',
+      'Tap Start.\n\nFlow: send words → see translations in the bot → export the file for examples.',
     started:
-      '🚀 Your session is ready.\n\nSend one word or phrase per line.\nYou can also send a bullet list, a numbered list, or one line with items separated by semicolons.',
+      '🚀 Session started.\n\nSend words or phrases:\n• one per line\n• as a list\n• or separated with semicolons\n\nIn the bot you will see translations only.\nExamples are in the exported file.',
     stopCancelled: 'Your session stays active.',
-    stopConfirm:
-      'Finish this session? This closes the current session. If you want to show or export these words in the bot, do that before finishing.',
-    stopRenameOffer: 'Name this session source now, or skip it for later.',
-    stopped:
-      '🏁 Session finished. Start a new session when you want to add more words.',
+    stopConfirm: 'Finish this session?\nExport what you need before finishing.',
+    stopRenameOffer: 'Name this session now, or do it later in History.',
+    stopped: '🏁 Session finished. Start a new one anytime.',
   },
   status: {
     active: ({
@@ -122,18 +120,18 @@ export const messages = {
     }) =>
       [
         `Saved: ${formatItems(totalEntries)}`,
-        `Still processing: ${formatItems(pendingEntries)}`,
+        `Processing: ${formatItems(pendingEntries)}`,
         `Ready: ${formatItems(completedEntries)}`,
-        `Need retry: ${formatItems(failedEntriesCount)}`,
+        `Retry: ${formatItems(failedEntriesCount)}`,
         completedEntrySummaries.length > 0 ? '' : null,
-        completedEntrySummaries.length > 0 ? 'Ready pairs:' : null,
+        completedEntrySummaries.length > 0 ? 'Ready:' : null,
         ...formatLimitedLines(
           completedEntrySummaries,
           MAX_VISIBLE_READY_ITEMS,
           (entry) => `${entry.text} - ${entry.translation}`,
         ),
         failedEntries.length > 0 ? '' : null,
-        failedEntries.length > 0 ? 'Failed items:' : null,
+        failedEntries.length > 0 ? 'Need retry:' : null,
         ...formatLimitedLines(
           failedEntries,
           MAX_VISIBLE_FAILED_ITEMS,
@@ -142,7 +140,7 @@ export const messages = {
         ),
         failedEntries.length > 0 ? '' : null,
         failedEntries.length > 0
-          ? 'Tap Retry failed or use /retry_failed to try those items again.'
+          ? 'Tap Retry failed or use /retry_failed.'
           : null,
       ]
         .filter((line): line is string => line !== null)
@@ -152,17 +150,17 @@ export const messages = {
     duplicatesOnly: 'These words are already in your current session.',
     empty: 'Please send at least one word or phrase.',
     insufficientQuota:
-      'I could not finish those items right now. Your saved items are still here, and you can try again with Retry failed.',
+      'I could not finish those items right now. They stay saved, and you can try Retry failed.',
     processedWithFailures: (failedCount: number) =>
-      `I could not finish ${formatItems(failedCount)} this time. Your saved items are still here, and you can try again with Retry failed.`,
+      `I could not finish ${formatItems(failedCount)} this time. They stay saved, and you can try Retry failed.`,
     processing: (count: number) =>
-      `⏳ Saved ${formatItems(count)}. I am working on them now and will send the results soon.`,
+      `⏳ Saved ${formatItems(count)}. Processing now.`,
     processingCompleted: (succeededCount: number) =>
       `✅ Done. ${formatItems(succeededCount)} ready.`,
     processingFinished: (succeededCount: number, failedCount: number) =>
-      `⚠️ Finished. ${formatItems(succeededCount)} ready, ${formatNeedsAnotherTry(failedCount)}.`,
+      `⚠️ Done. ${formatItems(succeededCount)} ready, ${formatNeedsAnotherTry(failedCount)}.`,
     processingNoCompleted: (failedCount: number) =>
-      `I could not finish any items this time. ${formatNeedsAnotherTry(failedCount)}.`,
+      `No items finished this time. ${formatNeedsAnotherTry(failedCount)}.`,
     retrying: (count: number) => `🔄 Trying ${formatItems(count)} again...`,
     retryNothingFailed: 'There is nothing to retry right now.',
     saved: (count: number) => `Saved ${formatItems(count)}.`,

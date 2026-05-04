@@ -20,11 +20,11 @@ test('status message truncates long ready and failed sections', () => {
     }),
     [
       'Saved: 27 items',
-      'Still processing: 3 items',
+      'Processing: 3 items',
       'Ready: 12 items',
-      'Need retry: 12 items',
+      'Retry: 12 items',
       '',
-      'Ready pairs:',
+      'Ready:',
       'word-1 - translation-1',
       'word-2 - translation-2',
       'word-3 - translation-3',
@@ -37,7 +37,7 @@ test('status message truncates long ready and failed sections', () => {
       'word-10 - translation-10',
       '...and 2 items more.',
       '',
-      'Failed items:',
+      'Need retry:',
       '1. failed-1 - error-1',
       '2. failed-2 - error-2',
       '3. failed-3 - error-3',
@@ -50,7 +50,7 @@ test('status message truncates long ready and failed sections', () => {
       '10. failed-10 - error-10',
       '...and 2 items more.',
       '',
-      'Tap Retry failed or use /retry_failed to try those items again.',
+      'Tap Retry failed or use /retry_failed.',
     ].join('\n'),
   );
 });

@@ -22,7 +22,7 @@ const VIEW_LABELS: Record<SessionWordsView, string> = {
   A: '🔥 Most useful',
   B: '👌 Good to know',
   C: '🪶 Rarely used',
-  all: '📚 Show all words',
+  all: '📚 All session words',
 };
 
 interface PageSlice<T> {
@@ -89,7 +89,7 @@ export function buildSessionWordsReply(
   failedItems: FailedSessionWordItem[],
   state: SessionWordsPageState,
 ): string {
-  const lines = ['Words in your session:'];
+  const lines = ['Current session'];
   const readySections = getReadySections(completedItems, state);
 
   for (const section of readySections) {
