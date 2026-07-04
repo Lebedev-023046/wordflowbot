@@ -278,7 +278,7 @@ test('history view words action opens a read-only finished session viewer', asyn
     ctx.replyCalls[0]?.text ?? '',
     /\n\nProcessing:\n1\. pending item/,
   );
-  assert.match(ctx.replyCalls[0]?.text ?? '', /\n\nFailed:\n1\. rumor$/);
+  assert.match(ctx.replyCalls[0]?.text ?? '', /\n\nNeed retry:\n1\. rumor$/);
   assert.deepEqual(normalizeMarkup(ctx.replyCalls[0]?.extra), {
     reply_markup: {
       inline_keyboard: [
@@ -329,7 +329,7 @@ test('back returns returning users to the returning home screen', async () => {
   assert.ok(handler);
   await handler(ctx);
 
-  assert.equal(ctx.replyCalls[0]?.text, messages.session.returningStart);
+  assert.equal(ctx.replyCalls[0]?.text, messages.session.returningStart(1, 0));
   assert.deepEqual(normalizeMarkup(ctx.replyCalls[0]?.extra), {
     reply_markup: {
       keyboard: [

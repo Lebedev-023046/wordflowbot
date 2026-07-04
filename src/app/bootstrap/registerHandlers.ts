@@ -1,6 +1,7 @@
 import type { Telegraf } from 'telegraf';
 import { registerClearSessionCommand } from '../../adapters/telegram/commands/clearSession.command';
 import { registerExportCsvCommand } from '../../adapters/telegram/commands/exportCsv.command';
+import { registerHelpCommand } from '../../adapters/telegram/commands/help.command';
 import { registerLibraryCommand } from '../../adapters/telegram/commands/library.command';
 import { registerRetryFailedCommand } from '../../adapters/telegram/commands/retryFailed.command';
 import { registerCurrentSessionWordsCommand } from '../../adapters/telegram/commands/currentSessionWords.command';
@@ -46,6 +47,7 @@ export function registerHandlers(bot: Telegraf, container: AppContainer) {
   );
   registerCurrentSessionWordsCommand(bot, container.useCases.getSessionWords);
   registerStatusCommand(bot, container.useCases.getSessionStatus);
+  registerHelpCommand(bot);
   registerStopCommand(
     bot,
     container.repositories.entries,

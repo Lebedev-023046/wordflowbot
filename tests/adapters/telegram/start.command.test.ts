@@ -87,7 +87,7 @@ test('start shows the returning-user home screen when finished sessions exist', 
   assert.ok(bot.startHandler);
   await bot.startHandler(ctx);
 
-  assert.equal(ctx.replyCalls[0]?.text, messages.session.returningStart);
+  assert.equal(ctx.replyCalls[0]?.text, messages.session.returningStart(0, 0));
   assert.deepEqual(normalizeMarkup(ctx.replyCalls[0]?.extra), {
     reply_markup: {
       keyboard: [

@@ -14,6 +14,13 @@ registerHandlers(bot, container);
 
 await healthServer.listen();
 await bot.telegram.getMe();
+await bot.telegram.setMyCommands([
+  { command: 'start', description: 'Open the home screen' },
+  { command: 'words', description: 'Show the current session' },
+  { command: 'status', description: 'Show progress and errors' },
+  { command: 'retry_failed', description: 'Retry failed words' },
+  { command: 'help', description: 'How this bot works' },
+]);
 await bot.launch();
 healthServer.setReady(true);
 

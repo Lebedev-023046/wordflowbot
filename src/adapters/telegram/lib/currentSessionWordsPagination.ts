@@ -20,11 +20,13 @@ type PaginationKey = ReadyPageKey | 'failedPage';
 const USAGE_ORDER: EntryUsage[] = ['A', 'B', 'C'];
 
 const VIEW_LABELS: Record<SessionWordsView, string> = {
-  A: 'Useful',
-  B: 'Common',
-  C: 'Rare',
+  A: '🔥 Useful',
+  B: '👌 Common',
+  C: '🪶 Rare',
   all: 'All',
 };
+
+const VIEW_LEGEND = '🔥 learn first · 👌 good to know · 🪶 can skip';
 
 interface PageSlice<T> {
   items: T[];
@@ -104,6 +106,8 @@ export function buildSessionWordsReply(
     return lines.join('\n');
   }
 
+  lines.push('', VIEW_LEGEND);
+
   const readySections = getReadySections(completedItems, state);
 
   for (const section of readySections) {
@@ -140,7 +144,9 @@ export function buildSessionWordsInlineKeyboard(
   const failedPage = getPageSlice(failedItems, state.failedPage);
 
   if (failedPage.totalPages > 1) {
-    rows.push(buildNavigationRow('Failed', state, failedPage, 'failedPage'));
+    rows.push(
+      buildNavigationRow('Need retry', state, failedPage, 'failedPage'),
+    );
   }
 
   return Markup.inlineKeyboard(rows);
@@ -228,7 +234,7 @@ function buildFailedSectionLines(
 
   return [
     '',
-    `Failed${formatPageSuffix(failedPage)}:`,
+    `Need retry${formatPageSuffix(failedPage)}:`,
     ...(failedPage.items.length > 0
       ? failedPage.items.map((item, index) =>
           formatFailedLine(item.text, failedPage.page, index),

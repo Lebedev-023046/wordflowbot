@@ -75,8 +75,18 @@ export const messages = {
       'Examples are in the export file.',
       'Translations are visible here in Telegram.',
     ].join('\n'),
-    returningStart:
-      'Ready to collect more words?\n\nYou can start a new session or reopen a past one.',
+    returningStart: (sessionsCompleted: number, wordsCollected: number) =>
+      [
+        'Ready to collect more words?',
+        '',
+        'You can start a new session or reopen a past one.',
+        ...(wordsCollected > 0
+          ? [
+              '',
+              `📊 ${formatItems(wordsCollected)} collected across ${sessionsCompleted} ${sessionsCompleted === 1 ? 'session' : 'sessions'}.`,
+            ]
+          : []),
+      ].join('\n'),
     started: [
       'Session started.',
       '',
@@ -122,7 +132,9 @@ export const messages = {
         `Saved: ${formatItems(totalEntries)}`,
         `Processing: ${formatItems(pendingEntries)}`,
         `Ready: ${formatItems(completedEntries)}`,
-        `Retry: ${formatItems(failedEntriesCount)}`,
+        failedEntriesCount > 0
+          ? `Retry: ${formatItems(failedEntriesCount)}`
+          : null,
         completedEntrySummaries.length > 0 ? '' : null,
         completedEntrySummaries.length > 0 ? 'Ready:' : null,
         ...formatLimitedLines(
@@ -177,5 +189,27 @@ export const messages = {
   },
   rename: {
     empty: 'Please send a non-empty session title.',
+  },
+  help: {
+    text: [
+      'How WordFlowBot works:',
+      '',
+      '1. Start a session.',
+      '2. Send English words or phrases, one per line, semicolon-separated, or pasted as a block.',
+      '3. The bot saves them and adds a Russian translation in the background.',
+      '4. Finish the session and export a CSV with examples for ReWord.',
+      '',
+      'Usage levels on saved words:',
+      '🔥 Useful - learn first',
+      '👌 Common - good to know',
+      '🪶 Rare - can skip',
+      '',
+      'Commands:',
+      '/start - open the home screen',
+      '/words - show the current session',
+      '/status - show progress and errors',
+      '/retry_failed - retry words that failed enrichment',
+      '/help - show this message',
+    ].join('\n'),
   },
 } as const;
