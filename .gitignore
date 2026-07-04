@@ -26,6 +26,4 @@ dist-ssr
 docs
 .env
 
-V2_PLAN.md
-V3_PLAN.md
-UX_PLAN.md
+*_PLAN.md
