@@ -3,7 +3,9 @@ import { registerClearSessionCommand } from '../../adapters/telegram/commands/cl
 import { registerExportCsvCommand } from '../../adapters/telegram/commands/exportCsv.command';
 import { registerHelpCommand } from '../../adapters/telegram/commands/help.command';
 import { registerLibraryCommand } from '../../adapters/telegram/commands/library.command';
+import { registerOnboardingCommand } from '../../adapters/telegram/commands/onboarding.command';
 import { registerRetryFailedCommand } from '../../adapters/telegram/commands/retryFailed.command';
+import { registerSettingsCommand } from '../../adapters/telegram/commands/settings.command';
 import { registerCurrentSessionWordsCommand } from '../../adapters/telegram/commands/currentSessionWords.command';
 import { registerStartCommand } from '../../adapters/telegram/commands/start.command';
 import { registerStatusCommand } from '../../adapters/telegram/commands/status.command';
@@ -23,6 +25,19 @@ export function registerHandlers(bot: Telegraf, container: AppContainer) {
     container.repositories.entries,
     container.repositories.sessions,
     container.useCases.startSession,
+    container.repositories.userSettings,
+  );
+  registerOnboardingCommand(
+    bot,
+    container.repositories.entries,
+    container.repositories.sessions,
+    container.repositories.userSettings,
+    container.repositories.languageLevels,
+  );
+  registerSettingsCommand(
+    bot,
+    container.repositories.userSettings,
+    container.repositories.languageLevels,
   );
   registerExportCsvCommand(
     bot,
@@ -64,5 +79,6 @@ export function registerHandlers(bot: Telegraf, container: AppContainer) {
     container.useCases.getFinishedSessionWords,
     container.useCases.renameSession,
     container.state.sessionRename,
+    container.repositories.languageLevels,
   );
 }

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { InMemoryUserSettingsRepository } from '../../../src/adapters/storage/in-memory/InMemoryUserSettingsRepository';
 import { StartSessionUseCase } from '../../../src/application/session/commands/StartSessionUseCase';
 import type {
   Session,
@@ -34,7 +35,10 @@ test('StartSessionUseCase returns alreadyActive when a unique constraint race ha
     },
   };
 
-  const result = await new StartSessionUseCase(sessions).execute(1);
+  const result = await new StartSessionUseCase(
+    sessions,
+    new InMemoryUserSettingsRepository(),
+  ).execute(1);
 
   assert.deepEqual(result, {
     kind: 'alreadyActive',

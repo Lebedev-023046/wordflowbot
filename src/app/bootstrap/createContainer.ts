@@ -5,7 +5,9 @@ import { ImmediateEnrichmentJobQueue } from '../../adapters/queue/ImmediateEnric
 import { PrismaEntryRepository } from '../../adapters/storage/prisma/PrismaEntryRepository';
 import { PrismaEnrichmentCacheRepository } from '../../adapters/storage/prisma/PrismaEnrichmentCacheRepository';
 import { createPrismaClient } from '../../adapters/storage/prisma/createPrismaClient';
+import { PrismaLanguageLevelRepository } from '../../adapters/storage/prisma/PrismaLanguageLevelRepository';
 import { PrismaSessionRepository } from '../../adapters/storage/prisma/PrismaSessionRepository';
+import { PrismaUserSettingsRepository } from '../../adapters/storage/prisma/PrismaUserSettingsRepository';
 import { PendingSessionRenameStore } from '../../adapters/telegram/lib/pendingSessionRenameState';
 import { AddEntriesFromTextUseCase } from '../../application/entries/commands/AddEntriesFromTextUseCase';
 import { EnrichEntriesUseCase } from '../../application/entries/commands/EnrichEntriesUseCase';
@@ -49,6 +51,8 @@ export function createContainer() {
 
   const sessionRepository = new PrismaSessionRepository(prisma);
   const entryRepository = new PrismaEntryRepository(prisma);
+  const languageLevelRepository = new PrismaLanguageLevelRepository(prisma);
+  const userSettingsRepository = new PrismaUserSettingsRepository(prisma);
   const enrichmentCacheRepository = new PrismaEnrichmentCacheRepository(
     prisma,
     cacheRepositoryLogger,
@@ -73,7 +77,10 @@ export function createContainer() {
   const entryFactory = new EntryFactory();
   const csvExporter = new CsvExporter();
 
-  const startSessionUseCase = new StartSessionUseCase(sessionRepository);
+  const startSessionUseCase = new StartSessionUseCase(
+    sessionRepository,
+    userSettingsRepository,
+  );
   const stopSessionUseCase = new StopSessionUseCase(sessionRepository);
   const clearSessionUseCase = new ClearSessionUseCase(
     sessionRepository,
@@ -123,6 +130,7 @@ export function createContainer() {
     sessionRepository,
     entryRepository,
     enrichmentJobQueue,
+    languageLevelRepository,
   );
   const renameSessionUseCase = new RenameSessionUseCase(sessionRepository);
   const pendingSessionRenameState = new PendingSessionRenameStore();
@@ -131,7 +139,9 @@ export function createContainer() {
     prisma,
     repositories: {
       entries: entryRepository,
+      languageLevels: languageLevelRepository,
       sessions: sessionRepository,
+      userSettings: userSettingsRepository,
     },
     useCases: {
       clearSession: clearSessionUseCase,

@@ -3,6 +3,7 @@ import test from 'node:test';
 import { registerStartCommand } from '../../../src/adapters/telegram/commands/start.command';
 import { InMemoryEntryRepository } from '../../../src/adapters/storage/in-memory/InMemoryEntryRepository';
 import { InMemorySessionRepository } from '../../../src/adapters/storage/in-memory/InMemorySessionRepository';
+import { InMemoryUserSettingsRepository } from '../../../src/adapters/storage/in-memory/InMemoryUserSettingsRepository';
 import { EntryFactory } from '../../../src/application/services/EntryFactory';
 import { StartSessionUseCase } from '../../../src/application/session/commands/StartSessionUseCase';
 import { failEntry } from '../../../src/entities/entry/model/entryState';
@@ -42,16 +43,88 @@ function normalizeMarkup(value: object | undefined) {
   return value ? JSON.parse(JSON.stringify(value)) : value;
 }
 
-test('start shows first-time onboarding for a new user', async () => {
+test('start shows the language picker for a brand-new user with no settings', async () => {
   const bot = new FakeBot();
   const entries = new InMemoryEntryRepository();
   const sessions = new InMemorySessionRepository();
+  const userSettings = new InMemoryUserSettingsRepository();
 
   registerStartCommand(
     bot as unknown as never,
     entries,
     sessions,
-    new StartSessionUseCase(sessions),
+    new StartSessionUseCase(sessions, userSettings),
+    userSettings,
+  );
+
+  const ctx = new FakeContext();
+
+  assert.ok(bot.startHandler);
+  await bot.startHandler(ctx);
+
+  assert.equal(ctx.replyCalls[0]?.text, messages.onboarding.chooseLanguage);
+  assert.deepEqual(normalizeMarkup(ctx.replyCalls[0]?.extra), {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            callback_data: 'onboarding_lang:en',
+            hide: false,
+            text: '🇬🇧 English',
+          },
+        ],
+        [
+          {
+            callback_data: 'onboarding_lang:pl',
+            hide: false,
+            text: '🇵🇱 Polish',
+          },
+        ],
+      ],
+    },
+  });
+});
+
+test('start skips onboarding for a pre-existing user with session history but no stored settings', async () => {
+  const bot = new FakeBot();
+  const entries = new InMemoryEntryRepository();
+  const sessions = new InMemorySessionRepository();
+  const userSettings = new InMemoryUserSettingsRepository();
+  await sessions.startSession(1);
+  await sessions.stopSession(1);
+
+  registerStartCommand(
+    bot as unknown as never,
+    entries,
+    sessions,
+    new StartSessionUseCase(sessions, userSettings),
+    userSettings,
+  );
+
+  const ctx = new FakeContext();
+
+  assert.ok(bot.startHandler);
+  await bot.startHandler(ctx);
+
+  assert.equal(ctx.replyCalls[0]?.text, messages.session.returningStart(0, 0));
+});
+
+test('start shows first-time onboarding for a user who finished settings but has no sessions', async () => {
+  const bot = new FakeBot();
+  const entries = new InMemoryEntryRepository();
+  const sessions = new InMemorySessionRepository();
+  const userSettings = new InMemoryUserSettingsRepository();
+  await userSettings.save(1, {
+    studyLanguage: 'en',
+    translationLanguage: 'ru',
+  });
+
+  registerStartCommand(
+    bot as unknown as never,
+    entries,
+    sessions,
+    new StartSessionUseCase(sessions, userSettings),
+    userSettings,
   );
 
   const ctx = new FakeContext();
@@ -72,6 +145,11 @@ test('start shows the returning-user home screen when finished sessions exist', 
   const bot = new FakeBot();
   const entries = new InMemoryEntryRepository();
   const sessions = new InMemorySessionRepository();
+  const userSettings = new InMemoryUserSettingsRepository();
+  await userSettings.save(1, {
+    studyLanguage: 'en',
+    translationLanguage: 'ru',
+  });
   await sessions.startSession(1);
   await sessions.stopSession(1);
 
@@ -79,7 +157,8 @@ test('start shows the returning-user home screen when finished sessions exist', 
     bot as unknown as never,
     entries,
     sessions,
-    new StartSessionUseCase(sessions),
+    new StartSessionUseCase(sessions, userSettings),
+    userSettings,
   );
 
   const ctx = new FakeContext();
@@ -104,6 +183,11 @@ test('start keeps active-session context and keyboard for active users', async (
   const bot = new FakeBot();
   const entries = new InMemoryEntryRepository();
   const sessions = new InMemorySessionRepository();
+  const userSettings = new InMemoryUserSettingsRepository();
+  await userSettings.save(1, {
+    studyLanguage: 'en',
+    translationLanguage: 'ru',
+  });
   const entryFactory = new EntryFactory();
   const session = await sessions.startSession(1);
 
@@ -116,7 +200,8 @@ test('start keeps active-session context and keyboard for active users', async (
     bot as unknown as never,
     entries,
     sessions,
-    new StartSessionUseCase(sessions),
+    new StartSessionUseCase(sessions, userSettings),
+    userSettings,
   );
 
   const ctx = new FakeContext();

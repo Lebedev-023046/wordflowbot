@@ -19,6 +19,7 @@ await bot.telegram.setMyCommands([
   { command: 'words', description: 'Show the current session' },
   { command: 'status', description: 'Show progress and errors' },
   { command: 'retry_failed', description: 'Retry failed words' },
+  { command: 'settings', description: 'Change what you are studying' },
   { command: 'help', description: 'How this bot works' },
 ]);
 await bot.launch();

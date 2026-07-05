@@ -209,7 +209,29 @@ export const messages = {
       '/words - show the current session',
       '/status - show progress and errors',
       '/retry_failed - retry words that failed enrichment',
+      '/settings - change what you are studying',
       '/help - show this message',
     ].join('\n'),
+  },
+  onboarding: {
+    chooseLanguage:
+      'Welcome to WordFlowBot!\n\nWhich language do you want to learn?',
+    chooseLevel: (languageLabel: string) =>
+      `Great choice: ${languageLabel}.\n\nWhat is your current level?`,
+    completed: (languageLabel: string, level: string) =>
+      `All set. You are studying ${languageLabel} at ${level} level.\n\nYou can change this anytime with /settings.`,
+  },
+  settings: {
+    overview: (languageLabel: string, level: string) =>
+      ['Settings', '', `Studying: ${languageLabel}`, `Level: ${level}`].join(
+        '\n',
+      ),
+    chooseLanguage: 'Which language do you want to study?',
+    chooseLevel: (languageLabel: string) =>
+      `What is your ${languageLabel} level?`,
+    languageChanged: (languageLabel: string, level: string) =>
+      `Now studying ${languageLabel} at ${level} level.`,
+    levelChanged: (languageLabel: string, level: string) =>
+      `${languageLabel} level set to ${level}.`,
   },
 } as const;
