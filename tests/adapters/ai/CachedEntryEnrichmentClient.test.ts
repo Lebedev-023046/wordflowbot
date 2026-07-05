@@ -46,7 +46,7 @@ test('CachedEntryEnrichmentClient reuses persisted enrichments across calls', as
   assert.deepEqual(first, second);
   assert.equal(callCount, 1);
   assert.deepEqual(cacheRepository.getStoredKeys(), [
-    'hilarious:gpt-5.4-mini:v1',
+    'hilarious:gpt-5.4-mini:v1:en:B2',
   ]);
 });
 
@@ -118,8 +118,60 @@ test('CachedEntryEnrichmentClient keeps distinct prompt versions isolated', asyn
 
   assert.equal(callCount, 2);
   assert.deepEqual(cacheRepository.getStoredKeys().sort(), [
-    'hilarious:gpt-5.4-mini:v1',
-    'hilarious:gpt-5.4-mini:v2',
+    'hilarious:gpt-5.4-mini:v1:en:B2',
+    'hilarious:gpt-5.4-mini:v2:en:B2',
+  ]);
+});
+
+test('CachedEntryEnrichmentClient keeps distinct study languages and levels isolated', async () => {
+  let callCount = 0;
+  const cacheRepository = new InMemoryEnrichmentCacheRepository();
+  const delegate: EntryEnrichmentClient = {
+    async enrich(text) {
+      callCount += 1;
+      return createEnrichment(text);
+    },
+  };
+
+  const client = new CachedEntryEnrichmentClient({
+    cacheRepository,
+    delegate,
+    logger: createLogger({
+      scope: 'CachedEntryEnrichmentClient',
+      warnEnabled: false,
+    }),
+    model: 'gpt-5.4-mini',
+    promptVersion: 'v1',
+  });
+
+  await withMutedConsole(async () => {
+    await client.enrich('hassle', {
+      level: 'B2',
+      studyLanguage: 'en',
+      translationLanguage: 'ru',
+    });
+    await client.enrich('hassle', {
+      level: 'B2',
+      studyLanguage: 'pl',
+      translationLanguage: 'ru',
+    });
+    await client.enrich('hassle', {
+      level: 'A1',
+      studyLanguage: 'en',
+      translationLanguage: 'ru',
+    });
+    await client.enrich('hassle', {
+      level: 'B2',
+      studyLanguage: 'en',
+      translationLanguage: 'ru',
+    });
+  });
+
+  assert.equal(callCount, 3);
+  assert.deepEqual(cacheRepository.getStoredKeys().sort(), [
+    'hassle:gpt-5.4-mini:v1:en:A1',
+    'hassle:gpt-5.4-mini:v1:en:B2',
+    'hassle:gpt-5.4-mini:v1:pl:B2',
   ]);
 });
 
@@ -127,16 +179,20 @@ class InMemoryEnrichmentCacheRepository implements EnrichmentCacheRepository {
   private readonly enrichmentsByKey = new Map<string, EntryEnrichment>();
 
   async findByKey({
+    level,
     model,
     normalizedText,
     promptVersion,
+    studyLanguage,
   }: {
+    level: string;
     model: string;
     normalizedText: string;
     promptVersion: string;
+    studyLanguage: string;
   }): Promise<EntryEnrichment | null> {
     const enrichment = this.enrichmentsByKey.get(
-      `${normalizedText}:${model}:${promptVersion}`,
+      this.getKey(normalizedText, model, promptVersion, studyLanguage, level),
     );
 
     return enrichment ? cloneEnrichment(enrichment) : null;
@@ -148,20 +204,34 @@ class InMemoryEnrichmentCacheRepository implements EnrichmentCacheRepository {
 
   async save({
     enrichment,
+    level,
     model,
     normalizedText,
     promptVersion,
+    studyLanguage,
   }: {
     enrichment: EntryEnrichment;
+    level: string;
     model: string;
     normalizedText: string;
     promptVersion: string;
     sourceText: string;
+    studyLanguage: string;
   }): Promise<void> {
     this.enrichmentsByKey.set(
-      `${normalizedText}:${model}:${promptVersion}`,
+      this.getKey(normalizedText, model, promptVersion, studyLanguage, level),
       cloneEnrichment(enrichment),
     );
+  }
+
+  private getKey(
+    normalizedText: string,
+    model: string,
+    promptVersion: string,
+    studyLanguage: string,
+    level: string,
+  ): string {
+    return `${normalizedText}:${model}:${promptVersion}:${studyLanguage}:${level}`;
   }
 }
 

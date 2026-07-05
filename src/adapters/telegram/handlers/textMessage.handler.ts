@@ -3,7 +3,9 @@ import { message } from 'telegraf/filters';
 import type { EnrichmentJobQueue } from '../../../application/ports/EnrichmentJobQueue';
 import type { AddEntriesFromTextUseCase } from '../../../application/entries/commands/AddEntriesFromTextUseCase';
 import type { GetFinishedSessionWordsUseCase } from '../../../application/library/queries/GetFinishedSessionWordsUseCase';
+import type { LanguageLevelRepository } from '../../../application/ports/LanguageLevelRepository';
 import type { RenameSessionUseCase } from '../../../application/session/commands/RenameSessionUseCase';
+import { resolveEnrichmentContext } from '../../../application/services/resolveEnrichmentContext';
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
 import { buttons, type ButtonText } from '../../../shared/i18n/buttons';
@@ -27,6 +29,7 @@ export function registerTextMessageHandler(
   getFinishedSessionWordsUseCase: GetFinishedSessionWordsUseCase,
   renameSessionUseCase: RenameSessionUseCase,
   pendingSessionRenameState: PendingSessionRenameStore,
+  languageLevelRepository: LanguageLevelRepository,
 ) {
   const ignoredButtonTexts = new Set<ButtonText>([
     buttons.back,
@@ -76,7 +79,14 @@ export function registerTextMessageHandler(
 
     await ctx.reply(getInitialReplyText(result));
 
-    const processedEntries = await enrichmentJobQueue.enqueue(result.entries);
+    const context = await resolveEnrichmentContext(
+      languageLevelRepository,
+      session,
+    );
+    const processedEntries = await enrichmentJobQueue.enqueue(
+      result.entries,
+      context,
+    );
     const sessionEntries = await entries.findBySessionId(session.id);
     const hasSessionEntries = sessionEntries.length > 0;
     const hasSessionFailures = sessionEntries.some(

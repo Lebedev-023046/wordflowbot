@@ -1,5 +1,9 @@
 import OpenAI from 'openai';
-import type { EntryEnrichmentClient } from '../../entities/entry/api/entryEnrichmentClient';
+import {
+  DEFAULT_ENRICHMENT_CONTEXT,
+  type EnrichmentContext,
+  type EntryEnrichmentClient,
+} from '../../entities/entry/api/entryEnrichmentClient';
 import type { EntryEnrichment } from '../../entities/entry/model/entry.types';
 import type { Logger } from '../../shared/logging/logger';
 import { normalizeEnrichmentTextCasing } from '../../shared/utils/enrichmentText';
@@ -41,9 +45,12 @@ export class OpenAIEnrichmentClient implements EntryEnrichmentClient {
     this.usageLogger = usageLogger;
   }
 
-  async enrich(text: string): Promise<EntryEnrichment> {
+  async enrich(
+    text: string,
+    context: EnrichmentContext = DEFAULT_ENRICHMENT_CONTEXT,
+  ): Promise<EntryEnrichment> {
     try {
-      const content = getSystemPrompt();
+      const content = getSystemPrompt(context);
 
       this.debugLogger.info('Starting enrichment request.', {
         model: this.model,

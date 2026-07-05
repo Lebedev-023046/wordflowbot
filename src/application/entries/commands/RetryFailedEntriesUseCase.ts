@@ -3,6 +3,8 @@ import { markEntryPending } from '../../../entities/entry/model/entryState';
 import type { SessionRepository } from '../../../entities/session/api/sessionRepository';
 import type { ProcessEntriesResult } from '../../../processes/entry-enrichment/model/process-entry.types';
 import type { EnrichmentJobQueue } from '../../ports/EnrichmentJobQueue';
+import type { LanguageLevelRepository } from '../../ports/LanguageLevelRepository';
+import { resolveEnrichmentContext } from '../../services/resolveEnrichmentContext';
 
 export type RetryFailedEntriesResult =
   | { kind: 'noActive' }
@@ -17,15 +19,18 @@ export class RetryFailedEntriesUseCase {
   private readonly sessionRepository: SessionRepository;
   private readonly entryRepository: EntryRepository;
   private readonly enrichmentJobQueue: EnrichmentJobQueue;
+  private readonly languageLevelRepository: LanguageLevelRepository;
 
   constructor(
     sessionRepository: SessionRepository,
     entryRepository: EntryRepository,
     enrichmentJobQueue: EnrichmentJobQueue,
+    languageLevelRepository: LanguageLevelRepository,
   ) {
     this.sessionRepository = sessionRepository;
     this.entryRepository = entryRepository;
     this.enrichmentJobQueue = enrichmentJobQueue;
+    this.languageLevelRepository = languageLevelRepository;
   }
 
   async execute(userId: number): Promise<RetryFailedEntriesResult> {
@@ -51,8 +56,14 @@ export class RetryFailedEntriesUseCase {
       await this.entryRepository.update(entry);
     }
 
-    const processingResult =
-      await this.enrichmentJobQueue.enqueue(retriedEntries);
+    const context = await resolveEnrichmentContext(
+      this.languageLevelRepository,
+      session,
+    );
+    const processingResult = await this.enrichmentJobQueue.enqueue(
+      retriedEntries,
+      context,
+    );
 
     return {
       kind: 'retried',

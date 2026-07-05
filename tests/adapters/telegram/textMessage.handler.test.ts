@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { registerTextMessageHandler } from '../../../src/adapters/telegram/handlers/textMessage.handler';
 import { InMemoryEntryRepository } from '../../../src/adapters/storage/in-memory/InMemoryEntryRepository';
+import { InMemoryLanguageLevelRepository } from '../../../src/adapters/storage/in-memory/InMemoryLanguageLevelRepository';
 import { InMemorySessionRepository } from '../../../src/adapters/storage/in-memory/InMemorySessionRepository';
 import { PendingSessionRenameStore } from '../../../src/adapters/telegram/lib/pendingSessionRenameState';
 import { GetFinishedSessionWordsUseCase } from '../../../src/application/library/queries/GetFinishedSessionWordsUseCase';
@@ -95,6 +96,7 @@ test('text message handler applies a pending session rename reply instead of int
     new GetFinishedSessionWordsUseCase(sessions, entries),
     new RenameSessionUseCase(sessions),
     renameState,
+    new InMemoryLanguageLevelRepository(),
   );
 
   assert.ok(bot.textHandler);

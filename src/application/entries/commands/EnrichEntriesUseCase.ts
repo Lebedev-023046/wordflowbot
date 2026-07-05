@@ -1,4 +1,7 @@
-import type { EntryEnrichmentClient } from '../../../entities/entry/api/entryEnrichmentClient';
+import type {
+  EnrichmentContext,
+  EntryEnrichmentClient,
+} from '../../../entities/entry/api/entryEnrichmentClient';
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
 import type { Entry } from '../../../entities/entry/model/entry.types';
 import {
@@ -32,11 +35,14 @@ export class EnrichEntriesUseCase {
     this.logger = logger;
   }
 
-  async execute(entries: Entry[]): Promise<ProcessEntriesResult> {
+  async execute(
+    entries: Entry[],
+    context: EnrichmentContext,
+  ): Promise<ProcessEntriesResult> {
     const results = await mapWithConcurrency(
       entries,
       this.concurrency,
-      (entry) => this.processEntry(entry),
+      (entry) => this.processEntry(entry, context),
     );
 
     return results.reduce<ProcessEntriesResult>(
@@ -62,9 +68,15 @@ export class EnrichEntriesUseCase {
     );
   }
 
-  private async processEntry(entry: Entry): Promise<ProcessEntryResult> {
+  private async processEntry(
+    entry: Entry,
+    context: EnrichmentContext,
+  ): Promise<ProcessEntryResult> {
     try {
-      const enrichment = await this.entryEnrichmentClient.enrich(entry.text);
+      const enrichment = await this.entryEnrichmentClient.enrich(
+        entry.text,
+        context,
+      );
       await this.entryRepository.update(completeEntry(entry, enrichment));
 
       return {

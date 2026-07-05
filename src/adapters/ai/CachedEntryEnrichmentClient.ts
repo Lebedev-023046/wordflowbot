@@ -1,5 +1,9 @@
 import type { EnrichmentCacheRepository } from '../../application/ports/EnrichmentCacheRepository';
-import type { EntryEnrichmentClient } from '../../entities/entry/api/entryEnrichmentClient';
+import {
+  DEFAULT_ENRICHMENT_CONTEXT,
+  type EnrichmentContext,
+  type EntryEnrichmentClient,
+} from '../../entities/entry/api/entryEnrichmentClient';
 import type { EntryEnrichment } from '../../entities/entry/model/entry.types';
 import type { Logger } from '../../shared/logging/logger';
 import { normalizeEntryText } from '../../shared/utils/entryText';
@@ -37,13 +41,18 @@ export class CachedEntryEnrichmentClient implements EntryEnrichmentClient {
     this.promptVersion = promptVersion;
   }
 
-  async enrich(text: string): Promise<EntryEnrichment> {
+  async enrich(
+    text: string,
+    context: EnrichmentContext = DEFAULT_ENRICHMENT_CONTEXT,
+  ): Promise<EntryEnrichment> {
     const normalizedText = normalizeEntryText(text);
-    const cacheKey = this.getCacheKey(normalizedText);
+    const cacheKey = this.getCacheKey(normalizedText, context);
     const cached = await this.cacheRepository.findByKey({
+      level: context.level,
       model: this.model,
       normalizedText,
       promptVersion: this.promptVersion,
+      studyLanguage: context.studyLanguage,
     });
 
     if (cached) {
@@ -72,7 +81,7 @@ export class CachedEntryEnrichmentClient implements EntryEnrichmentClient {
       text,
     });
 
-    const request = this.loadAndCacheEnrichment(text, normalizedText);
+    const request = this.loadAndCacheEnrichment(text, normalizedText, context);
     this.inFlightRequests.set(cacheKey, request);
 
     try {
@@ -82,22 +91,28 @@ export class CachedEntryEnrichmentClient implements EntryEnrichmentClient {
     }
   }
 
-  private getCacheKey(normalizedText: string): string {
-    return `${normalizedText}:${this.model}:${this.promptVersion}`;
+  private getCacheKey(
+    normalizedText: string,
+    context: EnrichmentContext,
+  ): string {
+    return `${normalizedText}:${this.model}:${this.promptVersion}:${context.studyLanguage}:${context.level}`;
   }
 
   private async loadAndCacheEnrichment(
     text: string,
     normalizedText: string,
+    context: EnrichmentContext,
   ): Promise<EntryEnrichment> {
-    const enrichment = await this.delegate.enrich(text);
+    const enrichment = await this.delegate.enrich(text, context);
 
     await this.cacheRepository.save({
       enrichment,
+      level: context.level,
       model: this.model,
       normalizedText,
       promptVersion: this.promptVersion,
       sourceText: text,
+      studyLanguage: context.studyLanguage,
     });
 
     this.logger.info('Cache stored.', {

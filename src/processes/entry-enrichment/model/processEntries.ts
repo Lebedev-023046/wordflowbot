@@ -1,10 +1,12 @@
 import { EnrichEntriesUseCase } from '../../../application/entries/commands/EnrichEntriesUseCase';
+import { DEFAULT_ENRICHMENT_CONTEXT } from '../../../entities/entry/api/entryEnrichmentClient';
 import type {
   ProcessEntriesParams,
   ProcessEntriesResult,
 } from './process-entry.types';
 
 export async function processEntries({
+  context = DEFAULT_ENRICHMENT_CONTEXT,
   entries,
   entryEnrichmentClient,
   entryRepository,
@@ -18,5 +20,5 @@ export async function processEntries({
       warn: () => undefined,
     },
     3,
-  ).execute(entries);
+  ).execute(entries, context);
 }

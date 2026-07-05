@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { InMemoryEntryRepository } from '../../../src/adapters/storage/in-memory/InMemoryEntryRepository';
+import { InMemoryLanguageLevelRepository } from '../../../src/adapters/storage/in-memory/InMemoryLanguageLevelRepository';
 import { InMemorySessionRepository } from '../../../src/adapters/storage/in-memory/InMemorySessionRepository';
 import type { EnrichmentJobQueue } from '../../../src/application/ports/EnrichmentJobQueue';
 import { EntryFactory } from '../../../src/application/services/EntryFactory';
@@ -23,6 +24,7 @@ test('RetryFailedEntriesUseCase returns noActive without an active session', asy
     sessions,
     entries,
     queue,
+    new InMemoryLanguageLevelRepository(),
   ).execute(1);
 
   assert.deepEqual(result, { kind: 'noActive' });
@@ -45,6 +47,7 @@ test('RetryFailedEntriesUseCase returns noFailed when there are no failed items'
     sessions,
     entries,
     queue,
+    new InMemoryLanguageLevelRepository(),
   ).execute(1);
 
   assert.deepEqual(result, { kind: 'noFailed' });
@@ -91,6 +94,7 @@ test('RetryFailedEntriesUseCase retries failed items only and resets them to pen
     sessions,
     entries,
     queue,
+    new InMemoryLanguageLevelRepository(),
   ).execute(1);
 
   assert.deepEqual(result, {

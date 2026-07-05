@@ -1,5 +1,6 @@
 import type { EnrichmentJobQueue } from '../../application/ports/EnrichmentJobQueue';
 import type { EnrichEntriesUseCase } from '../../application/entries/commands/EnrichEntriesUseCase';
+import type { EnrichmentContext } from '../../entities/entry/api/entryEnrichmentClient';
 import type { Entry } from '../../entities/entry/model/entry.types';
 
 export class ImmediateEnrichmentJobQueue implements EnrichmentJobQueue {
@@ -9,7 +10,7 @@ export class ImmediateEnrichmentJobQueue implements EnrichmentJobQueue {
     this.enrichEntriesUseCase = enrichEntriesUseCase;
   }
 
-  enqueue(entries: Entry[]) {
-    return this.enrichEntriesUseCase.execute(entries);
+  enqueue(entries: Entry[], context: EnrichmentContext) {
+    return this.enrichEntriesUseCase.execute(entries, context);
   }
 }

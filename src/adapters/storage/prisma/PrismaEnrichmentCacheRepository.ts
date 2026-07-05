@@ -30,10 +30,12 @@ export class PrismaEnrichmentCacheRepository implements EnrichmentCacheRepositor
     try {
       const record = await this.prisma.enrichmentCache.findUnique({
         where: {
-          normalizedText_model_promptVersion: {
+          normalizedText_model_promptVersion_studyLanguage_level: {
+            level: key.level,
             model: key.model,
             normalizedText: key.normalizedText,
             promptVersion: key.promptVersion,
+            studyLanguage: key.studyLanguage,
           },
         },
       });
@@ -59,10 +61,12 @@ export class PrismaEnrichmentCacheRepository implements EnrichmentCacheRepositor
         create: {
           examplesJson: record.enrichment.examples as Prisma.InputJsonValue,
           id: crypto.randomUUID(),
+          level: record.level,
           model: record.model,
           normalizedText: record.normalizedText,
           promptVersion: record.promptVersion,
           sourceText: record.sourceText,
+          studyLanguage: record.studyLanguage,
           translation: record.enrichment.translation,
           usage: record.enrichment.usage,
         },
@@ -73,10 +77,12 @@ export class PrismaEnrichmentCacheRepository implements EnrichmentCacheRepositor
           usage: record.enrichment.usage,
         },
         where: {
-          normalizedText_model_promptVersion: {
+          normalizedText_model_promptVersion_studyLanguage_level: {
+            level: record.level,
             model: record.model,
             normalizedText: record.normalizedText,
             promptVersion: record.promptVersion,
+            studyLanguage: record.studyLanguage,
           },
         },
       });

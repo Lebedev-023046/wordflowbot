@@ -1,4 +1,7 @@
-import type { EntryEnrichmentClient } from '../../../entities/entry/api/entryEnrichmentClient';
+import type {
+  EnrichmentContext,
+  EntryEnrichmentClient,
+} from '../../../entities/entry/api/entryEnrichmentClient';
 import type { EntryRepository } from '../../../entities/entry/api/entryRepository';
 import type { Entry } from '../../../entities/entry/model/entry.types';
 
@@ -16,6 +19,7 @@ export type ProcessEntriesResult = {
 };
 
 export interface ProcessEntriesParams {
+  context?: EnrichmentContext;
   entries: Entry[];
   entryEnrichmentClient: EntryEnrichmentClient;
   entryRepository: EntryRepository;
@@ -34,6 +38,7 @@ export type ProcessEntryResult =
     };
 
 export interface ProcessEntryParams {
+  context?: EnrichmentContext;
   entry: Entry;
   entryEnrichmentClient: EntryEnrichmentClient;
   entryRepository: EntryRepository;

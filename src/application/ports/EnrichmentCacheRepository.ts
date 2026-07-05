@@ -1,9 +1,11 @@
 import type { EntryEnrichment } from '../../entities/entry/model/entry.types';
 
 export interface EnrichmentCacheKey {
+  level: string;
   model: string;
   normalizedText: string;
   promptVersion: string;
+  studyLanguage: string;
 }
 
 export interface EnrichmentCacheRecord extends EnrichmentCacheKey {
