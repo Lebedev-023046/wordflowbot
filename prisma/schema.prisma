@@ -7,16 +7,34 @@ datasource db {
 }
 
 model Session {
-  id        String    @id
-  userId    BigInt
-  title     String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  endedAt   DateTime?
+  id                  String    @id
+  userId              BigInt
+  title               String?
+  studyLanguage       String    @default("en")
+  translationLanguage String    @default("ru")
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  endedAt             DateTime?
 
   entries Entry[]
 
   @@index([userId, endedAt])
+}
+
+model UserSettings {
+  userId              BigInt   @id
+  studyLanguage       String   @default("en")
+  translationLanguage String   @default("ru")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model LanguageLevel {
+  userId   BigInt
+  language String
+  level    String @default("B2")
+
+  @@id([userId, language])
 }
 
 model Entry {
@@ -53,18 +71,20 @@ model EntryExample {
 }
 
 model EnrichmentCache {
-  id             String   @id
+  id             String      @id
   normalizedText String
   sourceText     String
   model          String
   promptVersion  String
+  studyLanguage  String      @default("en")
+  level          String      @default("B2")
   usage          EntryUsage?
   translation    String
   examplesJson   Json
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
-  @@unique([normalizedText, model, promptVersion])
+  @@unique([normalizedText, model, promptVersion, studyLanguage, level])
   @@index([normalizedText])
 }
 

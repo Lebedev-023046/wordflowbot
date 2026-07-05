@@ -9,6 +9,8 @@ interface SessionRecord {
   endedAt: Date | null;
   id: string;
   title?: string | null;
+  studyLanguage?: string;
+  translationLanguage?: string;
   userId: bigint;
 }
 
@@ -106,10 +108,16 @@ export class PrismaSessionRepository implements SessionRepository {
     return mapSessionRecordToDomain(updatedSession);
   }
 
-  async startSession(userId: number): Promise<Session> {
+  async startSession(
+    userId: number,
+    studyLanguage: string,
+    translationLanguage: string,
+  ): Promise<Session> {
     const session = await this.prisma.session.create({
       data: {
         id: crypto.randomUUID(),
+        studyLanguage,
+        translationLanguage,
         userId: BigInt(userId),
       },
     });
@@ -165,6 +173,8 @@ function mapSessionRecordToDomain(record: SessionRecord): Session {
     id: record.id,
     isActive: record.endedAt === null,
     title: record.title ?? null,
+    studyLanguage: record.studyLanguage ?? 'en',
+    translationLanguage: record.translationLanguage ?? 'ru',
     userId: Number(record.userId),
   };
 }

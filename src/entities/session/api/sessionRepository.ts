@@ -5,6 +5,8 @@ export interface Session {
   userId: number;
   isActive: boolean;
   title: string | null;
+  studyLanguage: string;
+  translationLanguage: string;
 }
 
 export interface SessionRepository {
@@ -21,6 +23,10 @@ export interface SessionRepository {
     sessionId: string,
     title: string,
   ): Promise<Session | null>;
-  startSession(userId: number): Promise<Session>;
+  startSession(
+    userId: number,
+    studyLanguage: string,
+    translationLanguage: string,
+  ): Promise<Session>;
   stopSession(userId: number): Promise<Session | null>;
 }

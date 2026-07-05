@@ -1,30 +1,17 @@
 import type {
   Entry as PrismaEntry,
   EntryExample as PrismaEntryExample,
-  Session as PrismaSession,
 } from '@prisma/client';
 import type {
   Entry,
   EntryUsage,
 } from '../../../entities/entry/model/entry.types';
-import type { Session } from '../../../entities/session/api/sessionRepository';
 import { normalizeEntryText } from '../../../shared/utils/entryText';
 
 type PrismaEntryWithExamples = PrismaEntry & {
   examples: PrismaEntryExample[];
   usage?: EntryUsage | null;
 };
-
-export function mapSessionToDomain(session: PrismaSession): Session {
-  return {
-    createdAt: session.createdAt,
-    endedAt: session.endedAt,
-    id: session.id,
-    isActive: session.endedAt === null,
-    title: null,
-    userId: Number(session.userId),
-  };
-}
 
 export function mapEntryToDomain(entry: PrismaEntryWithExamples): Entry {
   const examples = entry.examples

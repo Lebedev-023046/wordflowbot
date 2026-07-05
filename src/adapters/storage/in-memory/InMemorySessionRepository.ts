@@ -57,12 +57,18 @@ export class InMemorySessionRepository implements SessionRepository {
     return sessions[sessionIndex];
   }
 
-  async startSession(userId: number) {
+  async startSession(
+    userId: number,
+    studyLanguage = 'en',
+    translationLanguage = 'ru',
+  ) {
     const session: Session = {
       createdAt: new Date(),
       endedAt: null,
       id: crypto.randomUUID(),
       title: null,
+      studyLanguage,
+      translationLanguage,
       userId,
       isActive: true,
     };

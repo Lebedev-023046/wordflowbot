@@ -1,0 +1,2 @@
+-- RenameIndex
+ALTER INDEX "EnrichmentCache_normalizedText_model_promptVersion_studyLanguag" RENAME TO "EnrichmentCache_normalizedText_model_promptVersion_studyLan_key";
