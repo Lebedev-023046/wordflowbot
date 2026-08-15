@@ -7,6 +7,9 @@ import { env } from './config/env';
 const bot = createBot();
 const container = createContainer();
 const healthServer = createHealthServer({
+  checkDatabase: async () => {
+    await container.prisma.$queryRaw`SELECT 1`;
+  },
   port: env.healthPort,
 });
 
@@ -22,7 +25,17 @@ await bot.telegram.setMyCommands([
   { command: 'settings', description: 'Change what you are studying' },
   { command: 'help', description: 'How this bot works' },
 ]);
-await bot.launch();
+
+// bot.launch() resolves only when the bot stops (long polling runs inside
+// its returned promise), so it must not be awaited here or readiness would
+// never flip to true during normal operation. Startup connectivity is
+// already verified above via getMe(); a launch failure after this point is
+// fatal and should crash the process so Docker restarts it.
+bot.launch().catch((error) => {
+  healthServer.setReady(false);
+  console.error('Bot failed to launch.', error);
+  process.exit(1);
+});
 healthServer.setReady(true);
 
 process.once('SIGINT', async () => {

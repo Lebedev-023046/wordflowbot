@@ -1,6 +1,7 @@
-import { createServer, type Server } from 'node:http';
+import { createServer, type Server, type ServerResponse } from 'node:http';
 
 type HealthServerOptions = {
+  checkDatabase: () => Promise<void>;
   port: number;
 };
 
@@ -20,14 +21,7 @@ export function createHealthServer(options: HealthServerOptions): HealthServer {
       return;
     }
 
-    if (!isReady) {
-      response.writeHead(503, { 'Content-Type': 'application/json' });
-      response.end(JSON.stringify({ ok: false }));
-      return;
-    }
-
-    response.writeHead(200, { 'Content-Type': 'application/json' });
-    response.end(JSON.stringify({ ok: true }));
+    void respondToHealthCheck(response, isReady, options.checkDatabase);
   });
 
   return {
@@ -44,6 +38,41 @@ export function createHealthServer(options: HealthServerOptions): HealthServer {
       isReady = ready;
     },
   };
+}
+
+async function respondToHealthCheck(
+  response: ServerResponse,
+  isReady: boolean,
+  checkDatabase: () => Promise<void>,
+): Promise<void> {
+  if (!isReady) {
+    writeHealthResponse(response, 503, {
+      database: false,
+      ok: false,
+      ready: false,
+    });
+    return;
+  }
+
+  const databaseOk = await checkDatabase().then(
+    () => true,
+    () => false,
+  );
+
+  writeHealthResponse(response, databaseOk ? 200 : 503, {
+    database: databaseOk,
+    ok: databaseOk,
+    ready: true,
+  });
+}
+
+function writeHealthResponse(
+  response: ServerResponse,
+  status: number,
+  body: Record<string, boolean>,
+): void {
+  response.writeHead(status, { 'Content-Type': 'application/json' });
+  response.end(JSON.stringify(body));
 }
 
 function closeServer(server: Server): Promise<void> {
